@@ -1,12 +1,11 @@
-"use strict";
+'use strict';
 
 (function(funcName, baseObj) {
-  
   // The public function name defaults to window.docReady
   // but you can modify the last line of this function to pass in a different object or method name
-  // if you want to put them in a different namespace and those will be used instead of 
+  // if you want to put them in a different namespace and those will be used instead of
   // window.docReady(...)
-  funcName = funcName || "docReady";
+  funcName = funcName || 'docReady';
   baseObj = baseObj || window;
   let readyList = [];
   let readyFired = false;
@@ -30,21 +29,21 @@
       // allow any closures held by these functions to free
       readyList = [];
     }
-  }
+  };
 
   const readyStateChange = () => {
-    if (document.readyState === "complete") {
+    if (document.readyState === 'complete') {
       ready();
     }
-  }
+  };
 
   // This is the one public interface
   // docReady(fn, context);
   // the context argument is optional - if present, it will be passed
   // as an argument to the callback
   baseObj[funcName] = (callback, context) => {
-    if (typeof callback !== "function") {
-      throw new TypeError("callback for docReady(fn) must be a function");
+    if (typeof callback !== 'function') {
+      throw new TypeError('callback for docReady(fn) must be a function');
     }
     // if ready has already fired, then just schedule the callback
     // to fire asynchronously, but right away
@@ -57,23 +56,23 @@
     }
     // if document already ready to go, schedule the ready function to run
     // IE only safe when readyState is "complete", others safe when readyState is "interactive"
-    if (document.readyState === "complete" || (!document.attachEvent && document.readyState === "interactive")) {
+    if (document.readyState === 'complete' || (!document.attachEvent && document.readyState === 'interactive')) {
       setTimeout(ready, 1);
     } else if (!readyEventHandlersInstalled) {
       // otherwise if we don't have event handlers installed, install them
       if (document.addEventListener) {
         // first choice is DOMContentLoaded event
-        document.addEventListener("DOMContentLoaded", ready, false);
+        document.addEventListener('DOMContentLoaded', ready, false);
         // backup is window load event
-        window.addEventListener("load", ready, false);
+        window.addEventListener('load', ready, false);
       } else {
         // must be IE
-        document.attachEvent("onreadystatechange", readyStateChange);
-        window.attachEvent("onload", ready);
+        document.attachEvent('onreadystatechange', readyStateChange);
+        window.attachEvent('onload', ready);
       }
       readyEventHandlersInstalled = true;
     }
-  }
-})("docReady", window);
-// modify this previous line to pass in your own method name 
+  };
+})('docReady', window);
+// modify this previous line to pass in your own method name
 // and object for the method to be attached to

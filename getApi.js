@@ -1,5 +1,5 @@
 (function() {
-  "use srict";
+  'use srict';
 
   const getJSON = url => fetch(url).then(res => res.json(), err => new Error(`Some Error Occurred ${err}`));
 
@@ -7,7 +7,7 @@
     // Return a new promise.
     return new Promise((resolve, reject) => {
       // Do the usual XHR stuff
-      var req = new XMLHttpRequest();
+      const req = new XMLHttpRequest();
       req.open('GET', url);
 
       req.onload = () => {
@@ -25,13 +25,13 @@
 
       // Handle network errors
       req.onerror = () => {
-        reject(Error("Network Error"));
+        reject(Error('Network Error'));
       };
 
       // Make the request
       req.send();
     });
-  }
+  };
 
   /*
     getJSON('story.json').then((story) => {
@@ -58,9 +58,9 @@
     });
   */
 
-  const spawn = (generatorFunc) => {
+  const spawn = generatorFunc => {
     const continuer = (verb, arg) => {
-      var result;
+      let result;
       try {
         result = generator[verb](arg);
       } catch (err) {
@@ -71,12 +71,12 @@
       } else {
         return Promise.resolve(result.value).then(onFulfilled, onRejected);
       }
-    }
-    var generator = generatorFunc();
-    var onFulfilled = continuer.bind(continuer, "next");
-    var onRejected = continuer.bind(continuer, "throw");
+    };
+    const generator = generatorFunc();
+    const onFulfilled = continuer.bind(continuer, 'next');
+    const onRejected = continuer.bind(continuer, 'throw');
     return onFulfilled();
-  }
+  };
 
   spawn(function*() {
     try {
@@ -86,9 +86,9 @@
       console.log(story);
     } catch (err) {
       // try/catch just works, rejected promises are thrown here
-      console.log("Argh, broken: " + err.message);
+      console.log('Argh, broken: ' + err.message);
     }
-  })
+  });
 
   class HttpError extends Error {
     constructor(response) {
@@ -106,10 +106,9 @@
         throw new HttpError(response);
       }
     });
-  }
+  };
 
   loadJSON('https://api.github.com/users/aasifrasul')
     .then(res => console.log(res))
     .catch(error => console.log(error));
-
-}());
+})();

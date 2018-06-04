@@ -8,25 +8,26 @@
   window: false, clearInterval: false, document: false,
   self: false, setInterval: false */
 
-
 define(function() {
   'use strict';
 
-  var isTop, testDiv, scrollIntervalId,
-    isBrowser = typeof window !== "undefined" && window.document,
+  let isTop,
+    testDiv,
+    scrollIntervalId,
+    isBrowser = typeof window !== 'undefined' && window.document,
     isPageLoaded = !isBrowser,
     doc = isBrowser ? document : null,
     readyCalls = [];
 
   function runCallbacks(callbacks) {
-    var i;
+    let i;
     for (i = 0; i < callbacks.length; i += 1) {
       callbacks[i](doc);
     }
   }
 
   function callReady() {
-    var callbacks = readyCalls;
+    const callbacks = readyCalls;
 
     if (isPageLoaded) {
       //Call the DOM ready callbacks
@@ -55,10 +56,10 @@ define(function() {
     if (document.addEventListener) {
       //Standards. Hooray! Assumption here that if standards based,
       //it knows about DOMContentLoaded.
-      document.addEventListener("DOMContentLoaded", pageLoaded, false);
-      window.addEventListener("load", pageLoaded, false);
+      document.addEventListener('DOMContentLoaded', pageLoaded, false);
+      window.addEventListener('load', pageLoaded, false);
     } else if (window.attachEvent) {
-      window.attachEvent("onload", pageLoaded);
+      window.attachEvent('onload', pageLoaded);
 
       testDiv = document.createElement('div');
       try {
@@ -89,7 +90,7 @@ define(function() {
     //so removing the || document.readyState === "interactive" test.
     //There is still a window.onload binding that should get fired if
     //DOMContentLoaded is missed.
-    if (document.readyState === "complete") {
+    if (document.readyState === 'complete') {
       pageLoaded();
     }
   }

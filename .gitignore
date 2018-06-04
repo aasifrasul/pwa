@@ -1,6 +1,1 @@
-service-worker.js
-service.worker.js
-service_worker.js
-serviceWorker.js
-BLOB.html
-test.html
+node_modules/

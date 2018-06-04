@@ -3,8 +3,8 @@
 // Only add setZeroTimeout to the window object, and hide everything
 // else in a closure.
 (function() {
-  var timeouts = [];
-  var messageName = "zero-timeout-message";
+  const timeouts = [];
+  const messageName = "zero-timeout-message";
 
   // Like setTimeout, but only takes a function argument.  There's
   // no time argument (always zero) and no arguments (you have to
@@ -18,7 +18,7 @@
     if (event.source == window && event.data == messageName) {
       event.stopPropagation();
       if (timeouts.length > 0) {
-        var fn = timeouts.shift();
+        const fn = timeouts.shift();
         fn();
       }
     }
@@ -36,20 +36,20 @@
 // BEGIN demo that uses setZeroTimeout
 
 function runtest() {
-  var output = document.getElementById("output");
-  var outputText = document.createTextNode("");
+  const output = document.getElementById("output");
+  const outputText = document.createTextNode("");
   output.appendChild(outputText);
 
   function printOutput(line) {
     outputText.data += line + "\n";
   }
 
-  var i = 0;
-  var startTime = Date.now();
+  let i = 0;
+  let startTime = Date.now();
 
   function test1() {
     if (++i == 100) {
-      var endTime = Date.now();
+      const endTime = Date.now();
       printOutput("100 iterations of setZeroTimeout took " +
         (endTime - startTime) + " milliseconds.");
       i = 0;
@@ -64,7 +64,7 @@ function runtest() {
 
   function test2() {
     if (++i == 100) {
-      var endTime = Date.now();
+      const endTime = Date.now();
       printOutput("100 iterations of setTimeout(0) took " +
         (endTime - startTime) + " milliseconds.");
     } else {

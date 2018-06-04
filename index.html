@@ -3,10 +3,38 @@
 <head>
   <title>My PWA</title>
   <link rel="manifest" href="/manifest.json">
+  <link rel="dns-prefetch" href="https://img1a.flixcart.com">
+  <link rel="stylesheet" type="text/css" href="css/RippleUtils.css">
+  <link rel="preload" href="js/app.js" crossorigin="anonymous" as="script">
+  <link rel="preload" href="SWRegistration.js" crossorigin="anonymous" as="script">
+  <link rel="preload" href="js/states.json" crossorigin="anonymous" as="script">
+  <link rel="preload" href="js/countries.json" crossorigin="anonymous" as="script">
+  <link rel="preload" href="js/cities.json" crossorigin="anonymous" as="script">
+  <link rel="preload" href="https://img1a.flixcart.com/www/linchpin/batman-returns/fingerprint/glMatrix.min.js" crossorigin="anonymous" as="script">
+  <link rel="preload" href="static/images/Dubai-Photos-Images-Travel-Tourist-Images-Pictures.jpg" as="image">
+  <script type="text/javascript">
+    const loadJS = async (src) => {
+      console.log('Script Invoked', src);
+      const ref = document.querySelectorAll("script")[0];
+      const script = document.createElement("script");
+      script.setAttribute('src', src);
+      script.setAttribute('defer', true);
+      script.setAttribute('async', true);
+      script.setAttribute('crossorigin', 'anonymous');
+      ref.parentNode.insertBefore(script, ref);
+      script.onload = await function(e) {
+        console.log('load', e);
+        console.log('Script Resolved', src);
+      };
+      script.onerror = await function(err) {
+        console.log('Script Rejected', src, err);
+      };
+    }
+    window.addEventListener('DOMContentLoaded', () => loadJS('js/app.js'));
+  </script>
 </head>
 <body>
-  <script type="text/javascript" src="js/states.json"></script>
-  <script type="text/javascript" src="js/app.js"></script>
+	<canvas id="canvas" height="100" width="100" style="display: inline" class="ripple"></canvas>
   <img src="static/images/Dubai-Photos-Images-Travel-Tourist-Images-Pictures.jpg">
 </body>
 </html>

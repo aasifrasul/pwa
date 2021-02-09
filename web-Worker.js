@@ -1,17 +1,6 @@
-(function() {
+(function () {
 	'use srict';
 
-	/*
-		importScripts('js/states.json');
-		importScripts('glMatrix.min.js');
-		importScripts('susan.min.json');
-		importScripts('simple.min.json');
-		console.log(glMatrix, mat4);
-	*/
-
-	importScripts(
-		'https://img1a.flixcart.com/www/linchpin/batman-returns/fingerprint/glMatrix.min.js'
-	);
 	console.log('glMatrix', glMatrix);
 	console.log('mat4', mat4);
 	async function getJSON(url) {
@@ -48,5 +37,5 @@
 		});
 	}
 
-	self.addEventListener('message', e => console.log(e));
+	self.addEventListener('message', (e) => console.log(e));
 })();

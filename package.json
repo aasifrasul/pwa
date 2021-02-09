@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "postcss": "^6.0.22",
-    "postcss-cli": "^5.0.0",
-    "postcss-color-rgba-fallback": "^3.0.0"
-  }
-}

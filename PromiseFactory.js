@@ -10,11 +10,17 @@ class Deferred {
 			this.resolve = resolve;
 		});
 		this.data = null;
+		this.forceResolve = this.forceResolve.bind(this);
+		this.forceUpdateResolvedData = this.forceUpdateResolvedData.bind(this);
 	}
 
 	forceResolve(value) {
 		this.data = value;
-		this.resolve(value)
+		this.resolve(value);
+	}
+
+	forceUpdateResolvedData(value) {
+		this.data = value;
 	}
 }
 
@@ -27,76 +33,46 @@ class Deferred {
  *
  * @class PromiseFactory
  */
-class PromiseFactory {
-	constructor() {
-		this.promises = {};
-	}
 
+const promises = new Map();
+
+class PromiseFactory {
 	validateId(key) {
 		if (!key) {
 			throw new Error('key cannot be empty !');
 		}
-		return this.promises[key];
+		return promises.get(key);
 	}
 
 	add(key) {
-		try {
-			if (!this.validateId(key)) {
-				this.promises[key] = new Deferred();
-			}
-			return true;
-		} catch (e) {
-			return e;
-		}
+		key && promises.set(key, new Deferred());
+		return this.get(key);
 	}
 
-	remove(key) {
-		try {
-			if (this.validateId(key)) {
-				delete this.promises[key];
-			}
-			return true;
-		} catch (e) {
-			return e;
-		}
-	}
-
-	resolve(key, value) {
-		try {
-			if (this.validateId(key)) {
-				const { promise, data } = this.promises[key] || {};
-				if (data) {
-					return promise;
-				} else {
-					this.promises[key].data = value;
-					this.promises[key].promise = Promise.resolve(value);
-					return this.promises[key].resolve(value);
-				}
-			}
-		} catch (e) {
-			return e;
-		}
-	}
-
-	fetchPromise(key) {
-		try {
-			if (this.validateId(key)) {
-				return this.promises[key];
-			}
-			return null;
-		} catch (e) {
-			return e;
-		}
+	get(key) {
+		return promises.get(key);
 	}
 
 	fetchResolvedData(key) {
-		try {
-			if (this.validateId(key)) {
-				const promise = this.promises[key] || {};
-				return promise.data;
-			}
-		} catch (e) {
-			return e;
-		}
+		const { data } = this.get(key) || {};
+		return data;
+	}
+
+	updateResolvedData(key, data) {
+		const promise = this.get(key);
+		promise && promise.forceUpdateResolvedData(data);
+	}
+
+	resolve(key, data) {
+		const promise = this.get(key);
+		return promise && promise.forceResolve(data);
+	}
+
+	remove(key) {
+		return promises.delete(key);
+	}
+
+	getOrAdd(key) {
+		return this.get(key) || this.add(key);
 	}
 }

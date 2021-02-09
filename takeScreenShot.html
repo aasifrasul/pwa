@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="en-IN" class=" en-fonts-loaded" style="height: 731px; pointer-events: auto;">
+
 <head>
   <title>My PWA</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,minimum-scale=1,user-scalable=no">
-  <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" type="text/css" href="css/RippleUtils.css">
-  <link rel="preload" href="js/app.js" crossorigin="anonymous" as="script">
-  <link rel="preload" href="js/states.json" crossorigin="anonymous" as="script">
-  <link rel="preload" href="js/countries.json" crossorigin="anonymous" as="script">
-  <link rel="preload" href="js/cities.json" crossorigin="anonymous" as="script">
-  <script type="text/javascript">
+</head>
+
+<body>
+  <video autoplay></video>
+  <script>
     window.loadJS = async (src) => {
       console.log('Script Invoked', src);
       const ref = document.querySelectorAll("script")[0];
@@ -20,21 +19,17 @@
       // script.setAttribute('async', true);
       script.setAttribute('crossorigin', 'anonymous');
       ref.parentNode.insertBefore(script, ref);
-      script.onload = await function(e) {
+      script.onload = await
+      function (e) {
         console.log('load', e);
         console.log('Script Resolved', src);
       };
-      script.onerror = await function(err) {
+      script.onerror = await
+      function (err) {
         console.log('Script Rejected', src, err);
       };
     }
-    loadJS('js/app.js');
-    new Worker('worker.js');
+    loadJS('screenShot.js');
   </script>
-</head>
-<body>
-	<canvas id="canvas" height="100" width="100" style="display: inline" class="ripple"></canvas>
-  <input type="text" id="firstName" />
-  <input type="text" id="lastName" />
 </body>
 </html>

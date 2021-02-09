@@ -10,15 +10,12 @@ const isLocalhost = Boolean(
 		window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/)
 );
 
-const checkValidServiceWorker = swUrl => {
+const checkValidServiceWorker = (swUrl) => {
 	// Check if the service worker can be found. If it can't reload the page.
 	fetch(swUrl)
-		.then(response => {
+		.then((response) => {
 			// Ensure service worker exists, and that we really are getting a JS file.
-			if (
-				response.status === 404 ||
-				response.headers.get('content-type').indexOf('javascript') === -1
-			) {
+			if (response.status === 404 || response.headers.get('content-type').indexOf('javascript') === -1) {
 				// No service worker found. Probably a different app. Reload the page.
 				unregister(window.location.reload);
 			} else {
@@ -64,10 +61,10 @@ const registerValidSW = () => {
 	window.requestIdleCallback(() => {
 		window.navigator.serviceWorker
 			.register(`/${SWFile}`, {
-				scope: '/'
+				scope: '/',
 			})
 			.then(window.navigator.serviceWorker.ready)
-			.then(registeringSW => {
+			.then((registeringSW) => {
 				const messageChannel = new MessageChannel();
 				if (registeringSW.active && !window.sessionStorage.getItem('SWVersionSent')) {
 					registeringSW.active.postMessage('Helloooooooooo');
@@ -76,10 +73,8 @@ const registerValidSW = () => {
 				registeringSW.update();
 				if (window.navigator.serviceWorker.controller) {
 					const messageChannel = new MessageChannel();
-					messageChannel.port1.onmessage = function(event) {
-						console.log(
-							`Received a direct message from the ServiceWorker: ${event.data}`
-						);
+					messageChannel.port1.onmessage = function (event) {
+						console.log(`Received a direct message from the ServiceWorker: ${event.data}`);
 					};
 					window.navigator.serviceWorker.controller.postMessage('Hello', [messageChannel.port2]);
 				}
@@ -98,9 +93,7 @@ const registerValidSW = () => {
 								console.log('SW state => installing');
 								break;
 							case 'installed':
-								console.log(
-									'SW state => installed, New or updated content is available.'
-								);
+								console.log('SW state => installed, New or updated content is available.');
 								break;
 							case 'activating':
 								console.log('SW state => activating');
@@ -115,14 +108,14 @@ const registerValidSW = () => {
 					};
 				};
 			})
-			.catch(e => {
+			.catch((e) => {
 				console.error('Error during service worker registration:', e);
 			});
 	});
 };
 
-const unregister = cb => {
-	window.navigator.serviceWorker.ready.then(registration => {
+const unregister = (cb) => {
+	window.navigator.serviceWorker.ready.then((registration) => {
 		registration.unregister().then(() => {
 			cb && cb();
 		});
@@ -143,7 +136,7 @@ if ('serviceWorker' in window.navigator) {
 		*/
 	});
 
-	window.navigator.serviceWorker.addEventListener('message', e => {
+	window.navigator.serviceWorker.addEventListener('message', (e) => {
 		if (window.location.origin !== e.origin || !(e.source instanceof ServiceWorker)) return;
 		console.log('event.data from SW', e.data);
 	});

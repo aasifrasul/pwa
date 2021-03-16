@@ -1,0 +1,112 @@
+{
+	"name": "ally-test",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"lint:css": "stylelint 'src/**/*.css'",
+		"lint:js": "eslint . --ext .js,.jsx,.ts,.tsx,.hbs",
+		"prettier": "prettier --write './**/*.{js,json,jsx,ts,tsx,hbs}'",
+		"build": "PROMO_ENV=next1 npm run build:make",
+		"build-prod": "PROMO_ENV=prod npm run build:make",
+		"ci-node": "npm run build:make && sh ./deployer/ci-node.sh",
+		"ci-web": "sh ./deployer/ci-web.sh",
+		"validate": "npm ls",
+		"build:make": "node make/make.js",
+		"start": "nodemon server/server.js",
+		"start-dev": "NODE_ENV=development BABEL_ENV=development nodemon server.js nodemon server.js",
+		"build-dev": "NODE_ENV=development BABEL_ENV=development webpack",
+		"test": "nodemon scripts/test.js"
+	},
+	"proxy": "http://my.flipkart.com:3000",
+	"browserslist": {
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	},
+	"lint-staged": {
+		"src/**/*.{js,json,jsx,ts,tsx,hbs}": [
+			"eslint --ext=js,json --fix"
+		]
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	},
+	"dependencies": {
+		"@material-ui/core": "4.9.14",
+		"@material-ui/icons": "4.9.1",
+		"axios": "0.21.1",
+		"idx": "2.5.6",
+		"react": "16.13.0",
+		"react-dom": "16.13.0",
+		"react-router-dom": "5.2.0"
+	},
+	"devDependencies": {
+		"@babel/core": "7.4.0",
+		"@babel/plugin-proposal-class-properties": "7.0.0",
+		"@babel/plugin-proposal-json-strings": "7.0.0",
+		"@babel/plugin-proposal-private-methods": "7.4.0",
+		"@babel/plugin-syntax-dynamic-import": "7.0.0",
+		"@babel/plugin-syntax-import-meta": "7.0.0",
+		"@babel/preset-env": "7.13.5",
+		"@babel/preset-react": "7.12.13",
+		"@babel/preset-typescript": "7.13.0",
+		"awesome-typescript-loader": "5.2.1",
+		"babel-eslint": "10.1.0",
+		"babel-loader": "8.0.5",
+		"babel-plugin-macros": "3.0.1",
+		"babel-plugin-named-asset-import": "0.3.1",
+		"clean-webpack-plugin": "0.1.19",
+		"compression-webpack-plugin": "1.1.11",
+		"cookie-parser": "1.4.5",
+		"cors": "2.8.5",
+		"css-loader": "1.0.0",
+		"eslint": "5.12.0",
+		"eslint-loader": "2.1.1",
+		"eslint-plugin-flowtype": "2.50.1",
+		"eslint-plugin-import": "2.14.0",
+		"eslint-plugin-jsx-a11y": "6.1.2",
+		"eslint-plugin-react": "7.12.4",
+		"express": "4.17.1",
+		"express-handlebars": "5.1.0",
+		"express-http-proxy": "1.4.0",
+		"file-loader": "2.0.0",
+		"handlebars": "4.7.7",
+		"handlebars-loader": "1.7.1",
+		"html-webpack-plugin": "3.2.0",
+		"htmlencode": "0.0.4",
+		"husky": "4.2.5",
+		"image-size-loader": "0.7.0",
+		"mini-css-extract-plugin": "0.5.0",
+		"nodemon": "2.0.4",
+		"optimize-css-assets-webpack-plugin": "5.0.0",
+		"postcss-cssnext": "3.1.0",
+		"postcss-for": "2.1.1",
+		"postcss-import": "10.0.0",
+		"postcss-loader": "2.0.5",
+		"postcss-mixins": "6.2.3",
+		"postcss-nested": "4.2.1",
+		"postcss-random": "1.0.9",
+		"postcss-simple-vars": "4.1.0",
+		"resolve": "1.10.0",
+		"sass-loader": "7.1.0",
+		"stats-webpack-plugin": "0.6.2",
+		"style-loader": "0.12.3",
+		"ua-parser-js": "0.7.24",
+		"uglifyjs-webpack-plugin": "1.2.7",
+		"url-loader": "4.1.1",
+		"webpack": "4.28.4",
+		"webpack-cli": "3.3.0",
+		"webpack-dev-server": "3.2.1",
+		"webpack-manifest-plugin": "2.0.4",
+		"webpack-visualizer-plugin": "0.1.11"
+	}
+}

@@ -1,8 +1,5 @@
 module.exports = {
-	publicPath:
-		process.env.NODE_ENV === 'production'
-			? 'https://img1a.flixcart.com/www/linchpin/ally-test/'
-			: '/',
+	publicPath: process.env.NODE_ENV === 'production' ? 'https://img1a.flixcart.com/www/linchpin/ally-test/' : '/',
 	APP_NAME: require('../package.json').name,
 	SENTRY_VERSION: '2.1.2',
 	SENTRY_KEY: 'https://e360ff5c7562465c8740a196305afd84@sentry.flipkart.com/63',

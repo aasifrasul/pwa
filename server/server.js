@@ -56,7 +56,11 @@ app.use(
 );
 
 app.all('/*', (req, res) => {
-	const data = { js: bundleConfig, ...AppHelper.constructReqDataObject(req), dev: true };
+	const data = {
+		js: bundleConfig,
+		...AppHelper.constructReqDataObject(req),
+		dev: true,
+	};
 	data.layout = false;
 	res.render('next1-ally-test', data);
 });

@@ -13,9 +13,7 @@ function throttled(delay, fn) {
 function debounced(delay, fn) {
 	let timerId;
 	return function (...args) {
-		if (timerId) {
-			clearTimeout(timerId);
-		}
+		timerId && clearTimeout(timerId);
 		timerId = setTimeout(() => {
 			fn(...args);
 			timerId = null;
@@ -90,3 +88,29 @@ const print = (num = isRequired()) => {
 print(2); //printing 2
 print(); // error
 print(null); //printing null
+
+// Execute a function only once
+const executeOnce = function executeOnce(func) {
+	var result;
+	var executed = false;
+	return function () {
+		if (!executed) {
+			result = func.apply(this, arguments);
+			executed = true;
+		}
+		return result;
+	};
+};
+
+const memoize = function memoize(func) {
+	var result = {};
+
+	return function () {
+		var args = Array.prototype.slice.call(arguments);
+		if (args in result) {
+			return result[args];
+		} else {
+			return (result[args] = func.apply(this, args));
+		}
+	};
+};

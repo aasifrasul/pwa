@@ -1,35 +1,32 @@
 <!DOCTYPE html>
-<html lang="en-IN" class=" en-fonts-loaded" style="height: 731px; pointer-events: auto;">
+<html lang="en-IN" class="en-fonts-loaded" style="height: 731px; pointer-events: auto">
+	<head>
+		<title>My PWA</title>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width,minimum-scale=1,user-scalable=no" />
+	</head>
 
-<head>
-  <title>My PWA</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,minimum-scale=1,user-scalable=no">
-</head>
-
-<body>
-  <video autoplay></video>
-  <script>
-    window.loadJS = async (src) => {
-      console.log('Script Invoked', src);
-      const ref = document.querySelectorAll("script")[0];
-      const script = document.createElement("script");
-      script.setAttribute('src', src);
-      // script.setAttribute('defer', true);
-      // script.setAttribute('async', true);
-      script.setAttribute('crossorigin', 'anonymous');
-      ref.parentNode.insertBefore(script, ref);
-      script.onload = await
-      function (e) {
-        console.log('load', e);
-        console.log('Script Resolved', src);
-      };
-      script.onerror = await
-      function (err) {
-        console.log('Script Rejected', src, err);
-      };
-    }
-    loadJS('screenShot.js');
-  </script>
-</body>
+	<body>
+		<video autoplay></video>
+		<script>
+			window.loadJS = async (src) => {
+				console.log('Script Invoked', src);
+				const ref = document.querySelectorAll('script')[0];
+				const script = document.createElement('script');
+				script.setAttribute('src', src);
+				// script.setAttribute('defer', true);
+				// script.setAttribute('async', true);
+				script.setAttribute('crossorigin', 'anonymous');
+				ref.parentNode.insertBefore(script, ref);
+				script.onload = await function (e) {
+					console.log('load', e);
+					console.log('Script Resolved', src);
+				};
+				script.onerror = await function (err) {
+					console.log('Script Rejected', src, err);
+				};
+			};
+			loadJS('screenShot.js');
+		</script>
+	</body>
 </html>

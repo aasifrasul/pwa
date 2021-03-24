@@ -20,6 +20,7 @@ console.log(car2.drive());
 
 // factory
 const proto = {
+	data: 10,
 	drive() {
 		console.log('Vroom!');
 	},

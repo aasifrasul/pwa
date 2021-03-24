@@ -6,33 +6,25 @@ const trace = (label) => (value) => {
 // pipe(...fns: [...Function]) => x => y
 const pipe = (...fns) => (x) => fns.reduce((y, f) => f(y), x);
 
-const map = (fn, arr) =>
-	arr.reduce((acc, item, index, arr) => {
-		return acc.concat(fn(item, index, arr));
-	}, []);
-
-const filter = (fn, arr) =>
-	arr.reduce((newArr, item) => {
-		return fn(item) ? newArr.concat([item]) : newArr;
-	}, []);
-
 const compose = (...fns) => (x) => fns.reduceRight((v, f) => f(v), x);
 
 const compose = (...fns) => fns.reduce((f, g) => (...args) => f(g(...args)));
 
+const map = (fn, arr) =>
+	arr.reduce((acc, item, index, arr) => acc.concat(fn(item, index, arr)), []);
+
+const filter = (fn, arr) =>
+	arr.reduce((newArr, item) => (fn(item) ? newArr.concat([item]) : newArr), []);
+
 const mapToObj = (map) => {
 	const obj = {};
-	map.forEach((key, value) => {
-		obj[key] = value;
-	});
+	map.forEach((key, value) => (obj[key] = value));
 	return obj;
 };
 
 const objToMap = (obj) => {
 	const map = new Map();
-	Object.keys(obj).forEach((key) => {
-		map.set(key, obj[key]);
-	});
+	Object.keys(obj).forEach((key) => map.set(key, obj[key]));
 	return map;
 };
 
@@ -61,6 +53,7 @@ const Identity = (value) => ({
 	},
 	constructor: Identity,
 });
+
 Object.assign(Identity, {
 	toString: () => 'Identity',
 	is: (x) => typeof x.map === 'function',
@@ -71,12 +64,12 @@ const fRange = (start, end) =>
 		{
 			length: end - start + 1,
 		},
-
 		// change `Identity` to `start.constructor`
 		(x, i) => start.constructor(i + start)
 	);
 
 const exists = (x) => x.valueOf() !== undefined && x.valueOf() !== null;
+
 const ifExists = (x) => ({
 	map: (fn) => (exists(x) ? x.map(fn) : x),
 });

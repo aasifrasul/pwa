@@ -1,6 +1,15 @@
 'use srict';
 
 (function () {
+	let docElement = document.documentElement;
+	console.log('docElement', docElement);
+
+	window.addEventListener('mousemove', (e) => {
+		console.log('mousemove', e);
+		docElement.style.setProperty('--mouse-x', e.clientX + 'px');
+		docElement.style.setProperty('--mouse-y', e.clientY + 'px');
+	});
+
 	const getJSON = (url) =>
 		fetch(url).then(
 			(res) => res.json(),
@@ -26,7 +35,7 @@
 		});
 	};
 
-	const loadDynamically = ['js/states.json', 'js/countries.json', 'js/twoWayBinding.js'];
+	const loadDynamically = ['js/states.json', 'js/countries.json'];
 
 	loadJS('SWRegistration.js').then((script) => {
 		console.info('script', script);

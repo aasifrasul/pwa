@@ -1,6 +1,5 @@
 const { mediaDevices } = window.navigator || {};
 function hasGetUserMedia() {
-	debugger;
 	return !!(mediaDevices && mediaDevices.getUserMedia);
 }
 

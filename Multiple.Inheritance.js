@@ -1,14 +1,18 @@
 // Implement multiple inherictance in JS
 
-function applyMixins(derivedCtor, baseCtors) {
-	baseCtors.forEach((baseCtor) => {
-		const propetyNames = Object.getOwnPropertyNames(baseCtor.prototype);
+// 1. Run a loop on baseClasses array
+// 2. fetch all the property names of that derived class and run a loop on them
+// 3. derive the descriptor of poperty
+// 4  Define a property with the descriptor on the protoype of the base class.
+function applyMixins(derivedClass, baseClases) {
+	baseClases.forEach((baseClass) => {
+		const propetyNames = Object.getOwnPropertyNames(baseClass.prototype);
 		console.log(propetyNames);
 		propetyNames.forEach((name) => {
 			if (name !== 'constructor') {
-				const descriptor = Object.getOwnPropertyDescriptor(baseCtor.prototype, name);
+				const descriptor = Object.getOwnPropertyDescriptor(baseClass.prototype, name);
 				console.log(descriptor);
-				Object.defineProperty(derivedCtor.prototype, name, descriptor);
+				Object.defineProperty(derivedClass.prototype, name, descriptor);
 			}
 		});
 	});

@@ -13,7 +13,7 @@ const AppHelper = require('./helper');
 const { userAgentHandler } = require('./middlewares');
 const app = express();
 // port to use
-const port = 3000;
+const port = 3100;
 //Set hbs template config
 app.engine('.hbs', exphbs({ extname: '.hbs' }));
 app.set('views', path.join(__dirname, '..', 'public', 'ally-test'));

@@ -5,7 +5,7 @@
 	"scripts": {
 		"lint:css": "stylelint 'src/**/*.css'",
 		"lint:js": "eslint . --ext .js,.jsx,.ts,.tsx,.hbs",
-		"prettier": "prettier --write './**/*.{js,json,jsx,ts,tsx,hbs}'",
+		"prettier": "prettier --write './**/*.{js,json,jsx,ts,tsx,hbs,css}'",
 		"build": "PROMO_ENV=next1 npm run build:make",
 		"build-prod": "PROMO_ENV=prod npm run build:make",
 		"ci-node": "npm run build:make && sh ./deployer/ci-node.sh",

@@ -2,7 +2,7 @@ import React, { forwardRef, useState, useEffect, useRef } from 'react';
 import useCombinedRefs from '../../../hooks/useCombinedRefs';
 
 const CombinedRefCheckbox = forwardRef(
-	({ label, name, value, onChange, defaultChecked = false, ...rest }, forwardedRef) => {
+	({ label, name, value, callback, defaultChecked = false, ...rest }, forwardedRef) => {
 		const [checked, setChecked] = useState(defaultChecked);
 
 		const innerRef = useRef(null);
@@ -17,7 +17,7 @@ const CombinedRefCheckbox = forwardRef(
 
 		useEffect(() => {
 			setCheckedInput(checked);
-			typeof onChange === 'function' && onChange(checked);
+			typeof callback === 'function' && callback(checked);
 		}, [checked]);
 
 		return (

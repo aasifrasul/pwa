@@ -1,40 +1,39 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, useRef } from 'react';
 
 import CombinedRefCheckbox from '../Common/Checkbox/CombinedRefCheckbox';
 import InputText from '../Common/InputText';
 
 import todoReducer from '../../reducers/todoReducer';
 
-const initialTodos = [{ text: 'Item 1', complete: false }];
+const initialTodos = Array.from({ length: 100 }, (_, i) => ({ text: `Item ${i + 1}`, complete: false }));
 
 function ToDos(props) {
-	const [value, setValue] = useState('');
+	const todosHtml = [];
+	const inputTextRef = useRef('');
+	const searchRef = useRef('');
 	const [checked, setChecked] = useState('');
-	// const [todos, setTodos] = useState([{ text: 'Item 1', complete: false }]);
 	const [todos, dispatch] = useReducer(todoReducer, initialTodos);
 
-	useEffect(() => {
-	}, [value, checked]);
+	console.log('In Render');
 
-	const todosHtml = todos.filter((item, key) => {
-		let include = false;
-		include = checked ? item.complete
-		return ((checked && item.complete) || (!checked && !item.complete)) &&(
-			<div key={key}>
-				<span>{item.text}</span>
-				<span onClick={() => handleDelete(key)}> Delete </span>
-				<span onClick={() => handleComplete(key)}> Complete </span>
-			</div>
-		);
+	todos.forEach((item, key) => {
+		const { text, complete } = item;
+		const include = checked ? complete : !complete;
+		include &&
+			todosHtml.push(
+				<div key={key}>
+					<span>{text}</span>
+					<span onClick={() => handleDelete(key)}> Delete </span>
+					<span onClick={() => handleComplete(key)}> Complete </span>
+				</div>
+			);
 	});
-
-	const handleChange = (data) => data && setValue(data);
 
 	function handleSubmit(event) {
 		event.preventDefault();
-		if (value) {
-			dispatch({ type: 'TODO_ADD_NEW', payload: { value } });
-			setValue('');
+		if (inputTextRef.current) {
+			dispatch({ type: 'TODO_ADD_NEW', payload: { value: inputTextRef.current } });
+			inputTextRef.current = '';
 		}
 	}
 
@@ -50,17 +49,18 @@ function ToDos(props) {
 		dispatch({ type: 'TODO_COMPLETE', payload: { id: key } });
 	}
 
-	const handleShowCompleted = (isChecked, val) => setChecked(isChecked);
+	const handleShowCompleted = () => (isChecked, val) => setChecked(isChecked);
 
 	return (
 		<React.Fragment>
-			<CombinedRefCheckbox name="Show Completed:" label="Show Completed:" callback={handleShowCompleted} />
 			<form onSubmit={handleSubmit}>
-				<InputText label="Add Item:" defaultValue={value} callback={handleChange} />
+				<InputText label="Search Item:" defaultValue={searchRef.current} inputTextRef={searchRef} />
+				<CombinedRefCheckbox name="Show Completed:" label="Show Completed:" callback={handleShowCompleted()} />
+				<InputText label="Add Item:" defaultValue={inputTextRef.current} inputTextRef={inputTextRef} />
 				<input type="submit" value="Submit" />
-				<div>All the Todos</div>
-				<div>{todosHtml}</div>
 			</form>
+			<div>All the Todos</div>
+			<div>{todosHtml}</div>
 		</React.Fragment>
 	);
 }

@@ -51,7 +51,7 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 			} catch (err) {
 				setErrorMessage(err.message);
 				dispatch({ type: 'FETCH_FAILURE' });
-				typeof successCallback === 'function' && failureCallback(result);
+				typeof successCallback === 'function' && failureCallback(err);
 			} finally {
 				dispatch({ type: 'FETCH_STOP' });
 			}

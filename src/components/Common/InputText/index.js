@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 
 const InputText = (props) => {
-	const { label, name, callback, defaultValue = '' } = props;
+	const { label, name, inputTextRef, defaultValue = '', callback } = props;
 	const [value, setValue] = useState(defaultValue);
-	useEffect(() => setValue(defaultValue), [defaultValue]);
+	useEffect(() => setValue(inputTextRef.current), [inputTextRef.current]);
 	const handleChange = (e) => {
 		e.preventDefault();
-		setValue(e.target.value);
-		typeof callback === 'function' && callback(e.target.value);
+		const value = e.target.value;
+		setValue(value);
+		inputTextRef && (inputTextRef.current = value);
+		typeof callback === 'function' && callback(value);
 	};
 
 	return (

@@ -1,0 +1,9 @@
+.displayError {
+	border: 1px solid #d8d8d8;
+	padding: 5px;
+	border-radius: 5px;
+	background-color: rgb(255, 249, 242);
+	color: rgb(211, 0, 0);
+	text-align: left;
+	word-wrap: break-word;
+}

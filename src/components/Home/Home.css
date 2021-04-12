@@ -1,6 +1,6 @@
 .home {
-    /* background-color: #e4e4e4; */
-    padding: 10px;
+	/* background-color: #e4e4e4; */
+	padding: 10px;
 }
 
 .parent {
@@ -8,7 +8,7 @@
 }
 
 .children {
-    padding-left: 10px;
+	padding-left: 10px;
 }
 
 .checkBox {

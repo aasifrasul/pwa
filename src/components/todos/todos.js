@@ -37,17 +37,11 @@ function ToDos(props) {
 		}
 	}
 
-	function handleRemoveFromComplete(key) {
-		dispatch({ type: 'TODO_UNCOMPLETE', payload: { id: key } });
-	}
+	const handleRemoveFromComplete = (key) => dispatch({ type: 'TODO_UNCOMPLETE', payload: { id: key } });
 
-	function handleDelete(key) {
-		dispatch({ type: 'TODO_DELETE', payload: { id: key } });
-	}
+	const handleDelete = (key) => dispatch({ type: 'TODO_DELETE', payload: { id: key } });
 
-	function handleComplete(key) {
-		dispatch({ type: 'TODO_COMPLETE', payload: { id: key } });
-	}
+	const handleComplete = (key) => dispatch({ type: 'TODO_COMPLETE', payload: { id: key } });
 
 	const handleShowCompleted = () => (isChecked, val) => setChecked(isChecked);
 

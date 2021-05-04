@@ -4,11 +4,11 @@ function stopwatch(props) {
 	const seconds = useRef(0);
 	const intervalID = useRef(0);
 	const [timer, setTimer] = useState(0);
+	const [toggle, setToggle] = useState(true);
 
 	const stopTimer = () => clearInterval(intervalID.current);
 
 	useEffect(() => {
-		console.log('Hi');
 		intervalID.current = setInterval(
 			() =>
 				setTimer((timerCount) => {
@@ -21,14 +21,16 @@ function stopwatch(props) {
 			100
 		);
 		return stopTimer;
-	}, []);
+	}, [toggle]);
 	const handleStop = () => (e) => stopTimer();
-	const handleStart = () => (e) => console.log(timer);
+	const handleStart = () => (e) => setToggle(!toggle);
+	const handleReset = () => (e) => setTimer(() => (seconds.current = 0));
 	return (
 		<div>
 			{seconds.current} {timer}
 			<button onClick={handleStop()}>Stop</button>
 			<button onClick={handleStart()}>Start</button>
+			<button onClick={handleReset()}>Reset</button>
 		</div>
 	);
 }

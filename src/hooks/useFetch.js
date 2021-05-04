@@ -39,7 +39,6 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 					method: 'get',
 					signal: controller.signal,
 				});
-				// const response = await fetch(`${url}${queryString}`);
 				const result = await response.json();
 				if (response.ok) {
 					dispatch({ type: 'FETCH_SUCCESS', payload: result });

@@ -10,11 +10,9 @@ const compose = (...fns) => (x) => fns.reduceRight((v, f) => f(v), x);
 
 const compose = (...fns) => fns.reduce((f, g) => (...args) => f(g(...args)));
 
-const map = (fn, arr) =>
-	arr.reduce((acc, item, index, arr) => acc.concat(fn(item, index, arr)), []);
+const map = (fn, arr) => arr.reduce((acc, item, index, arr) => acc.concat(fn(item, index, arr)), []);
 
-const filter = (fn, arr) =>
-	arr.reduce((newArr, item) => (fn(item) ? newArr.concat([item]) : newArr), []);
+const filter = (fn, arr) => arr.reduce((newArr, item) => (fn(item) ? newArr.concat([item]) : newArr), []);
 
 const mapToObj = (map) => {
 	const obj = {};

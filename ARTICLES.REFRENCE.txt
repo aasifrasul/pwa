@@ -1,2 +1,13 @@
 
 https://medium.com/javascript-in-plain-english/i-use-these-4-questions-to-find-outstanding-javascript-developers-4a468ea17155
+
+https://stackoverflow.com/questions/26094969/design-a-generic-job-scheduler
+
+https://medium.com/jspoint/how-the-browser-renders-a-web-page-dom-cssom-and-rendering-df10531c9969#:~:text=When%20a%20web%20page%20is,the%20Render-Tree%20from%20it.
+
+
+Ask Clarifying questions.
+
+Try to run through the problem without coding to undertsand it.
+Highlight  strengths/limtations.
+Provide other options to the solution.

@@ -6,6 +6,9 @@
 // 4  Define a property with the descriptor on the protoype of the base class.
 function applyMixins(derivedClass, baseClases) {
 	baseClases.forEach((baseClass) => {
+		// gets all the all the methods defined on this class including "construcor"
+		// Note even if the class is empty(meaning no mehtod is defned including 'construcor')
+		// It will still return "constructor" as a own property Name
 		const propetyNames = Object.getOwnPropertyNames(baseClass.prototype);
 		console.log(propetyNames);
 		propetyNames.forEach((name) => {

@@ -7,7 +7,7 @@
 		return await get(url).then(JSON.parse);
 	}
 
-	function get(url) {
+	function fetch(url) {
 		// Return a new promise.
 		return new Promise((resolve, reject) => {
 			// Do the usual XHR stuff

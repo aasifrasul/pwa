@@ -10,17 +10,18 @@ var isPushEnabled = false;
 // in Chrome 44 by concatenating the subscription Id
 // to the subscription endpoint
 function endpointWorkaround(pushSubscription) {
+	const { endpoint, subscriptionId } = pushSubscription || {};
 	// Make sure we only mess with GCM
-	if (pushSubscription.endpoint.indexOf('https://android.googleapis.com/gcm/send') !== 0) {
-		return pushSubscription.endpoint;
+	if (endpoint.indexOf('https://android.googleapis.com/gcm/send') !== 0) {
+		return endpoint;
 	}
 
-	var mergedEndpoint = pushSubscription.endpoint;
+	let mergedEndpoint = endpoint;
 	// Chrome 42 + 43 will not have the subscriptionId attached
 	// to the endpoint.
-	if (pushSubscription.subscriptionId && pushSubscription.endpoint.indexOf(pushSubscription.subscriptionId) === -1) {
+	if (subscriptionId && endpoint.indexOf(subscriptionId) === -1) {
 		// Handle version 42 where you have separate subId and Endpoint
-		mergedEndpoint = pushSubscription.endpoint + '/' + pushSubscription.subscriptionId;
+		mergedEndpoint = endpoint + '/' + subscriptionId;
 	}
 	return mergedEndpoint;
 }

@@ -19,22 +19,6 @@ var func1Ins = createInstance(Foo, 10, 20, 30);
 
 // 10,20,30
 
-// target = Foo
-var createInstance = function (func, ...args) {
-	var newFunc = new Proxy(func, {
-		apply(target, thisArg, argumentsList) {
-			console.log('target', target);
-			console.log('thisArg', thisArg);
-			console.log('argumentsList', argumentsList);
-			return new target(...argumentsList);
-		},
-	});
-	console.log(newFunc);
-	newFunc(...args);
-};
-
-createInstance(Foo, 1, 2, 3);
-
 function Foo(p1, p2, p3) {
 	console.log(p1, p2, p3);
 }
@@ -48,3 +32,19 @@ function MyConstructor(func, ...args) {
 var instance1 = MyConstructor(Foo, 10, 20, 30);
 
 console.log(instance1);
+
+// target = Foo
+var createInstance = function (func, ...args) {
+	var newFunc = new Proxy(func, {
+		apply(target, thisArg, argumentsList) {
+			console.log('target', target);
+			console.log('thisArg', thisArg);
+			console.log('argumentsList', argumentsList);
+			target(...argumentsList);
+		},
+	});
+	console.log(newFunc);
+	newFunc(...args);
+};
+
+createInstance(Foo, 1, 2, 3);

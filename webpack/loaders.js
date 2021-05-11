@@ -94,7 +94,7 @@ if (PROD) {
 			{
 				loader: 'css-loader',
 				query: {
-					module: true,
+					modules: true,
 					localIdentName: '[local]_[hash:base64:6]',
 					getLocalIdent: getDefaultLocalIdent,
 					importLoaders: 1,

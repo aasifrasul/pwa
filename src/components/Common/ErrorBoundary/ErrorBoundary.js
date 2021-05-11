@@ -15,7 +15,6 @@ class ErrorBoundary extends React.Component {
 	render() {
 		const { hasError, error } = this.state;
 		const { children } = this.props;
-		console.log(styles.displayError, 'displayError');
 		return hasError ? (
 			<div>
 				<div>Something went wrong </div>
@@ -27,3 +26,5 @@ class ErrorBoundary extends React.Component {
 		);
 	}
 }
+
+export default ErrorBoundary;

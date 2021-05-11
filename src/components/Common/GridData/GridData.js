@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDataGrid from 'react-data-grid';
 
 import { getArrayCount } from '../../../utils/typeChecking';
@@ -11,7 +11,7 @@ const columns = [
 function GridData(props) {
 	const { socket, queue } = props;
 	const [rows, setRows] = useState([]);
-	const didMount = React.useRef(false);
+	const didMount = useRef(false);
 	let rafId;
 
 	socket.on('currencyPairData', (data) => {
@@ -23,6 +23,7 @@ function GridData(props) {
 	function setRowsData() {
 		const data = queue.dequeue();
 		didMount.current && getArrayCount(data) && setRows(data);
+		window.cancelAnimationFrame(rafId);
 		rafId = window.requestAnimationFrame(setRowsData);
 	}
 

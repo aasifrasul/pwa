@@ -1,22 +1,22 @@
 .ripple {
-     position: absolute;
-     background: rgba(200, 200, 200, 0.6);
-     width: 10px;
-     height: 10px;
-     border-radius: 100%;
-     box-sizing: border-box;
-     opacity: 1;
-     transform:scale(0);
+	position: absolute;
+	background: rgba(200, 200, 200, 0.6);
+	width: 10px;
+	height: 10px;
+	border-radius: 100%;
+	box-sizing: border-box;
+	opacity: 1;
+	transform: scale(0);
 }
- .ripple.animate {
-     animation: rippleAnimation 0.25s ease-out;
+.ripple.animate {
+	animation: rippleAnimation 0.25s ease-out;
 }
- @keyframes rippleAnimation{
-     0% {
-         transform:scale(0);
-    }
-     100% {
-         opacity: 0;
-         transform:scale(1.5);
-    }
+@keyframes rippleAnimation {
+	0% {
+		transform: scale(0);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(1.5);
+	}
 }

@@ -11,7 +11,7 @@ function myPromise(callback) {
 	}
 
 	this.state = 'pending';
-	this.data = null;
+	this.result = null;
 	this.error = null;
 
 	callback.call(this, this.resolve.bind(this), this.reject.bind(this));
@@ -20,7 +20,7 @@ function myPromise(callback) {
 
 myPromise.prototype.then = function (onFulfilled, onRejected) {
 	console.log('In prototype then');
-	this.state === 'fulfilled' && isFunction(onFulfilled) && onFulfilled(this.data);
+	this.state === 'fulfilled' && isFunction(onFulfilled) && onFulfilled(this.result);
 	this.state === 'rejected' && isFunction(onRejected) && onRejected(this.error);
 	return this;
 };
@@ -34,7 +34,7 @@ myPromise.prototype.catch = function (errCallback) {
 myPromise.prototype.resolve = function (data) {
 	console.log('In prototype resolve');
 	this.state = 'fulfilled';
-	this.data = data;
+	this.result = data;
 };
 
 myPromise.prototype.reject = function (err) {
@@ -61,33 +61,26 @@ myPromise.reject = function (data) {
 	return promise;
 };
 
-myPromise.all = function (promises) {
-	debugger;
-	if (!isArray(promises)) {
-		throw new Error('Parameter expected of type array');
-	}
-
-	return new myPromise((resolve, reject) => {
-		const result = [];
-
-		promises.forEach((promise) => {
-			if (!isFunction(promise.then)) {
-				reject();
-				throw new Error('expected Parameter is array of promises');
-			}
-			promise.then(
-				(data) => {
-					result.push(data);
-					if (promises.length == result.length) {
-						resolve(result);
+myPromise.all = function (arr) {
+	let results = [];
+	return new Promise((resolve, reject) => {
+		for (var i = arr.length - 1; i >= 0; i--) {
+			(function (idx) {
+				arr[idx].then(
+					(data) => {
+						results[idx] = data;
+						results = [...results];
+						if (results.length === arr.length) {
+							resolve(results);
+						}
+					},
+					(e) => {
+						reject(e);
+						throw new Error(e);
 					}
-				},
-				(err) => {
-					reject(err);
-					throw new Error(err);
-				}
-			);
-		});
+				);
+			})(i);
+		}
 	});
 };
 
@@ -117,6 +110,36 @@ promise
 	.catch((e) => {
 		throw new Error(e);
 	});
+*/
+
+/**
+
+
+var promises = [];
+
+function promiseFactory(payload) {
+	return new Promise((resolve, reject) => {
+		const { delay, isReject } = payload || {};
+		setTimeout(() => {
+			isReject ? reject(payload) : resolve(payload);
+		}, delay);
+	});
+}
+promises.push(promiseFactory({ id: 1, delay: 100 }));
+promises.push(promiseFactory({ id: 2, delay: 50 }));
+promises.push(promiseFactory({ id: 3, delay: 25 }));
+promises.push(promiseFactory({ id: 5, delay: 200, isReject: true }));
+promises.push(promiseFactory({ id: 4, delay: 200 }));
+
+myPromiseAll(promises).then(
+	(data) => console.log('In then', data),
+	(e) => console.log('In Error', e)
+)
+.catch(e => {
+	console.log('In catch', e);
+});
+
+
 */
 
 myPromise

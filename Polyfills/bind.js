@@ -1,9 +1,21 @@
 // bind Polyfill
-Function.prototype.bind =
-	Function.prototype.bind ||
-	function (context) {
-		const self = this;
+Function.prototype.myBind =
+	Function.prototype.myBind ||
+	function (context, ...args) {
+		context.myBind = this;
 		return function () {
-			self.apply(context, Array.prototype.slice.call(arguments));
+			context.myBind(...args);
 		};
 	};
+
+var obj = {
+	a: 'Hi, ',
+	b: 'Hello!',
+	func: function () {
+		return this.a + this.b;
+	},
+};
+
+var func = obj.func;
+
+console.log(func.myBind(obj)()); // prints 'Hi, Hello!'

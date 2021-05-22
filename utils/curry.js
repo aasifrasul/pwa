@@ -16,6 +16,20 @@ function add() {
 	}, 0);
 }
 
+function curry(fn, ...args) {
+	return function (...params) {
+		return fn.apply(this, [...args, ...params]);
+	};
+}
+
+function add(...args) {
+	return args.reduce((accu, value) => accu + value, 0);
+}
+
+const curry = (fn, ...args) => (...params) => fn(...args, ...params);
+
+const add = (...args) => args.reduce((accu, value) => accu + value, 0);
+
 const curry1 = curry(add, 1);
 
 console.log(

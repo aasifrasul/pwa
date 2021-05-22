@@ -466,12 +466,12 @@ export function fetch(input, init) {
 
 		xhr.onload = function () {
 			var options = {
-				status: xhr.status,
-				statusText: xhr.statusText,
-				headers: parseHeaders(xhr.getAllResponseHeaders() || ''),
+				status: this.status,
+				statusText: this.statusText,
+				headers: parseHeaders(this.getAllResponseHeaders() || ''),
 			};
-			options.url = 'responseURL' in xhr ? xhr.responseURL : options.headers.get('X-Request-URL');
-			var body = 'response' in xhr ? xhr.response : xhr.responseText;
+			options.url = 'responseURL' in this ? this.responseURL : options.headers.get('X-Request-URL');
+			var body = 'response' in this ? this.response : this.responseText;
 			resolve(new Response(body, options));
 		};
 

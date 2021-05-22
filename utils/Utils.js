@@ -1,5 +1,17 @@
 const toArray = (args) => Array.prototype.slice.call(args);
 
+new Array(10).fill(0);
+// creates an array with 10 zeroes
+// [0, ,0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+Array.from(Array(10).keys());
+// [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+Array.apply(null, { length: N }).map(Number.call, Number);
+// [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+Array.apply(null, { length: N }).map(Function.call, Math.random);
+
 function addSubtract(n) {
 	let sum = n;
 	let count = 0;
@@ -452,11 +464,11 @@ print(null); //printing null
 
 // Execute a function only once
 const executeOnce = function executeOnce(func) {
-	var result;
-	var executed = false;
-	return function () {
+	let result,
+		executed = false;
+	return function (...params) {
 		if (!executed) {
-			result = func.apply(this, arguments);
+			result = func.apply(this, params);
 			executed = true;
 		}
 		return result;
@@ -464,14 +476,12 @@ const executeOnce = function executeOnce(func) {
 };
 
 const memoize = function memoize(func) {
-	var result = {};
-
-	return function () {
-		var args = Array.prototype.slice.call(arguments);
-		if (args in result) {
-			return result[args];
-		} else {
-			return (result[args] = func.apply(this, args));
+	const hash = new Map();
+	return function (...params) {
+		const key = JSON.stringify(params);
+		if (!hash.has(key)) {
+			hash.set(key, func.apply(this, params));
 		}
+		return hash.get(key);
 	};
 };

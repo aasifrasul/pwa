@@ -1,3 +1,12 @@
+const tap = curry((fn, x) => {
+	fn(x);
+	return x;
+});
+
+const trace = (label) => {
+	return tap((x) => console.log(`== ${label}:  ${x}`));
+};
+
 const trace = (label) => (value) => {
 	console.log(`${label}: ${value}`);
 	return value;

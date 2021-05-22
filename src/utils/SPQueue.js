@@ -7,11 +7,15 @@ const Queue = (function () {
 			console.log('Return the existing instance');
 			return Queue.instance;
 		}
-		this.hash = new Map();
+		this.reset();
+		Queue.instance = this;
+	};
+
+	Queue.prototype.reset = function () {
+		console.log('Queue is reset');
+		this.hash = {};
 		this.count = 0;
 		this.lowestCount = 0;
-
-		Queue.instance = this;
 	};
 
 	Queue.prototype.increment = function (key) {
@@ -36,18 +40,17 @@ const Queue = (function () {
 			this.increment('count');
 		}
 
-		this.hash.set(key, data);
+		this.hash[key] = data;
 	};
 
 	Queue.prototype.dequeue = function () {
 		if (this.size() === 0) {
-			this.count = this.lowestCount = 0;
-			this.hash = new Map();
+			this.reset();
 			return;
 		}
 
-		const result = this.hash.get(this.lowestCount);
-		this.hash.delete(this.lowestCount);
+		const result = this.hash[this.lowestCount];
+		delete this.hash[this.lowestCount];
 		this.increment('lowestCount');
 		return result;
 	};
@@ -61,4 +64,4 @@ const Queue = (function () {
 
 const queue = new Queue();
 
-export default queue;
+export default Queue;

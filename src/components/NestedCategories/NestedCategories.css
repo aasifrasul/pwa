@@ -1,0 +1,43 @@
+.home {
+	/* background-color: #e4e4e4; */
+	padding: 10px;
+}
+
+.category_parent {
+	font-weight: bold;
+}
+
+.category_children {
+	padding-left: 10px;
+}
+
+.checkBox {
+	float: left;
+}
+
+.arrow-up-down {
+	border-bottom: 10px solid #050505;
+	border-right: 10px solid transparent;
+	border-left: 10px solid transparent;
+	height: 0px;
+	width: 0px;
+	transition: 0.5s ease all;
+	float: right;
+	margin-top: 5px;
+	margin-right: 5px;
+}
+
+.up {
+	transform: rotate(180deg);
+}
+
+.hidden {
+	visibility: hidden;
+	height: 0px;
+}
+
+.dev-wrapper {
+	display: flex;
+	justify-content: center;
+	float: left;
+}

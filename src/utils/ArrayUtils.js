@@ -33,7 +33,8 @@ const getArrayCount = (arr) => idx(arr, (_) => _.length) || 0;
 
 const buildNestedWithParentId = (arr) => {
 	const nestedStructure = Object.create(null);
-	const categories = Object.create(null);
+	const categories = [];
+	const uniqueCategories = {};
 	let elem;
 
 	for (var i = 0; i < arr.length; i++) {
@@ -50,7 +51,15 @@ const buildNestedWithParentId = (arr) => {
 			parentElem.children.push(elem);
 		} else {
 			nestedStructure[elem.id] = elem;
-			categories[elem.category] = elem.category;
+			if (!uniqueCategories[elem.category]) {
+				uniqueCategories[elem.category] = true;
+				const category = Object.create(null);
+				category.id = elem.id;
+				category.title = elem.category;
+				category.selected = false;
+				category.key = 'category';
+				categories.push(category);
+			}
 		}
 	}
 

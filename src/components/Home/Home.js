@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import Checkbox from '../Common/Checkbox';
 
-import { getArrayCount, alphabets } from '../../../utils/ArrayUtils';
+import { getArrayCount, alphabets } from '../../utils/ArrayUtils';
 
 import './Home.css';
 

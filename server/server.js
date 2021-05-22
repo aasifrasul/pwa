@@ -2,6 +2,7 @@
 const socketio = require('socket.io');
 const webpack = require('webpack');
 const os = require('os');
+const fs = require('fs');
 
 const WebpackDevServer = require('webpack-dev-server');
 const webpackConfig = require('../webpack-configs/webpack.config');
@@ -14,6 +15,51 @@ const proxy = require('express-http-proxy');
 const path = require('path');
 const AppHelper = require('./helper');
 const { userAgentHandler } = require('./middlewares');
+
+const enc = {
+	encoding: 'utf-8',
+};
+
+const generateBuildTime = async function () {
+	return new Promise((resolve, reject) => {
+		fs.writeFile(path.join(__dirname, '..', 'public', 'server', 'buildtime'), new Date().toUTCString(), function (
+			err
+		) {
+			if (err) {
+				reject('Error occured while writing to generateBuildTime :: ' + err.toString());
+			}
+			resolve();
+		});
+	});
+};
+
+generateBuildTime();
+
+const getStartTime = () => {
+	if (process.env.NODE_ENV !== 'production') {
+		return fs.readFileSync(path.join(__dirname, '..', 'public', 'server', 'buildtime'), enc);
+	}
+
+	let startTime = fs.readFileSync(path.join(__dirname, 'public', 'server', 'buildtime'), enc);
+	startTime = new Date(Date.parse(startTime) + 1000000000).toUTCString();
+	return startTime;
+};
+
+const startTime = getStartTime();
+
+// Last modified header
+// Assumtion here is that the everytime any file is modified, the build is restarted hence last-modified == build time.
+const nocache = function (res) {
+	res.set({
+		'Cache-Control': 'private, no-cache, no-store, must-revalidate, max-age=0',
+		Expires: 'Thu, 01 Jan 1970 00:00:00 GMT',
+		Pragma: 'no-cache',
+		'Last-Modified': startTime,
+	});
+};
+
+const webWorkerContent = fs.readFileSync(`./src/utils/WebWorker.js`, enc);
+
 const app = express();
 // port to use
 const port = 3100;
@@ -58,6 +104,12 @@ app.use(
 	})
 );
 
+app.get('/WebWorker.js', function (req, res) {
+	res.set('Content-Type', `application/javascript; charset=${enc.encoding}`);
+	nocache(res);
+	res.end(webWorkerContent);
+});
+
 app.all('/*', (req, res) => {
 	const data = {
 		js: bundleConfig,
@@ -76,7 +128,7 @@ const server = app.listen(port, function () {
 const io = socketio(server);
 
 io.on('connection', (socket) => {
-	currencyPairs = [
+	const currencyPairs = [
 		{
 			key: 'EURUSD',
 			value: 1.1857,
@@ -120,29 +172,20 @@ io.on('connection', (socket) => {
 	];
 
 	const getRandomizedArray = (arr) => arr.sort(() => 0.5 - Math.random());
-	console.log('New user connected');
 
 	let IntervalId;
 
 	socket.on('fetchOSStats', () => {
 		const data = os.cpus();
-		console.log(data);
-		console.log('fetchOSStats invoked');
 		socket.emit('oSStatsData', data);
 	});
 
 	//handle the new message event
 	socket.on('fetchCurrencyPair', () => {
-		console.log('fetchCurrencyPair invoked');
 		IntervalId && clearInterval(IntervalId);
 		IntervalId = setInterval(() => {
-			socket.emit(
-				'currencyPairData',
-				new Array(100)
-					.fill(0)
-					.map((i) => getRandomizedArray(currencyPairs))
-					.flat()
-			);
-		}, 1000);
+			const data = getRandomizedArray(currencyPairs)[0];
+			socket.emit('currencyPairData', data);
+		}, 1);
 	});
 });

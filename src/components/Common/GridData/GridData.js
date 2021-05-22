@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDataGrid from 'react-data-grid';
+import socketClient from 'socket.io-client';
 
 import { getArrayCount } from '../../../utils/typeChecking';
+
+const socket = socketClient.connect('http://localhost:3100');
 
 const columns = [
 	{ key: 'key', name: 'Currency Pair' },
@@ -9,36 +12,46 @@ const columns = [
 ];
 
 function GridData(props) {
-	const { socket, queue } = props;
+	const { queue } = props;
 	const [rows, setRows] = useState([]);
 	const didMount = useRef(false);
 	let rafId;
 
-	socket.on('currencyPairData', (data) => {
-		while (getArrayCount(data)) {
-			queue.enqueue(data.splice(0, 30));
-		}
-	});
-
 	function setRowsData() {
-		const data = queue.dequeue();
+		const data = [];
+		let res;
+		while (data.length < 50) {
+			res = queue.dequeue();
+			console.log('res', res);
+			data.push(res);
+		}
 		didMount.current && getArrayCount(data) && setRows(data);
 		window.cancelAnimationFrame(rafId);
-		rafId = window.requestAnimationFrame(setRowsData);
+		//rafId = window.requestAnimationFrame(setRowsData);
 	}
 
 	useEffect(() => {
 		if (!didMount.current) {
 			didMount.current = true;
-		}
 
-		rafId = window.requestAnimationFrame(setRowsData);
+			socket.emit('fetchCurrencyPair');
+			socket.on('currencyPairData', queue.enqueue);
+
+			const myWorker = new Worker('WebWorker.js');
+			myWorker.postMessage('Helloooo');
+			console.log('myWorker', myWorker);
+			myWorker.onmessage = (e) => {
+				console.log('myWorker', e.data);
+			};
+
+			rafId = window.requestAnimationFrame(setRowsData);
+		}
 
 		return () => {
 			didMount.current = false;
 			window.cancelAnimationFrame(rafId);
 		};
-	});
+	}, []);
 	return <ReactDataGrid columns={columns} rows={rows} rowsCount={20} minHeight={150} />;
 }
 

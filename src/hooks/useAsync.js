@@ -1,11 +1,11 @@
+import React, { useRef, useEffect } from 'react';
+
 function useAsync(asyncFn, onSuccess) {
+	const didMount = useRef(false);
+
 	useEffect(() => {
-		let isMounted = true;
-		asyncFn().then((data) => {
-			if (isMounted) onSuccess(data);
-		});
-		return () => {
-			isMounted = false;
-		};
+		!didMount.current && (didMount.current = true);
+		asyncFn().then((data) => didMount.current && onSuccess(data));
+		return () => (didMount.current = false);
 	}, [asyncFn, onSuccess]);
 }

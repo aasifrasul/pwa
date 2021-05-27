@@ -30,12 +30,16 @@ function GridData(props) {
 		//rafId = window.requestAnimationFrame(setRowsData);
 	}
 
+	function enqueue(data) {
+		queue.enqueue(data);
+	}
+
 	useEffect(() => {
 		if (!didMount.current) {
 			didMount.current = true;
 
 			socket.emit('fetchCurrencyPair');
-			socket.on('currencyPairData', queue.enqueue);
+			socket.on('currencyPairData', enqueue);
 
 			const myWorker = new Worker('WebWorker.js');
 			myWorker.postMessage('Helloooo');

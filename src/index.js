@@ -1,7 +1,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
+import { Provider } from 'react-redux';
+
+import configureStore from './store';
+
 import App from './components/App/App';
 
+import './index.css';
+
+const store = configureStore();
+window.store = store;
+
 // ReactDOM.unstable_createRoot(document.querySelector('#root')).render(<App />);
-ReactDOM.render(<App />, document.querySelector('#root'));
+ReactDOM.render(
+	<Provider store={store}>
+		<App />
+	</Provider>,
+	document.querySelector('#root')
+);

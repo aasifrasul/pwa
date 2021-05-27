@@ -1,4 +1,6 @@
-const todoReducer = (state, action) => {
+const defaultState = Array.from({ length: 10 }, (_, i) => ({ text: `Item ${i + 1}`, complete: false }));
+
+const todoReducer = (state = defaultState, action) => {
 	const { type, payload } = action;
 	switch (type) {
 		case 'TODO_COMPLETE':
@@ -24,7 +26,7 @@ const todoReducer = (state, action) => {
 		case 'TODO_ADD_NEW':
 			return [...state, { text: payload.value, complete: false }];
 		case 'TODO_DELETE':
-			return state.filter((todo) => todo.id !== payload.id);
+			return state.filter((todo, key) => key !== payload.id);
 		default:
 			return state;
 	}

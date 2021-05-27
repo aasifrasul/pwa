@@ -1,5 +1,5 @@
 const Queue = (function () {
-	const Queue = function () {
+	const Queue = function Queue() {
 		if (Queue.instance) {
 			// Singleton
 			console.log('Return the existing instance');
@@ -11,34 +11,27 @@ const Queue = (function () {
 
 	Queue.prototype.reset = function () {
 		console.log('Queue is reset');
-		this.hash = {};
+		this.hash = new Map();
 		this.count = 0;
 		this.lowestCount = 0;
 	};
 
 	Queue.prototype.increment = function (key) {
-		this[key] = this[key] + 1;
-		return this[key];
+		return (this[key] = this[key] + 1);
 	};
 
 	Queue.prototype.decrement = function (key) {
-		this[key] = this[key] - 1;
-		return this[key];
+		return (this[key] = this[key] - 1);
 	};
 
 	Queue.prototype.enqueue = function (data, priority) {
 		if (!data) {
 			return;
 		}
-		let key;
-		if (priority == 1) {
-			key = this.decrement('lowestCount');
-		} else {
-			key = this.count;
-			this.increment('count');
-		}
 
-		this.hash[key] = data;
+		const key = priority ? --this.lowestCount : this.count++;
+
+		this.hash.set(key, data);
 	};
 
 	Queue.prototype.dequeue = function () {
@@ -47,8 +40,8 @@ const Queue = (function () {
 			return;
 		}
 
-		const result = this.hash[this.lowestCount];
-		delete this.hash[this.lowestCount];
+		const result = this.hash.get(this.lowestCount);
+		this.hash.delete(this.lowestCount);
 		this.increment('lowestCount');
 		return result;
 	};

@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import Checkbox from '../Common/Checkbox';
 import Spacer from '../Common/Spacer/Spacer1';
@@ -23,6 +23,8 @@ export default function NestedCategories(props) {
 	let childHtml = [];
 	const categoriesHtml = [];
 	let count = 0;
+
+	const [nestedCategories, dispatch] = useReducer(nestedCategoriesReducer, initialNestedCategories);
 
 	const { data, isError, isLoading } = useFetch(
 		'https://okrcentral.github.io/sample-okrs/db.json',
@@ -158,7 +160,7 @@ export default function NestedCategories(props) {
 	};
 
 	return (
-		<Fragment>
+		<>
 			<DropDown title="Select a category" options={categories} selectHandler={handleCategoriesSelection} />
 			{/*<DropDown
 				titleHelper="Category"
@@ -168,6 +170,6 @@ export default function NestedCategories(props) {
 				toggleItem={toggleItem}
 			/>*/}
 			<div className={styles['home']}>{parent}</div>
-		</Fragment>
+		</>
 	);
 }

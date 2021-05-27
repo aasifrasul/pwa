@@ -1,0 +1,34 @@
+import React, { useState } from 'react';
+
+import Portal from '../Common/Portal/Portal';
+
+export default function Movie(props) {
+	const [isShown, setIsShown] = useState(false);
+	const { styles, item } = props;
+	const { id, poster_path, title, vote_average, overview } = item;
+	const imagePath = poster_path ? `https://image.tmdb.org/t/p/w1280${poster_path}` : '';
+
+	return (
+		<>
+			<div
+				className={styles.imageWrapper}
+				key={id}
+				onMouseEnter={() => setIsShown(true)}
+				onMouseLeave={() => setIsShown(false)}
+			>
+				<div className={styles.image}>
+					<img src={imagePath} width="150" height="200" />
+				</div>
+				<div>
+					{title} {vote_average}
+				</div>
+				{isShown && (
+					<Portal container={document.querySelector(`.${styles.mouseOverWrapper}_${id}`)}>
+						<div className={styles.imageWrapper}>{overview}</div>
+					</Portal>
+				)}
+			</div>
+			<div className={`${styles.mouseOverWrapper}_${id}`}></div>
+		</>
+	);
+}

@@ -1,62 +1,90 @@
 import React, { useState, useEffect, useReducer, useRef } from 'react';
+import { connect } from 'react-redux';
 
 import CombinedRefCheckbox from '../Common/Checkbox/CombinedRefCheckbox';
 import InputText from '../Common/InputText';
 
-import todoReducer from '../../reducers/todoReducer';
+class Todos extends React.Component {
+	constructor(props) {
+		super(props);
+		this.inputTextRef = React.createRef('');
+		this.searchRef = React.createRef('');
 
-const initialTodos = Array.from({ length: 100 }, (_, i) => ({ text: `Item ${i + 1}`, complete: false }));
+		this.props = props;
 
-function ToDos(props) {
-	const todosHtml = [];
-	const inputTextRef = useRef('');
-	const searchRef = useRef('');
-	const [checked, setChecked] = useState('');
-	const [todos, dispatch] = useReducer(todoReducer, initialTodos);
+		this.handleSubmit = this.handleSubmit.bind(this);
 
-	console.log('In Render');
+		this.state = {
+			checked: '',
+		};
+	}
 
-	todos.forEach((item, key) => {
-		const { text, complete } = item;
-		const include = checked ? complete : !complete;
-		include &&
-			todosHtml.push(
-				<div key={key}>
-					<span>{text}</span>
-					<span onClick={() => handleDelete(key)}> Delete </span>
-					<span onClick={() => handleComplete(key)}> Complete </span>
-				</div>
-			);
-	});
-
-	function handleSubmit(event) {
+	handleSubmit(event) {
 		event.preventDefault();
-		if (inputTextRef.current) {
-			dispatch({ type: 'TODO_ADD_NEW', payload: { value: inputTextRef.current } });
-			inputTextRef.current = '';
+		if (this.inputTextRef.current) {
+			this.props.dispatch({ type: 'TODO_ADD_NEW', payload: { value: this.inputTextRef.current } });
+			this.inputTextRef.current = '';
 		}
 	}
 
-	const handleRemoveFromComplete = (key) => dispatch({ type: 'TODO_UNCOMPLETE', payload: { id: key } });
+	handleRemoveFromComplete = (key) => this.props.dispatch({ type: 'TODO_UNCOMPLETE', payload: { id: key } });
 
-	const handleDelete = (key) => dispatch({ type: 'TODO_DELETE', payload: { id: key } });
+	handleDelete = (key) => this.props.dispatch({ type: 'TODO_DELETE', payload: { id: key } });
 
-	const handleComplete = (key) => dispatch({ type: 'TODO_COMPLETE', payload: { id: key } });
+	handleComplete = (key) => this.props.dispatch({ type: 'TODO_COMPLETE', payload: { id: key } });
 
-	const handleShowCompleted = () => (isChecked, val) => setChecked(isChecked);
+	handleShowCompleted = () => (isChecked, val) => this.setState({ checked: isChecked });
 
-	return (
-		<React.Fragment>
-			<form onSubmit={handleSubmit}>
-				<InputText label="Search Item:" defaultValue={searchRef.current} inputTextRef={searchRef} />
-				<CombinedRefCheckbox name="Show Completed:" label="Show Completed:" callback={handleShowCompleted()} />
-				<InputText label="Add Item:" defaultValue={inputTextRef.current} inputTextRef={inputTextRef} />
-				<input type="submit" value="Submit" />
-			</form>
-			<div>All the Todos</div>
-			<div>{todosHtml}</div>
-		</React.Fragment>
-	);
+	render() {
+		const todosHtml = [];
+		this.props.todos.forEach((item, key) => {
+			const { text, complete } = item;
+			const include = this.state.checked ? complete : !complete;
+			include &&
+				todosHtml.push(
+					<div key={key}>
+						<span>{text}</span>
+						<span onClick={() => this.handleDelete(key)}> Delete </span>
+						<span onClick={() => this.handleComplete(key)}> Complete </span>
+					</div>
+				);
+		});
+
+		return (
+			<>
+				<form onSubmit={this.handleSubmit}>
+					<InputText
+						label="Search Item:"
+						defaultValue={this.searchRef.current}
+						inputTextRef={this.searchRef}
+					/>
+					<CombinedRefCheckbox
+						name="Show Completed:"
+						label="Show Completed:"
+						callback={this.handleShowCompleted()}
+					/>
+					<InputText
+						label="Add Item:"
+						defaultValue={this.inputTextRef.current}
+						inputTextRef={this.inputTextRef}
+					/>
+					<input type="submit" value="Submit" />
+				</form>
+				<div>All the Todos</div>
+				<div>{todosHtml}</div>
+			</>
+		);
+	}
 }
 
-export default ToDos;
+const mapStateToProps = (state) => {
+	return { todos: state.todoReducer };
+};
+
+const mapDispatchToProps = (dispatch) => {
+	return {
+		dispatch,
+	};
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Todos);

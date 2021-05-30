@@ -1,7 +1,13 @@
+const idx = require('idx');
+
 const AppHelper = require('./helper');
 const htmlEncode = require('htmlencode');
 const { parse } = require('./UAParser');
-const idx = require('idx');
+const { fetchCSVasJSON } = require('./fetchCSVasJSON');
+
+const csvData = fetchCSVasJSON('../../Downloads/winemag-data_first150k3ed116a.csv');
+const { headers, result } = csvData;
+
 /**
  * Generate user agent object (platform, version, ...)
  * @param req
@@ -29,6 +35,23 @@ const userAgentHandler = (req, res, next) => {
 	next();
 };
 
+const getCSVData = (req, res, next) => {
+	const { url } = req;
+	if (url.includes('api/fetchWineData')) {
+		const params = url.split('/');
+		const pageNum = parseInt(params[3], 10);
+		const pageData = result.slice(pageNum * 10, (pageNum + 1) * 10);
+		if (pageNum) {
+			res.end(JSON.stringify({ pageData }));
+		} else {
+			res.end(JSON.stringify({ headers, pageData }));
+		}
+	} else {
+		next();
+	}
+};
+
 module.exports = {
 	userAgentHandler,
+	getCSVData,
 };

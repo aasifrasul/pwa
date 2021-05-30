@@ -45,12 +45,12 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 					typeof successCallback === 'function' && successCallback(result);
 				} else {
 					dispatch({ type: 'FETCH_FAILURE' });
-					typeof successCallback === 'function' && failureCallback(result);
+					typeof failureCallback === 'function' && failureCallback(result);
 				}
 			} catch (err) {
 				setErrorMessage(err.message);
 				dispatch({ type: 'FETCH_FAILURE' });
-				typeof successCallback === 'function' && failureCallback(err);
+				typeof failureCallback === 'function' && failureCallback(err);
 			} finally {
 				dispatch({ type: 'FETCH_STOP' });
 			}

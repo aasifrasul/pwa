@@ -14,7 +14,7 @@ const cookieParser = require('cookie-parser');
 const proxy = require('express-http-proxy');
 const path = require('path');
 const AppHelper = require('./helper');
-const { userAgentHandler } = require('./middlewares');
+const { userAgentHandler, getCSVData } = require('./middlewares');
 
 const enc = {
 	encoding: 'utf-8',
@@ -78,7 +78,7 @@ handlebars.registerHelper({
 
 app.use(cors());
 app.use(cookieParser());
-app.use(userAgentHandler);
+app.use([userAgentHandler, getCSVData]);
 
 // start the webpack dev server
 const devServer = new WebpackDevServer(webpack(webpackConfig), {

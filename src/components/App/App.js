@@ -3,15 +3,18 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import regeneratorRuntime from 'regenerator-runtime';
 
 const Home = lazy(() => import(/* webpackChunkName: "Home" */ '../Home/Home'));
+const ImplementKeyBoardShortcut = lazy(() =>
+	import(/* webpackChunkName: "ImplementKeyBoardShortcut" */ '../ImplementKeyBoardShortcut/ImplementKeyBoardShortcut')
+);
 const WineConnoisseur = lazy(() =>
 	import(/* webpackChunkName: "WineConnoisseur" */ '../WineConnoisseur/WineConnoisseur')
 );
 const Profile = lazy(() => import(/* webpackChunkName: "Profile" */ '../Profile/Profile'));
-const Todos = lazy(() => import(/* webpackChunkName: "Todos" */ '../Todos/Todos'));
+const Todos = lazy(() => import(/* webpackChunkName: "Todos" */ '../todos/todos'));
 const NestedCategories = lazy(() =>
 	import(/* webpackChunkName: "NestedCategories" */ '../NestedCategories/NestedCategories')
 );
-const Stopwatch = lazy(() => import(/* webpackChunkName: "Stopwatch" */ '../Stopwatch/Stopwatch'));
+const Stopwatch = lazy(() => import(/* webpackChunkName: "Stopwatch" */ '../stopwatch/stopwatch'));
 const CurrencyStream = lazy(() => import(/* webpackChunkName: "CurrencyStream" */ '../CurrencyStream/CurrencyStream'));
 const MovieList = lazy(() => import(/* webpackChunkName: "MovieList" */ '../MovieList/MovieList'));
 const TicTacToe = lazy(() => import(/* webpackChunkName: "TicTacToe" */ '../TicTacToe/TicTacToe'));
@@ -49,6 +52,11 @@ function App(props) {
 					<Switch>
 						<Route exact path="/" component={() => <Home />} />
 						<Route exact path="/TicTacToe" component={() => <TicTacToe />} />
+						<Route
+							exact
+							path="/ImplementKeyBoardShortcut"
+							component={() => <ImplementKeyBoardShortcut />}
+						/>
 						<Route exact path="/WineConnoisseur" component={() => <WineConnoisseur />} />
 						<Route exact path="/Profile" component={() => <Profile />} />
 						<Route exact path="/NestedCategories" component={() => <NestedCategories />} />
@@ -58,8 +66,6 @@ function App(props) {
 						<Route exact path="/MovieList" component={() => <MovieList />} />
 					</Switch>
 				</Router>
-				<button onClick={handleShow}>Show modal</button>
-				{modal}
 			</ErrorBoundary>
 		</Suspense>
 	);

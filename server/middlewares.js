@@ -41,11 +41,7 @@ const getCSVData = (req, res, next) => {
 		const params = url.split('/');
 		const pageNum = parseInt(params[3], 10);
 		const pageData = result.slice(pageNum * 10, (pageNum + 1) * 10);
-		if (pageNum) {
-			res.end(JSON.stringify({ pageData }));
-		} else {
-			res.end(JSON.stringify({ headers, pageData }));
-		}
+		res.end(JSON.stringify(pageNum ? { pageData } : { headers, pageData }));
 	} else {
 		next();
 	}

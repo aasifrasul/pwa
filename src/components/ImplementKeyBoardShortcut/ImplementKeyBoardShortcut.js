@@ -14,6 +14,7 @@ class ImplementKeyBoardShortcut extends React.Component {
 	componentDidMount() {}
 
 	toggleGreen = () => {
+		document.body.style.backgroundColor = document.body.style.backgroundColor === 'green' ? '' : 'green';
 		alert('toggleGreen Invoked');
 	};
 
@@ -25,23 +26,13 @@ class ImplementKeyBoardShortcut extends React.Component {
 				<KeyBoardShortcut
 					combo="shift s"
 					callback={this.toggleGreen}
-					description="Turns the Background color of the Component to yellow"
+					description="Turns the Background color of the Component to green"
+					addShortcut={this.props.addShortcut}
+					removeShortcut={this.props.removeShortcut}
 				/>
 			</ThemeContext.Provider>
 		);
 	}
 }
-
-ImplementKeyBoardShortcut.defaultProps = {
-	combo: '',
-	callback: () => {},
-	description: '',
-};
-
-ImplementKeyBoardShortcut.propTypes = {
-	combo: PropTypes.string,
-	callback: PropTypes.func,
-	description: PropTypes.string,
-};
 
 export default withKeyBoardShortcut(ImplementKeyBoardShortcut);

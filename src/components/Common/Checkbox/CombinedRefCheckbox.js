@@ -1,5 +1,8 @@
 import React, { forwardRef, useState, useEffect, useRef } from 'react';
+
 import useCombinedRefs from '../../../hooks/useCombinedRefs';
+
+import { isFunction } from '../../../utils/typeChecking';
 
 const CombinedRefCheckbox = forwardRef(
 	({ label, name, value, callback, defaultChecked = false, ...rest }, forwardedRef) => {
@@ -15,9 +18,11 @@ const CombinedRefCheckbox = forwardRef(
 			}
 		};
 
+		const handleChecked = () => (e) => setChecked(e.target.checked);
+
 		useEffect(() => {
 			setCheckedInput(checked);
-			typeof callback === 'function' && callback(checked);
+			isFunction(callback) && callback(checked);
 		}, [checked]);
 
 		return (
@@ -29,9 +34,7 @@ const CombinedRefCheckbox = forwardRef(
 					name={name}
 					value={value}
 					defaultChecked={defaultChecked}
-					onChange={(e) => {
-						setChecked(e.target.checked);
-					}}
+					onChange={handleChecked()}
 				/>
 				[{checked ? 'X' : ' '}]{label}
 			</div>

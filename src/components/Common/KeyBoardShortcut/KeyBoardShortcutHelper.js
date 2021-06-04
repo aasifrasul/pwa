@@ -4,7 +4,7 @@ const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567
 const charactersLength = characters.length;
 
 class KeyBoardShortcutHelper {
-	static displayName = 'Rating';
+	static displayName = 'KeyBoardShortcutHelper';
 	static instance = null;
 
 	static getInstance() {
@@ -24,10 +24,10 @@ class KeyBoardShortcutHelper {
 	}
 
 	generateHash(length = 10) {
-		const result = [];
+		let result = '';
 
-		for (const i = 0; i < length; i++) {
-			result.push(characters.charAt(Math.floor(Math.random() * charactersLength)));
+		for (let i = 0; i < length; i++) {
+			result += characters.charAt(Math.floor(Math.random() * charactersLength));
 		}
 
 		return result;

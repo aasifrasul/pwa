@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 
+import { isFunction } from '../../../utils/typeChecking';
+
 const Checkbox = (props) => {
 	const [checked, setChecked] = useState(false);
 	const { label = '', name = '', style = '', callback, value = null } = props;
-	const handleChange = (e) => {
+	const handleChange = () => (e) => {
 		const { checked } = e.target;
 		console.log('checked', checked);
 		setChecked(checked);
-		typeof callback === 'function' && callback(checked, value);
+		isFunction(callback) && callback(checked, value);
 	};
 
 	return (
@@ -18,7 +20,7 @@ const Checkbox = (props) => {
 				name={name}
 				value={value}
 				checked={checked}
-				onChange={(e) => handleChange(e)}
+				onChange={handleChange()}
 			/>
 			{label || name}
 		</label>

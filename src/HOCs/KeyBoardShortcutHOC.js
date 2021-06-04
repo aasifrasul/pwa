@@ -8,25 +8,24 @@ const withKeyBoardShortcut = (WrappedComponent) => {
 		constructor(props) {
 			super(props);
 			this.state = {
-				activeShortcuts: {}
+				activeShortcuts: {},
 			};
 		}
-		
+
 		fetchActiveShortcuts = () => {
 			return this.state.activeShortcuts;
 		};
 		addShortcut = (hash, obj, desc) => {
-			this.setState(({activeShortcuts}) => {
+			this.setState(({ activeShortcuts }) => {
 				activeShortcuts[hash] = {
 					obj,
 					desc,
 				};
 				return activeShortcuts;
 			});
-			
 		};
 		removeShortcut = (hash) => {
-			this.setState(({activeShortcuts}) => {
+			this.setState(({ activeShortcuts }) => {
 				delete activeShortcuts[hash];
 				return activeShortcuts;
 			});

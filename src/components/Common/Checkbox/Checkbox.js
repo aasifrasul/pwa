@@ -1,12 +1,16 @@
 import React, { forwardRef, useState, useEffect } from 'react';
 
+import { isFunction } from '../../../utils/typeChecking';
+
 const Checkbox = forwardRef(({ label, name, value, onChange, defaultChecked, ...rest }, forwardedRef) => {
 	const [checked, setChecked] = useState(defaultChecked);
 
-	useEffect(() => typeof onChange === 'function' && onChange(checked), [checked]);
+	const handleChange = () => (e) => setChecked(e.target.checked);
+
+	useEffect(() => isFunction(onChange) && onChange(checked), [checked]);
 
 	return (
-		<div onClick={() => setChecked(!checked)} style={{ cursor: 'pointer' }}>
+		<div style={{ cursor: 'pointer' }}>
 			<input
 				style={{ display: 'none' }}
 				ref={forwardedRef}
@@ -14,9 +18,7 @@ const Checkbox = forwardRef(({ label, name, value, onChange, defaultChecked, ...
 				name={name}
 				value={value}
 				checked={checked}
-				onChange={(e) => {
-					setChecked(e.target.checked);
-				}}
+				onChange={handleChange()}
 			/>
 			[{checked ? 'X' : ' '}]{label}
 		</div>

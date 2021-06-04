@@ -19,7 +19,7 @@ class KeyBoardShortcut extends React.Component {
 	componentDidMount() {
 		const { combo, description } = this.props;
 		this.registeredObject = listener.simple_combo(combo.toLowerCase(), () => {
-			Promise.resolve(this.handleSuccess);
+			Promise.resolve().then(this.handleSuccess);
 			alert(`You pressed ${combo}`);
 			this.props.callback();
 		});
@@ -27,11 +27,11 @@ class KeyBoardShortcut extends React.Component {
 
 	handleSuccess() {
 		this.hash = helperInstance.generateHash();
-		this.props.addShortcut(hash, this.registeredObject, this.props.description);
+		this.props.addShortcut(this.hash, this.registeredObject, this.props.description);
 	}
 
 	componentWillUnmount() {
-		this.props.removeShortcut(hash);
+		this.props.removeShortcut(this.hash);
 		listener.unregister_many([this.registeredObject]);
 	}
 
@@ -58,4 +58,4 @@ KeyBoardShortcut.propTypes = {
 	description: PropTypes.string,
 };
 
-export default withKeyBoardShortcut(KeyBoardShortcut);
+export default KeyBoardShortcut;

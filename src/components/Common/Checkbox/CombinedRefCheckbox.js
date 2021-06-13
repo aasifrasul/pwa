@@ -2,7 +2,7 @@ import React, { forwardRef, useState, useEffect, useRef } from 'react';
 
 import useCombinedRefs from '../../../hooks/useCombinedRefs';
 
-import { isFunction } from '../../../utils/typeChecking';
+import { safeExecFunc } from '../../../utils/typeChecking';
 
 const CombinedRefCheckbox = forwardRef(
 	({ label, name, value, callback, defaultChecked = false, ...rest }, forwardedRef) => {
@@ -22,7 +22,7 @@ const CombinedRefCheckbox = forwardRef(
 
 		useEffect(() => {
 			setCheckedInput(checked);
-			isFunction(callback) && callback(checked);
+			safeExecFunc(callback, checked);
 		}, [checked]);
 
 		return (

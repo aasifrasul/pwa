@@ -1,50 +1,29 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useReducer, useEffect } from 'react';
 
-//const activeShortcuts = Object.create(null);
+import { useKeyBoardShortcut } from '../Context/KeyBoardShortcutContext';
 
 const withKeyBoardShortcut = (WrappedComponent) => {
-	class Wrapper extends React.Component {
-		constructor(props) {
-			super(props);
-			this.state = {
-				activeShortcuts: {},
-			};
-		}
+	function Wrapper(props) {
+		const { state, dispatch } = useKeyBoardShortcut();
 
-		fetchActiveShortcuts = () => {
-			return this.state.activeShortcuts;
+		const fetchActiveShortcuts = () => {
+			return state;
 		};
-		addShortcut = (hash, obj, desc) => {
-			this.setState(({ activeShortcuts }) => {
-				activeShortcuts[hash] = {
-					obj,
-					desc,
-				};
-				return activeShortcuts;
-			});
+		const addShortcut = (hash, obj, desc) => {
+			dispatch({ type: 'ADD_SHORTCUT', payload: { hash, obj, desc } });
 		};
-		removeShortcut = (hash) => {
-			this.setState(({ activeShortcuts }) => {
-				delete activeShortcuts[hash];
-				return activeShortcuts;
-			});
+		const removeShortcut = (hash) => {
+			dispatch({ type: 'REMOVE_SHORTCUT', payload: { hash } });
 		};
-		render() {
-			// ... and renders the wrapped component with the fresh data!
-			return (
-				<WrappedComponent
-					{...this.props}
-					fetchActiveShortcuts={this.fetchActiveShortcuts}
-					addShortcut={this.addShortcut}
-					removeShortcut={this.removeShortcut}
-				/>
-			);
-		}
+		return (
+			<WrappedComponent
+				{...props}
+				fetchActiveShortcuts={fetchActiveShortcuts}
+				addShortcut={addShortcut}
+				removeShortcut={removeShortcut}
+			/>
+		);
 	}
-
-	Wrapper.contextTypes = {};
-
 	return Wrapper;
 };
 

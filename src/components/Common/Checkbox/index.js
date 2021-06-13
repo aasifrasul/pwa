@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { isFunction } from '../../../utils/typeChecking';
+import { safeExecFunc } from '../../../utils/typeChecking';
 
 const Checkbox = (props) => {
 	const [checked, setChecked] = useState(false);
@@ -9,7 +9,7 @@ const Checkbox = (props) => {
 		const { checked } = e.target;
 		console.log('checked', checked);
 		setChecked(checked);
-		isFunction(callback) && callback(checked, value);
+		safeExecFunc(callback, checked, value);
 	};
 
 	return (

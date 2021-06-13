@@ -1,17 +1,14 @@
 const path = require('path');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const paths = require('./paths');
-var webpackCommonConfig = require('../webpack/webpack.common');
+const webpackCommonConfig = require('../webpack/webpack.common');
 const fs = require('fs');
 const LOADERS = require('../webpack/loaders');
 const PLUGINS = require('../webpack/plugins');
 const isProduction = process.env.NODE_ENV === 'production';
-const APP_NAME = require('../webpack/constants').APP_NAME;
+const { APP_NAME, publicPath } = require('../webpack/constants');
 
-const exclude_vendor = process.env.EXCLUDE_VENDOR;
-
-function makeConfig() {
+const makeConfig = () => {
 	return {
 		context: path.join(__dirname, '..', 'src'),
 		mode: webpackCommonConfig.getNodeEnv(),
@@ -30,7 +27,7 @@ function makeConfig() {
 		output: {
 			path: isProduction ? path.join(paths.appBuild, APP_NAME) : paths.appBuildDev,
 			filename: isProduction ? '[name].[chunkhash].js' : '[name].bundle.js',
-			publicPath: isProduction ? '//img1a.flixcart.com/www/linchpin/' + APP_NAME + '/' : '/public/',
+			publicPath: isProduction ? publicPath : '/public/',
 			pathinfo: !isProduction,
 			chunkFilename: isProduction ? '[name].[chunkhash].js' : '[name].bundle.js',
 			jsonpFunction: 'webpackJsonp',
@@ -100,7 +97,7 @@ function makeConfig() {
 		plugins: PLUGINS,
 		devtool: isProduction ? 'hidden-source-map' : 'eval-source-map',
 	};
-}
+};
 
 // PROD && (CONFIG.devtool = 'hidden-source-map');
 

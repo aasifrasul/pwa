@@ -2,7 +2,10 @@ import React, { Suspense, lazy, useState } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import regeneratorRuntime from 'regenerator-runtime';
 
+import { KeyBoardShortcutProvider } from '../../Context/KeyBoardShortcutContext';
+
 const Home = lazy(() => import(/* webpackChunkName: "Home" */ '../Home/Home'));
+const ReactQuery = lazy(() => import(/* webpackChunkName: "ReactQuery" */ '../ReactQuery/ReactQuery'));
 const ImplementKeyBoardShortcut = lazy(() =>
 	import(/* webpackChunkName: "ImplementKeyBoardShortcut" */ '../ImplementKeyBoardShortcut/ImplementKeyBoardShortcut')
 );
@@ -50,12 +53,17 @@ function App(props) {
 			<ErrorBoundary>
 				<Router>
 					<Switch>
-						<Route exact path="/" component={() => <Home />} />
+						<Route exact path="/" component={() => <Home handleShow={handleShow} />} />
 						<Route exact path="/TicTacToe" component={() => <TicTacToe />} />
+						<Route exact path="/ReactQuery" component={() => <ReactQuery />} />
 						<Route
 							exact
 							path="/ImplementKeyBoardShortcut"
-							component={() => <ImplementKeyBoardShortcut />}
+							component={() => (
+								<KeyBoardShortcutProvider>
+									<ImplementKeyBoardShortcut />
+								</KeyBoardShortcutProvider>
+							)}
 						/>
 						<Route exact path="/WineConnoisseur" component={() => <WineConnoisseur />} />
 						<Route exact path="/Profile" component={() => <Profile />} />

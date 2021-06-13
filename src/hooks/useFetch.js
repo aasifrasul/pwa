@@ -1,6 +1,7 @@
 import { useState, useEffect, useReducer } from 'react';
 
 import dataFetchReducer from '../reducers/dataFetchReducer';
+import { safeExecFunc } from '../utils/typeChecking';
 
 const controller = new AbortController();
 
@@ -42,15 +43,15 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 				const result = await response.json();
 				if (response.ok) {
 					dispatch({ type: 'FETCH_SUCCESS', payload: result });
-					typeof successCallback === 'function' && successCallback(result);
+					safeExecFunc(successCallback, result);
 				} else {
 					dispatch({ type: 'FETCH_FAILURE' });
-					typeof failureCallback === 'function' && failureCallback(result);
+					safeExecFunc(failureCallback, result);
 				}
 			} catch (err) {
 				setErrorMessage(err.message);
 				dispatch({ type: 'FETCH_FAILURE' });
-				typeof failureCallback === 'function' && failureCallback(err);
+				safeExecFunc(failureCallback, err);
 			} finally {
 				dispatch({ type: 'FETCH_STOP' });
 			}

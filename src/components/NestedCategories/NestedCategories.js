@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useReducer } from 'react';
 
 import Checkbox from '../Common/Checkbox';
 import Spacer from '../Common/Spacer/Spacer1';
@@ -24,7 +24,7 @@ export default function NestedCategories(props) {
 	const categoriesHtml = [];
 	let count = 0;
 
-	const [nestedCategories, dispatch] = useReducer(nestedCategoriesReducer, initialNestedCategories);
+	// const [nestedCategories, dispatch] = useReducer(nestedCategoriesReducer, initialNestedCategories);
 
 	const { data, isError, isLoading } = useFetch(
 		'https://okrcentral.github.io/sample-okrs/db.json',

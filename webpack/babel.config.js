@@ -14,6 +14,7 @@ const config = {
 		'@babel/plugin-proposal-class-properties',
 		'@babel/plugin-syntax-dynamic-import',
 		'@babel/plugin-transform-modules-commonjs',
+		'@babel/plugin-transform-runtime',
 		'macros',
 	],
 };

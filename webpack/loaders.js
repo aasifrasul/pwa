@@ -8,7 +8,7 @@ const appName = process.env.APP_NAME;
 
 var loaders = [
 	{
-		test: /\.tsx?$/,
+		test: /\.(ts|tsx)$/,
 		use: [
 			{
 				loader: 'awesome-typescript-loader',
@@ -95,7 +95,7 @@ if (PROD) {
 				loader: 'css-loader',
 				query: {
 					modules: true,
-					localIdentName: '[local]_[hash:base64:6]',
+					localIdentName: '[path][name]_[local]_[hash:base64:6]',
 					getLocalIdent: getDefaultLocalIdent,
 					importLoaders: 1,
 				},
@@ -107,4 +107,5 @@ if (PROD) {
 		],
 	});
 }
+
 module.exports = loaders;

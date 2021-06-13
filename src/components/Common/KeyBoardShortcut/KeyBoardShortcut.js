@@ -1,61 +1,48 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useEffect, useRef } from 'react';
 
 import KeyBoardShortcutHelper from './KeyBoardShortcutHelper';
 
 import withKeyBoardShortcut from '../../../HOCs/KeyBoardShortcutHOC';
-import ThemeContext from '../../../Context/ThemeContext';
 
 const helperInstance = KeyBoardShortcutHelper.getInstance();
 const listener = helperInstance.getListenerInstance();
 
-class KeyBoardShortcut extends React.Component {
-	constructor(props) {
-		super(props);
-		this.registeredObject = null;
-		this.handleSuccess = this.handleSuccess.bind(this);
+function KeyBoardShortcut(props) {
+	const didMount = useRef(false);
+	const { combo, description } = props;
+	const [registeredObject, setRegisteredObject] = useState(null);
+	const [hash, setHash] = useState(null);
+
+	function handleSuccess() {
+		const hash1 = helperInstance.generateHash();
+		setHash(hash1);
+		props.addShortcut(hash1, registeredObject, description);
 	}
 
-	componentDidMount() {
-		const { combo, description } = this.props;
-		this.registeredObject = listener.simple_combo(combo.toLowerCase(), () => {
-			Promise.resolve().then(this.handleSuccess);
-			alert(`You pressed ${combo}`);
-			this.props.callback();
-		});
-	}
+	useEffect(() => {
+		if (!didMount.current) {
+			const regObject = listener.simple_combo(combo.toLowerCase(), () => {
+				alert(`You pressed ${combo}`);
+				handleSuccess();
+				props.callback();
+			});
 
-	handleSuccess() {
-		this.hash = helperInstance.generateHash();
-		this.props.addShortcut(this.hash, this.registeredObject, this.props.description);
-	}
+			setRegisteredObject(regObject);
+			didMount.current = true;
+		}
 
-	componentWillUnmount() {
-		this.props.removeShortcut(this.hash);
-		listener.unregister_many([this.registeredObject]);
-	}
+		return () => {
+			props.removeShortcut(hash);
+			listener.unregister_many([registeredObject]);
+		};
+	}, [registeredObject, hash]);
 
-	render() {
-		return (
-			<ThemeContext.Consumer>
-				{(activeShortcuts) => {
-					return <div>{JSON.stringify(activeShortcuts)}</div>;
-				}}
-			</ThemeContext.Consumer>
-		);
-	}
+	return (
+		<>
+			<div>Name: {combo}</div>
+			<div>Description: {description}</div>
+		</>
+	);
 }
 
-KeyBoardShortcut.defaultProps = {
-	combo: '',
-	callback: () => {},
-	description: '',
-};
-
-KeyBoardShortcut.propTypes = {
-	combo: PropTypes.string,
-	callback: PropTypes.func,
-	description: PropTypes.string,
-};
-
-export default KeyBoardShortcut;
+export default withKeyBoardShortcut(KeyBoardShortcut);

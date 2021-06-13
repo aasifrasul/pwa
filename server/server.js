@@ -1,11 +1,11 @@
 // webpack
 const socketio = require('socket.io');
+const http = require('http');
 const webpack = require('webpack');
 const os = require('os');
 const fs = require('fs');
-
+const mongoose = require('mongoose');
 const WebpackDevServer = require('webpack-dev-server');
-const webpackConfig = require('../webpack-configs/webpack.config');
 const cors = require('cors');
 const express = require('express');
 const exphbs = require('express-handlebars');
@@ -13,21 +13,32 @@ const handlebars = require('handlebars');
 const cookieParser = require('cookie-parser');
 const proxy = require('express-http-proxy');
 const path = require('path');
+
+const webpackConfig = require('../webpack-configs/webpack.config');
 const AppHelper = require('./helper');
 const { userAgentHandler, getCSVData } = require('./middlewares');
+
+mongoose.connect('mongodb://localhost:27017/test', { useNewUrlParser: true, useUnifiedTopology: true });
 
 const enc = {
 	encoding: 'utf-8',
 };
+
+const log = (msg) => console.log.bind(console, msg);
+
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+	// we're connected!
+	log('connection successfull');
+});
 
 const generateBuildTime = async function () {
 	return new Promise((resolve, reject) => {
 		fs.writeFile(path.join(__dirname, '..', 'public', 'server', 'buildtime'), new Date().toUTCString(), function (
 			err
 		) {
-			if (err) {
-				reject('Error occured while writing to generateBuildTime :: ' + err.toString());
-			}
+			err && reject('Error occured while writing to generateBuildTime :: ' + err.toString());
 			resolve();
 		});
 	});
@@ -84,9 +95,18 @@ app.use([userAgentHandler, getCSVData]);
 const devServer = new WebpackDevServer(webpack(webpackConfig), {
 	publicPath: webpackConfig.output.publicPath,
 });
+
 devServer.listen(port + 1, 'localhost', function () {
 	console.log('webpack-dev-server listening on port 3001');
 });
+
+const server = http.createServer(app);
+
+server.on('connection', (socket) => {
+	socket.on('close', () => log('server.connection'));
+});
+
+server.on('request', () => log('server.request'));
 
 const bundleConfig = [
 	webpackConfig.output.publicPath + 'en.bundle.js',
@@ -121,8 +141,8 @@ app.all('/*', (req, res) => {
 });
 
 //Start the server
-const server = app.listen(port, function () {
-	console.log('Express server listening on port %s', port);
+server.listen(port, 'localhost', function () {
+	log('webpack-dev-server listening on port 3001');
 });
 
 const io = socketio(server);
@@ -171,7 +191,7 @@ io.on('connection', (socket) => {
 		},
 	];
 
-	const getRandomizedArray = (arr) => arr.sort(() => 0.5 - Math.random());
+	const getRandomInt = (max) => Math.floor(Math.random() * max);
 
 	let IntervalId;
 
@@ -184,7 +204,7 @@ io.on('connection', (socket) => {
 	socket.on('fetchCurrencyPair', () => {
 		IntervalId && clearInterval(IntervalId);
 		IntervalId = setInterval(() => {
-			const data = getRandomizedArray(currencyPairs)[0];
+			const data = currencyPairs[getRandomInt(10)];
 			socket.emit('currencyPairData', data);
 		}, 1);
 	});

@@ -11,6 +11,11 @@ const isBoolean = (data) => dataType(data) === 'boolean';
 
 const getArrayCount = (arr) => isArray(arr) && arr.length;
 
+const safeExecFunc = (...params) => {
+	const func = params.shift();
+	isFunction(func) && func.apply(func, params);
+};
+
 module.exports = {
 	isFunction,
 	isArray,
@@ -21,4 +26,5 @@ module.exports = {
 	isString,
 	isBoolean,
 	getArrayCount,
+	safeExecFunc,
 };

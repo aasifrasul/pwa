@@ -46,9 +46,21 @@ const subscription = PubSub.subscribe('/page/load', function (obj) {
 	// Do something now that the event has occurred
 });
 
+const subscription2 = PubSub.subscribe('/page/load', function (obj) {
+	console.log('subscribed2 to', obj);
+	// Do something now that the event has occurred
+});
+
+const subscription3 = PubSub.subscribe('/page/load', function (obj) {
+	console.log('subscribed3 to', obj);
+	// Do something now that the event has occurred
+});
+
 PubSub.publish('/page/load', {
 	url: '/some/url/path', // any argument
 });
 
 // ...sometime later where I no longer want subscription...
 subscription.unsubscribe();
+subscription2.unsubscribe();
+subscription3.unsubscribe();

@@ -12,10 +12,12 @@ function getGlobalContext() {
 
 var globalContext = getGlobalContext();
 
-Function.prototype.myCall = function myCall(context = globalContext, ...args) {
-	context.myCall = this;
-	return context.myCall(...args);
-};
+Function.prototype.myCall =
+	Function.prototype.myCall ||
+	function myCall(context = globalContext, ...args) {
+		context.myCall = this;
+		return context.myCall(...args);
+	};
 
 var obj = {
 	a: 'Hi, ',

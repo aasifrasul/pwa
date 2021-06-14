@@ -14,14 +14,17 @@ function myPromise(callback) {
 	this.result = null;
 	this.error = null;
 
-	callback.call(this, this.resolve.bind(this), this.reject.bind(this));
+	callback(this.resolve.bind(this), this.reject.bind(this));
 	console.log('In Constructor, callback => ', callback);
 }
 
 myPromise.prototype.then = function (onFulfilled, onRejected) {
 	console.log('In prototype then');
-	this.state === 'fulfilled' && isFunction(onFulfilled) && onFulfilled(this.result);
-	this.state === 'rejected' && isFunction(onRejected) && onRejected(this.error);
+	if (!isFunction(onFulfilled) || (onRejected && !isFunction(onRejected))) {
+		throw new Error('callback param can only be of type function');
+	}
+	this.state === 'fulfilled' && onFulfilled(this.result);
+	this.state === 'rejected' && onRejected(this.error);
 	return this;
 };
 
@@ -76,7 +79,7 @@ myPromise.all = function (arr) {
 					},
 					(e) => {
 						reject(e);
-						throw new Error(e);
+						// throw new Error(e);
 					}
 				);
 			})(i);
@@ -84,7 +87,6 @@ myPromise.all = function (arr) {
 	});
 };
 
-/*
 const promise = new myPromise((resolve, reject) => {
 	fetch('https://api.github.com/users/aasifrasul/followers').then(
 		(data) => {
@@ -110,15 +112,11 @@ promise
 	.catch((e) => {
 		throw new Error(e);
 	});
-*/
-
-/**
-
 
 var promises = [];
 
 function promiseFactory(payload) {
-	return new Promise((resolve, reject) => {
+	return new myPromise((resolve, reject) => {
 		const { delay, isReject } = payload || {};
 		setTimeout(() => {
 			isReject ? reject(payload) : resolve(payload);
@@ -131,16 +129,15 @@ promises.push(promiseFactory({ id: 3, delay: 25 }));
 promises.push(promiseFactory({ id: 5, delay: 200, isReject: true }));
 promises.push(promiseFactory({ id: 4, delay: 200 }));
 
-myPromiseAll(promises).then(
-	(data) => console.log('In then', data),
-	(e) => console.log('In Error', e)
-)
-.catch(e => {
-	console.log('In catch', e);
-});
-
-
-*/
+myPromise
+	.all(promises)
+	.then(
+		(data) => console.log('In then', data),
+		(e) => console.log('In Error', e)
+	)
+	.catch((e) => {
+		console.log('In catch', e);
+	});
 
 myPromise
 	.all([

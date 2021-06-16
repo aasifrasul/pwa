@@ -10,10 +10,9 @@ const listener = helperInstance.getListenerInstance();
 
 function KeyBoardShortcut(props) {
 	const didMount = useRef(false);
-	const { combo, description } = props;
+	const { combo, description, dispatch } = props;
 	const [registeredObject, setRegisteredObject] = useState(null);
 	const [hash, setHash] = useState(null);
-	const [state, dispatch] = useKeyBoardShortcut();
 
 	const addShortcut = (hash, obj, desc) => {
 		dispatch({ type: 'ADD_SHORTCUT', payload: { hash, obj, desc } });
@@ -44,7 +43,7 @@ function KeyBoardShortcut(props) {
 			hash && removeShortcut(hash);
 			listener.unregister_many([registeredObject]);
 		};
-	}, [registeredObject, hash, state]);
+	}, [registeredObject, hash]);
 
 	return (
 		<>

@@ -2,14 +2,12 @@ import React, { Suspense, lazy, useState } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import regeneratorRuntime from 'regenerator-runtime';
 
-import { KeyBoardShortcutProvider } from '../../Context/KeyBoardShortcutContext';
-
 import Spinner from '../Common/Spinner/Spinner';
 
 const Home = lazy(() => import(/* webpackChunkName: "Home" */ '../Home/Home'));
 const ReactQuery = lazy(() => import(/* webpackChunkName: "ReactQuery" */ '../ReactQuery/ReactQuery'));
-const ImplementKeyBoardShortcut = lazy(() =>
-	import(/* webpackChunkName: "ImplementKeyBoardShortcut" */ '../ImplementKeyBoardShortcut/ImplementKeyBoardShortcut')
+const KeyBoardShortcutPage = lazy(() =>
+	import(/* webpackChunkName: "KeyBoardShortcutPage" */ '../KeyBoardShortcutPage/KeyBoardShortcutPage')
 );
 const WineConnoisseur = lazy(() =>
 	import(/* webpackChunkName: "WineConnoisseur" */ '../WineConnoisseur/WineConnoisseur')
@@ -63,15 +61,7 @@ function App(props) {
 						<Route exact path="/Contacts" component={() => <Contacts />} />
 						<Route exact path="/TicTacToe" component={() => <TicTacToe />} />
 						<Route exact path="/ReactQuery" component={() => <ReactQuery />} />
-						<Route
-							exact
-							path="/ImplementKeyBoardShortcut"
-							component={() => (
-								<KeyBoardShortcutProvider>
-									<ImplementKeyBoardShortcut />
-								</KeyBoardShortcutProvider>
-							)}
-						/>
+						<Route exact path="/KeyBoardShortcutPage" component={() => <KeyBoardShortcutPage />} />
 						<Route exact path="/WineConnoisseur" component={() => <WineConnoisseur />} />
 						<Route exact path="/Profile" component={() => <Profile />} />
 						<Route exact path="/NestedCategories" component={() => <NestedCategories />} />

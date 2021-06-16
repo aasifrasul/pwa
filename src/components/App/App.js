@@ -4,6 +4,8 @@ import regeneratorRuntime from 'regenerator-runtime';
 
 import { KeyBoardShortcutProvider } from '../../Context/KeyBoardShortcutContext';
 
+import Spinner from '../Common/Spinner/Spinner';
+
 const Home = lazy(() => import(/* webpackChunkName: "Home" */ '../Home/Home'));
 const ReactQuery = lazy(() => import(/* webpackChunkName: "ReactQuery" */ '../ReactQuery/ReactQuery'));
 const ImplementKeyBoardShortcut = lazy(() =>
@@ -21,6 +23,9 @@ const Stopwatch = lazy(() => import(/* webpackChunkName: "Stopwatch" */ '../stop
 const CurrencyStream = lazy(() => import(/* webpackChunkName: "CurrencyStream" */ '../CurrencyStream/CurrencyStream'));
 const MovieList = lazy(() => import(/* webpackChunkName: "MovieList" */ '../MovieList/MovieList'));
 const TicTacToe = lazy(() => import(/* webpackChunkName: "TicTacToe" */ '../TicTacToe/TicTacToe'));
+const Counter = lazy(() => import(/* webpackChunkName: "Counter" */ '../Counter/view'));
+const Contacts = lazy(() => import(/* webpackChunkName: "Contacts" */ '../Contacts/view'));
+
 const Modal = lazy(() => import(/* webpackChunkName: "Modal" */ '../Common/Modal/Modal'));
 
 import ErrorBoundary from '../Common/ErrorBoundary/ErrorBoundary';
@@ -49,11 +54,13 @@ function App(props) {
 	const handleHide = () => setShowModal(false);
 
 	return (
-		<Suspense fallback={<h1>Loading App...</h1>}>
+		<Suspense fallback={<Spinner />}>
 			<ErrorBoundary>
 				<Router>
 					<Switch>
 						<Route exact path="/" component={() => <Home handleShow={handleShow} />} />
+						<Route exact path="/Counter" component={() => <Counter />} />
+						<Route exact path="/Contacts" component={() => <Contacts />} />
 						<Route exact path="/TicTacToe" component={() => <TicTacToe />} />
 						<Route exact path="/ReactQuery" component={() => <ReactQuery />} />
 						<Route

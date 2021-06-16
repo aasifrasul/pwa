@@ -2,9 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 
 import KeyBoardShortcutHelper from './KeyBoardShortcutHelper';
 
-import withKeyBoardShortcut from '../../../HOCs/KeyBoardShortcutHOC';
-import { useKeyBoardShortcut } from '../../../Context/KeyBoardShortcutContext';
-
 const helperInstance = KeyBoardShortcutHelper.getInstance();
 const listener = helperInstance.getListenerInstance();
 

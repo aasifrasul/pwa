@@ -4,7 +4,7 @@ export const GenericContext = React.createContext();
 
 const { Provider } = GenericContext;
 
-export const useProviderFactory = (props, Reducer, initialState = {}) => {
+export const contextProviderFactory = (props, Reducer, initialState = {}) => {
 	const [state, dispatch] = React.useReducer(Reducer, initialState);
 	const value = React.useMemo(() => ([ state, dispatch ]), [state]);
 

@@ -2,7 +2,7 @@ import React, { useReducer, createContext } from 'react';
 
 import ContactReducer from '../reducers/ContactReducer';
 import useContextFactory from './useContextFactory';
-import {GenericContext, useProviderFactory} from './useProviderFactory';
+import {GenericContext, contextProviderFactory} from './contextProviderFactory';
 
 const initialState = {
 	contacts: [
@@ -26,7 +26,7 @@ const initialState = {
 	error: null,
 };
 
-const ContactContextProvider = (props) => useProviderFactory(props, ContactReducer, initialState);
+const ContactContextProvider = (props) => contextProviderFactory(props, ContactReducer, initialState);
 const useContactContext = useContextFactory('ContactContextProvider', GenericContext);
 
 export { ContactContextProvider, useContactContext };

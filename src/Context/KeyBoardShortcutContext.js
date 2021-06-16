@@ -1,27 +1,19 @@
 import * as React from 'react';
 
+import useContextFactory from './useContextFactory';
 import KeyBoardShortcutReducer from '../reducers/KeyBoardShortcutReducer';
 
-const KeyBoardShortcutContext = React.createContext({ state: {}, dispatch: () => {} });
+const KeyBoardShortcutContext = React.createContext();
 
 const { Provider } = KeyBoardShortcutContext;
 
-function KeyBoardShortcutProvider({ children }) {
-	let state, dispatch;
-	[state, dispatch] = React.useReducer(KeyBoardShortcutReducer, {});
-	[state, dispatch] = React.useMemo(() => [state, dispatch], [state]);
+function KeyBoardShortcutProvider(props) {
+	const [state, dispatch] = React.useReducer(KeyBoardShortcutReducer, {});
+	//const value = React.useMemo(() => ({ state, dispatch }), [state]);
 
-	return <Provider value={{ state, dispatch }}>{children}</Provider>;
+	return <Provider value={[state, dispatch]}>{props.children}</Provider>;
 }
 
-function useKeyBoardShortcut() {
-	const context = React.useContext(KeyBoardShortcutContext);
-
-	if (context === undefined) {
-		throw new Error('useKeyBoardShortcut must be used within a KeyBoardShortcutProvider');
-	}
-
-	return context;
-}
+const useKeyBoardShortcut = useContextFactory('KeyBoardShortcutProvider', KeyBoardShortcutContext);
 
 export { KeyBoardShortcutProvider, useKeyBoardShortcut };

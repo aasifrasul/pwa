@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import KeyBoardShortcutHelper from './KeyBoardShortcutHelper';
 
 import withKeyBoardShortcut from '../../../HOCs/KeyBoardShortcutHOC';
+import { useKeyBoardShortcut } from '../../../Context/KeyBoardShortcutContext';
 
 const helperInstance = KeyBoardShortcutHelper.getInstance();
 const listener = helperInstance.getListenerInstance();
@@ -12,12 +13,20 @@ function KeyBoardShortcut(props) {
 	const { combo, description } = props;
 	const [registeredObject, setRegisteredObject] = useState(null);
 	const [hash, setHash] = useState(null);
+	const [state, dispatch] = useKeyBoardShortcut();
 
-	function handleSuccess() {
+	const addShortcut = (hash, obj, desc) => {
+		dispatch({ type: 'ADD_SHORTCUT', payload: { hash, obj, desc } });
+	};
+	const removeShortcut = (hash) => {
+		dispatch({ type: 'REMOVE_SHORTCUT', payload: { hash } });
+	};
+
+	const handleSuccess = () => {
 		const hash1 = helperInstance.generateHash();
 		setHash(hash1);
-		props.addShortcut(hash1, registeredObject, description);
-	}
+		addShortcut(hash1, registeredObject, description);
+	};
 
 	useEffect(() => {
 		if (!didMount.current) {
@@ -32,10 +41,10 @@ function KeyBoardShortcut(props) {
 		}
 
 		return () => {
-			props.removeShortcut(hash);
+			hash && removeShortcut(hash);
 			listener.unregister_many([registeredObject]);
 		};
-	}, [registeredObject, hash]);
+	}, [registeredObject, hash, state]);
 
 	return (
 		<>
@@ -45,4 +54,4 @@ function KeyBoardShortcut(props) {
 	);
 }
 
-export default withKeyBoardShortcut(KeyBoardShortcut);
+export default KeyBoardShortcut;

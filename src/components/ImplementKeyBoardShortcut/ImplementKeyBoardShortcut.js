@@ -4,19 +4,23 @@ import PropTypes from 'prop-types';
 import KeyBoardShortcut from '../Common/KeyBoardShortcut/KeyBoardShortcut';
 import Spacer from '../Common/Spacer/Spacer1';
 
+import { useKeyBoardShortcut } from '../../Context/KeyBoardShortcutContext';
+
 function ImplementKeyBoardShortcut(props) {
+	const [state] = useKeyBoardShortcut();
+
 	const toggleGreen = () => {
 		document.body.style.backgroundColor = document.body.style.backgroundColor === 'green' ? '' : 'green';
 		alert('toggleGreen Invoked');
 	};
 
 	const shiftP = () => {
-		console.log('control P invoked');
+		console.log('shift P invoked');
 	};
 
 	return (
 		<>
-			<div>{JSON.stringify({})}</div>
+			<div>{JSON.stringify(state)}</div>
 			<Spacer size={16} />
 			<KeyBoardShortcut
 				combo="shift s"

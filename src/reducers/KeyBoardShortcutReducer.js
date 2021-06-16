@@ -1,12 +1,12 @@
-const KeyBoardShortcutReducer = (state = {}, action = {}) => {
+const KeyBoardShortcutReducer = (state, action) => {
 	const { type, payload } = action;
+	const { hash, obj, desc } = payload || {};
 	switch (type) {
 		case 'ADD_SHORTCUT':
-			const { hash, obj, desc } = payload || {};
-			state[hash] = { obj, desc };
+			hash && (state[hash] = { obj, desc });
 			return state;
 		case 'REMOVE_SHORTCUT':
-			delete state[payload.hash];
+			hash && delete state[hash];
 			return state;
 		default:
 			return state;

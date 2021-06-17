@@ -1,12 +1,11 @@
-import * as React from 'react';
+import React from 'react';
 
-import useContextFactory from './useContextFactory';
+import storeFactory from '../store/storeFactory';
+
 import KeyBoardShortcutReducer from '../reducers/KeyBoardShortcutReducer';
-import {GenericContext, contextProviderFactory} from './contextProviderFactory';
 
 const initialState = {};
 
-const KeyBoardShortcutProvider = (props) => contextProviderFactory(props, KeyBoardShortcutReducer, initialState);
-const useKeyBoardShortcut = useContextFactory('KeyBoardShortcutProvider', GenericContext);
+const [KeyBoardShortcutContextProvider, useKeyBoardShortcutStore, useKeyBoardShortcutDispatch] = storeFactory(KeyBoardShortcutReducer, initialState);
 
-export { KeyBoardShortcutProvider, useKeyBoardShortcut };
+export { KeyBoardShortcutContextProvider, useKeyBoardShortcutStore, useKeyBoardShortcutDispatch };

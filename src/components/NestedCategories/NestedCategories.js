@@ -24,8 +24,6 @@ export default function NestedCategories(props) {
 	const categoriesHtml = [];
 	let count = 0;
 
-	// const [nestedCategories, dispatch] = useReducer(nestedCategoriesReducer, initialNestedCategories);
-
 	const { data, isError, isLoading } = useFetch(
 		'https://okrcentral.github.io/sample-okrs/db.json',
 		Object.create(null),
@@ -161,6 +159,7 @@ export default function NestedCategories(props) {
 
 	return (
 		<>
+			<Spacer size={16} />
 			<DropDown title="Select a category" options={categories} selectHandler={handleCategoriesSelection} />
 			{/*<DropDown
 				titleHelper="Category"

@@ -8,13 +8,17 @@ export default function Movie(props) {
 	const { id, poster_path, title, vote_average, overview } = item;
 	const imagePath = poster_path ? `https://image.tmdb.org/t/p/w1280${poster_path}` : '';
 
+	function changeBackground(e) {
+		e.target.style.background = 'red';
+	}
+
 	return (
 		<>
 			<div
 				className={styles.imageWrapper}
 				key={id}
-				onMouseEnter={() => setIsShown(true)}
-				onMouseLeave={() => setIsShown(false)}
+				onMouseOver={() => setIsShown(true)}
+				onMouseOut={() => setIsShown(false)}
 			>
 				<div className={styles.image}>
 					<img src={imagePath} width="150" height="200" />

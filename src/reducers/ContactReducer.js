@@ -1,13 +1,14 @@
 const ContactReducer = (state, action) => {
 	const { type, payload } = action;
+	const { contacts } = state;
 	switch (type) {
 		case 'ADD_CONTACT':
 			return {
-				contacts: [...state.contacts, payload],
+				contacts: [...contacts, payload],
 			};
 		case 'DEL_CONTACT':
 			return {
-				contacts: state.contacts.filter((contact) => contact.id !== payload),
+				contacts: contacts.filter((contact) => contact.id !== payload),
 			};
 		case 'START':
 			return {

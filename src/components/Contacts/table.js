@@ -1,10 +1,12 @@
 import React, { useState, useContext } from 'react';
 import { Segment, Table, Button, Icon } from 'semantic-ui-react';
-import { useContactContext } from '../../Context/ContactContext';
+import { useContactStore, useContactDispatch } from '../../Context/ContactContext';
 
 export default function ContactTable() {
 	// Subscribe to `contacts` state and access dispatch function
-	const [state, dispatch] = useContactContext();
+	const state = useContactStore();
+	const dispatch = useContactDispatch();
+
 	// Declare a local state to be used internally by this component
 	const [selectedId, setSelectedId] = useState();
 

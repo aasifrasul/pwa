@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import styles from './DropDown.css';
+
 export default function DropDown(props) {
 	const { options, selectHandler, title, children } = props;
 	const [selected, setSelected] = useState();
@@ -16,7 +18,7 @@ export default function DropDown(props) {
 	));
 	optionsHtml.unshift(<option key={0}>{title}</option>);
 	return (
-		<div>
+		<div className={styles['center']}>
 			<select value={selected} defaultValue={selected} onChange={handleChange()}>
 				{optionsHtml}
 			</select>

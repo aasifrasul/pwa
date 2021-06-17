@@ -1,11 +1,25 @@
-import { useState, useEffect, useReducer, useMemo } from 'react';
+import React, { useState, useReducer, useMemo, useContext, useEffect } from 'react';
 
 import dataFetchReducer from '../reducers/dataFetchReducer';
-import { safeExecFunc } from '../utils/typeChecking';
+import useContextFactory from './useContextFactory';
+import { GenericContext, contextProviderFactory } from './contextProviderFactory';
 
-const controller = new AbortController();
+const initialState = {
+	isLoading: false,
+	isError: false,
+	data: {},
+};
 
-const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallback, skip = false) => {
+const { Provider } = GenericContext;
+
+const FetchContextProvider = (props) => {
+	const [state, dispatch] = useReducer(dataFetchReducer, initialState);
+	const value = useMemo(() => [state, dispatch], [state]);
+
+	return <Provider value={value}>{props.children}</Provider>;
+};
+
+const useFetchContext = (initialUrl, initialParams = {}, successCallback, failureCallback, skip = false) => {
 	const [url, updateUrl] = useState(initialUrl);
 	const [params, updateParams] = useState(initialParams);
 	const [errorMessage, setErrorMessage] = useState('');
@@ -14,13 +28,7 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 		.map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(params[key]))
 		.join('&');
 
-	const [state, dispatch] = useReducer(dataFetchReducer, {
-		isLoading: false,
-		isError: false,
-		data: Object.create(null),
-	});
-
-	const value = useMemo(() => [state, dispatch], [state]);
+	const [state, dispatch] = useContext(GenericContext);
 
 	const refetch = () => setRefetchIndex((prevRefetchIndex) => prevRefetchIndex + 1);
 	const abortFetching = () => {
@@ -69,7 +77,7 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 		fetchData();
 	}, [url, params, refetchIndex]);
 	return {
-		state: value.state,
+		state,
 		errorMessage,
 		updateUrl,
 		updateParams,
@@ -78,4 +86,4 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 	};
 };
 
-export default useFetch;
+export { FetchContextProvider, useFetchContext };

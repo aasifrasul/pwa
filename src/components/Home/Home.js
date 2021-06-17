@@ -1,15 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
-// import Button from '../Common/Button/Button';
+function Home() {
+	const [bgColour, setBgColour] = useState('#fafafa');
 
-import './Home.css';
+	const appStyles = {
+		height: '100vh',
+		background: `${bgColour}`,
+	};
 
-const Home = () => {
+	const styles = {
+		width: '100px',
+		fontSize: '20px',
+		borderRadius: '40px',
+		border: '1px solid black',
+		color: 'white',
+		margin: '0.5em 1em',
+		padding: '0.25em 1em',
+		background: '#c83f49',
+	};
+
 	return (
-		<React.Fragment>
-			<div>Hello</div>
-		</React.Fragment>
+		<div className="App" style={appStyles}>
+			<div style={styles} onMouseEnter={() => setBgColour('#c83f49')} onMouseLeave={() => setBgColour('#fafafa')}>
+				{' '}
+				Red
+			</div>
+		</div>
 	);
-};
+}
 
 export default Home;

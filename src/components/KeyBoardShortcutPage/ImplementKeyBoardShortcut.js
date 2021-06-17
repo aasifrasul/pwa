@@ -4,10 +4,10 @@ import PropTypes from 'prop-types';
 import KeyBoardShortcut from '../Common/KeyBoardShortcut/KeyBoardShortcut';
 import Spacer from '../Common/Spacer/Spacer1';
 
-import { useKeyBoardShortcut } from '../../Context/KeyBoardShortcutContext';
+import { useKeyBoardShortcutStore } from '../../Context/KeyBoardShortcutContext';
 
 function ImplementKeyBoardShortcut(props) {
-	const [state, dispatch] = useKeyBoardShortcut();
+	const state = useKeyBoardShortcutStore();
 
 	const toggleGreen = () => {
 		document.body.style.backgroundColor = document.body.style.backgroundColor === 'green' ? '' : 'green';
@@ -25,14 +25,12 @@ function ImplementKeyBoardShortcut(props) {
 			<KeyBoardShortcut
 				combo="shift s"
 				callback={toggleGreen}
-				dispatch={dispatch}
 				description="Turns the Background color of the Component to green"
 			/>
 			<Spacer size={16} />
 			<KeyBoardShortcut
 				combo="shift p"
 				callback={shiftP}
-				dispatch={dispatch}
 				description="Turns the Background color of the Component to green"
 			/>
 		</>

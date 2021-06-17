@@ -2,29 +2,32 @@ const dataFetchReducer = (state = {}, action = {}) => {
 	const { type, payload } = action;
 	switch (type) {
 		case 'FETCH_INIT':
-			return {
-				...state,
+			state = {
+				data: [],
 				isLoading: true,
 				isError: false,
 			};
+			return state;
 		case 'FETCH_SUCCESS':
-			return {
-				...state,
+			state = {
 				isLoading: false,
 				isError: false,
 				data: payload,
 			};
+			return state;
 		case 'FETCH_FAILURE':
-			return {
-				...state,
+			state = {
+				data: payload,
 				isLoading: false,
 				isError: true,
 			};
+			return state;
 		case 'FETCH_STOP':
-			return {
-				...state,
+			state = {
+				data: payload,
 				isLoading: false,
 			};
+			return state;
 		default:
 			return {
 				...state,

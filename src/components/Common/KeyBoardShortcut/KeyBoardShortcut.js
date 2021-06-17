@@ -2,18 +2,22 @@ import React, { useState, useEffect, useRef } from 'react';
 
 import KeyBoardShortcutHelper from './KeyBoardShortcutHelper';
 
+import { useKeyBoardShortcutDispatch } from '../../../Context/KeyBoardShortcutContext';
+
 const helperInstance = KeyBoardShortcutHelper.getInstance();
 const listener = helperInstance.getListenerInstance();
 
 function KeyBoardShortcut(props) {
 	const didMount = useRef(false);
-	const { combo, description, dispatch } = props;
+	const { combo, description } = props;
 	const [registeredObject, setRegisteredObject] = useState(null);
 	const [hash, setHash] = useState(null);
+	const dispatch = useKeyBoardShortcutDispatch();
 
 	const addShortcut = (hash, obj, desc) => {
 		dispatch({ type: 'ADD_SHORTCUT', payload: { hash, obj, desc } });
 	};
+
 	const removeShortcut = (hash) => {
 		dispatch({ type: 'REMOVE_SHORTCUT', payload: { hash } });
 	};

@@ -1,8 +1,8 @@
-import React, { useReducer, createContext } from 'react';
+import React from 'react';
+
+import storeFactory from '../store/storeFactory';
 
 import ContactReducer from '../reducers/ContactReducer';
-import useContextFactory from './useContextFactory';
-import {GenericContext, contextProviderFactory} from './contextProviderFactory';
 
 const initialState = {
 	contacts: [
@@ -26,7 +26,6 @@ const initialState = {
 	error: null,
 };
 
-const ContactContextProvider = (props) => contextProviderFactory(props, ContactReducer, initialState);
-const useContactContext = useContextFactory('ContactContextProvider', GenericContext);
+const [ContactContextProvider, useContactStore, useContactDispatch] = storeFactory(ContactReducer, initialState);
 
-export { ContactContextProvider, useContactContext };
+export { ContactContextProvider, useContactStore, useContactDispatch };

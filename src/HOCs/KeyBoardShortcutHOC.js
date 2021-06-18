@@ -1,11 +1,10 @@
 import React, { useReducer, useEffect } from 'react';
 
-import { useKeyBoardShortcut } from '../Context/KeyBoardShortcutContext';
+import { useKeyBoardShortcutDispatch } from '../Context/KeyBoardShortcutContext';
 
 const withKeyBoardShortcut = (WrappedComponent) => {
 	function Wrapper(props) {
-		//const [dispatch] = useKeyBoardShortcut();
-		const [state, dispatch] = useKeyBoardShortcut();
+		const dispatch = useKeyBoardShortcutDispatch();
 
 		const addShortcut = (hash, obj, desc) => {
 			dispatch({ type: 'ADD_SHORTCUT', payload: { hash, obj, desc } });

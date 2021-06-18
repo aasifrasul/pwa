@@ -15,6 +15,7 @@ function ImplementKeyBoardShortcut(props) {
 	};
 
 	const shiftP = () => {
+		document.body.style.backgroundColor = document.body.style.backgroundColor === 'red' ? '' : 'red';
 		console.log('shift P invoked');
 	};
 
@@ -31,7 +32,7 @@ function ImplementKeyBoardShortcut(props) {
 			<KeyBoardShortcut
 				combo="shift p"
 				callback={shiftP}
-				description="Turns the Background color of the Component to green"
+				description="Turns the Background color of the Component to red"
 			/>
 		</>
 	);

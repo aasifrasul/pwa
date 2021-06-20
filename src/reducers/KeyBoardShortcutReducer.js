@@ -5,16 +5,16 @@ const KeyBoardShortcutReducer = (state, action) => {
 		case 'ADD_SHORTCUT':
 			return {
 				...state,
-				[hash]: { obj, desc }
-			}
+				[hash]: { obj, desc },
+			};
 		case 'REMOVE_SHORTCUT':
 			delete state[hash];
 			return {
 				...state,
-			}
+			};
 		default:
 			return {
-				...state
+				...state,
 			};
 	}
 };

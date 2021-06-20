@@ -7,12 +7,13 @@ export default function storeFactory(reducer, initialState) {
 	const dispatchContext = React.createContext();
 
 	const StoreProvider = ({ children }) => {
-		const [store, dispatch] = React.useReducer(reducer, initialState);
-		const value = React.useMemo(() => [store, dispatch], [store]);
+		let store, dispatch;
+		[store, dispatch] = React.useReducer(reducer, initialState);
+		[store, dispatch] = React.useMemo(() => [store, dispatch], [store, dispatch]);
 
 		return (
-			<dispatchContext.Provider value={value[1]}>
-				<storeContext.Provider value={value[0]}>{children}</storeContext.Provider>
+			<dispatchContext.Provider value={dispatch}>
+				<storeContext.Provider value={store}>{children}</storeContext.Provider>
 			</dispatchContext.Provider>
 		);
 	};

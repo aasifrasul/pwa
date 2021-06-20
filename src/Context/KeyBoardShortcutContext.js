@@ -6,6 +6,9 @@ import KeyBoardShortcutReducer from '../reducers/KeyBoardShortcutReducer';
 
 const initialState = {};
 
-const [KeyBoardShortcutContextProvider, useKeyBoardShortcutStore, useKeyBoardShortcutDispatch] = storeFactory(KeyBoardShortcutReducer, initialState);
+const [KeyBoardShortcutContextProvider, useKeyBoardShortcutStore, useKeyBoardShortcutDispatch] = storeFactory(
+	KeyBoardShortcutReducer,
+	initialState
+);
 
 export { KeyBoardShortcutContextProvider, useKeyBoardShortcutStore, useKeyBoardShortcutDispatch };

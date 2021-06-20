@@ -16,14 +16,14 @@ function Home() {
 		color: 'white',
 		margin: '0.5em 1em',
 		padding: '0.25em 1em',
-		background: '#c83f49',
+		background: '#17e1e9',
 	};
 
 	return (
 		<div className="App" style={appStyles}>
-			<div style={styles} onMouseEnter={() => setBgColour('#c83f49')} onMouseLeave={() => setBgColour('#fafafa')}>
+			<div style={styles} onMouseEnter={() => setBgColour('#17e1e9')} onMouseLeave={() => setBgColour('#fafafa')}>
 				{' '}
-				Red
+				Sand Green
 			</div>
 		</div>
 	);

@@ -3,17 +3,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import KeyBoardShortcutHelper from './KeyBoardShortcutHelper';
 import withKeyBoardShortcut from '../../../HOCs/KeyBoardShortcutHOC';
 
-import { useKeyBoardShortcutDispatch } from '../../../Context/KeyBoardShortcutContext';
-
 const helperInstance = KeyBoardShortcutHelper.getInstance();
 const listener = helperInstance.getListenerInstance();
 
 function KeyBoardShortcut(props) {
 	const didMount = useRef(false);
 	const { combo, description } = props;
-	const [registeredObject, setRegisteredObject] = useState({});
+	const [registeredObject, setRegisteredObject] = useState(null);
 	const [hash, setHash] = useState(null);
-	const dispatch = useKeyBoardShortcutDispatch();
 
 	const handleSuccess = () => {
 		const hash1 = helperInstance.generateHash();
@@ -24,7 +21,6 @@ function KeyBoardShortcut(props) {
 	useEffect(() => {
 		if (!didMount.current) {
 			const regObject = listener.simple_combo(combo.toLowerCase(), () => {
-				alert(`You pressed ${combo}`);
 				handleSuccess();
 				props.callback();
 			});

@@ -30,6 +30,7 @@ class myPromise {
 	}
 
 	reject(err) {
+        console.log('Inside reject', err);
 		this.state.status = 'rejected';
 		this.state.error = err;
 	}

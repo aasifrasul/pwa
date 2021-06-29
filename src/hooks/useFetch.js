@@ -5,7 +5,14 @@ import { safeExecFunc } from '../utils/typeChecking';
 
 const controller = new AbortController();
 
+const initialState = {
+	isLoading: false,
+	isError: false,
+	data: Object.create(null),
+};
+
 const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallback, skip = false) => {
+	let state, dispatch;
 	const [url, updateUrl] = useState(initialUrl);
 	const [params, updateParams] = useState(initialParams);
 	const [errorMessage, setErrorMessage] = useState('');
@@ -14,13 +21,11 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 		.map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(params[key]))
 		.join('&');
 
-	const [state, dispatch] = useReducer(dataFetchReducer, {
-		isLoading: false,
-		isError: false,
-		data: Object.create(null),
-	});
-
-	const value = useMemo(() => [state, dispatch], [state]);
+	function useMemoCB () {
+		return [state, dispatch];
+	}
+	[state, dispatch] = useReducer(dataFetchReducer, initialState);
+	[state, dispatch] = useMemo(useMemoCB, [state, dispatch]);
 
 	const refetch = () => setRefetchIndex((prevRefetchIndex) => prevRefetchIndex + 1);
 	const abortFetching = () => {
@@ -66,10 +71,15 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 				dispatch({ type: 'FETCH_STOP' });
 			}
 		};
+
 		fetchData();
+
+		return () => {
+			abortFetching();
+		};
 	}, [url, params, refetchIndex]);
 	return {
-		state: value.state,
+		state,
 		errorMessage,
 		updateUrl,
 		updateParams,

@@ -74,6 +74,18 @@ const webWorkerContent = fs.readFileSync(`./src/utils/WebWorker.js`, enc);
 const app = express();
 // port to use
 const port = 3100;
+
+
+app.get('/WebWorker.js', function (req, res) {
+	res.set('Content-Type', `application/javascript; charset=${enc.encoding}`);
+	nocache(res);
+	res.end(webWorkerContent);
+});
+
+app.get('/api/fetchWineData/:pageNum', function (req, res) {
+	getCSVData(req, res, req.params.pageNum);
+});
+
 //Set hbs template config
 app.engine('.hbs', exphbs({ extname: '.hbs' }));
 app.set('views', path.join(__dirname, '..', 'public', 'ally-test'));
@@ -87,9 +99,7 @@ handlebars.registerHelper({
 	},
 });
 
-app.use(cors());
-app.use(cookieParser());
-app.use([userAgentHandler, getCSVData]);
+app.use([cors(), cookieParser(), userAgentHandler]);
 
 // start the webpack dev server
 const devServer = new WebpackDevServer(webpack(webpackConfig), {
@@ -115,20 +125,15 @@ const bundleConfig = [
 ];
 
 // start the express server
+
 app.use(
 	'/public',
-	proxy('localhost:' + (port + 1), {
-		forwardPath: function forwardPath(req) {
+	proxy(`localhost:${port + 1}`, {
+		proxyReqPathResolver: function (req) {
 			return req.originalUrl;
 		},
 	})
 );
-
-app.get('/WebWorker.js', function (req, res) {
-	res.set('Content-Type', `application/javascript; charset=${enc.encoding}`);
-	nocache(res);
-	res.end(webWorkerContent);
-});
 
 app.all('/*', (req, res) => {
 	const data = {

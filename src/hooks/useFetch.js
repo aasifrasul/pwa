@@ -21,7 +21,7 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 		.map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(params[key]))
 		.join('&');
 
-	function useMemoCB () {
+	function useMemoCB() {
 		return [state, dispatch];
 	}
 	[state, dispatch] = useReducer(dataFetchReducer, initialState);
@@ -75,7 +75,7 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 		fetchData();
 
 		return () => {
-			abortFetching();
+			// abortFetching();
 		};
 	}, [url, params, refetchIndex]);
 	return {

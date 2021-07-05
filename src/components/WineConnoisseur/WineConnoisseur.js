@@ -5,9 +5,10 @@ import useFetch from '../../hooks/useFetch';
 
 import styles from './WineConnoisseur.css';
 
+const baseURL = `http://localhost:3100/api/fetchWineData/`;
+
 export default function WineConnoisseur(props) {
 	const [page, setPage] = useState(0);
-	const [url, setUrl] = useState(`http://localhost:3100/api/fetchWineData/${page}`);
 	const [columns, setColumns] = useState([]);
 	const [rows, setRows] = useState([]);
 
@@ -21,10 +22,10 @@ export default function WineConnoisseur(props) {
 		console.log('IN failureCallback');
 	};
 
-	useEffect(() => {}, [url, page, rows]);
+	useEffect(() => {}, [page, rows]);
 
-	const { data, isLoading, isError, errorMessage, updateUrl } = useFetch(
-		url,
+	const { state, errorMessage, updateUrl } = useFetch(
+		`${baseURL}${page}`,
 		Object.create(null),
 		successCallback,
 		failureCallback
@@ -33,7 +34,7 @@ export default function WineConnoisseur(props) {
 	const clickHandler = () => (e) => {
 		e.preventDefault();
 		setPage(page + 1);
-		updateUrl(`http://localhost:3100/api/fetchWineData/${page + 1}`);
+		updateUrl(`${baseURL}${page + 1}`);
 	};
 
 	return (

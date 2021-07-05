@@ -35,16 +35,10 @@ const userAgentHandler = (req, res, next) => {
 	next();
 };
 
-const getCSVData = (req, res, next) => {
-	const { url } = req;
-	if (url.includes('api/fetchWineData')) {
-		const params = url.split('/');
-		const pageNum = parseInt(params[3], 10);
-		const pageData = result.slice(pageNum * 10, (pageNum + 1) * 10);
-		res.end(JSON.stringify(pageNum ? { pageData } : { headers, pageData }));
-	} else {
-		next();
-	}
+const getCSVData = (req, res, pageNum) => {
+	const pageNumber = parseInt(pageNum, 10);
+	const pageData = result.slice(pageNumber * 10, (pageNumber + 1) * 10);
+	res.end(JSON.stringify(pageNumber ? { pageData } : { headers, pageData }));
 };
 
 module.exports = {

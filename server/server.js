@@ -75,16 +75,13 @@ const app = express();
 // port to use
 const port = 3100;
 
-
 app.get('/WebWorker.js', function (req, res) {
 	res.set('Content-Type', `application/javascript; charset=${enc.encoding}`);
 	nocache(res);
 	res.end(webWorkerContent);
 });
 
-app.get('/api/fetchWineData/:pageNum', function (req, res) {
-	getCSVData(req, res, req.params.pageNum);
-});
+app.get('/api/fetchWineData/:pageNum', getCSVData);
 
 //Set hbs template config
 app.engine('.hbs', exphbs({ extname: '.hbs' }));

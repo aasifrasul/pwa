@@ -35,10 +35,10 @@ const userAgentHandler = (req, res, next) => {
 	next();
 };
 
-const getCSVData = (req, res, pageNum) => {
-	const pageNumber = parseInt(pageNum, 10);
-	const pageData = result.slice(pageNumber * 10, (pageNumber + 1) * 10);
-	res.end(JSON.stringify(pageNumber ? { pageData } : { headers, pageData }));
+const getCSVData = (req, res) => {
+	const pageNum = parseInt(req.params.pageNum, 10);
+	const pageData = result.slice(pageNum * 10, (pageNum + 1) * 10);
+	res.end(JSON.stringify(pageNum ? { pageData } : { headers, pageData }));
 };
 
 module.exports = {

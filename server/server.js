@@ -25,13 +25,11 @@ const enc = {
 };
 
 const log = (msg) => console.log.bind(console, msg);
+const error = (msg) => console.error.bind(console, msg);
 
 const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function () {
-	// we're connected!
-	log('connection successfull');
-});
+db.on('error', error('connection error:'));
+db.once('open', () => log('connection successfull'));
 
 const generateBuildTime = async function () {
 	return new Promise((resolve, reject) => {
@@ -98,27 +96,25 @@ handlebars.registerHelper({
 
 app.use([cors(), cookieParser(), userAgentHandler]);
 
+const publicPath = webpackConfig.output.publicPath;
+
 // start the webpack dev server
 const devServer = new WebpackDevServer(webpack(webpackConfig), {
-	publicPath: webpackConfig.output.publicPath,
+	publicPath,
 });
 
-devServer.listen(port + 1, 'localhost', function () {
-	console.log('webpack-dev-server listening on port 3001');
-});
+devServer.listen(port + 1, 'localhost', () => log('webpack-dev-server listening on port 3001'));
 
 const server = http.createServer(app);
 
-server.on('connection', (socket) => {
-	socket.on('close', () => log('server.connection'));
-});
+server.on('connection', (socket) => socket.on('close', () => log('server.connection')));
 
 server.on('request', () => log('server.request'));
 
 const bundleConfig = [
-	webpackConfig.output.publicPath + 'en.bundle.js',
-	webpackConfig.output.publicPath + 'vendor.bundle.js',
-	webpackConfig.output.publicPath + 'app.bundle.js',
+	publicPath + 'en.bundle.js',
+	publicPath + 'vendor.bundle.js',
+	publicPath + 'app.bundle.js',
 ];
 
 // start the express server
@@ -126,9 +122,7 @@ const bundleConfig = [
 app.use(
 	'/public',
 	proxy(`localhost:${port + 1}`, {
-		proxyReqPathResolver: function (req) {
-			return req.originalUrl;
-		},
+		proxyReqPathResolver: (req) => req.originalUrl,
 	})
 );
 
@@ -137,15 +131,13 @@ app.all('/*', (req, res) => {
 		js: bundleConfig,
 		...AppHelper.constructReqDataObject(req),
 		dev: true,
+		layout: false,
 	};
-	data.layout = false;
 	res.render('next1-ally-test', data);
 });
 
 //Start the server
-server.listen(port, 'localhost', function () {
-	log('webpack-dev-server listening on port 3001');
-});
+server.listen(port, 'localhost', () => log('webpack-dev-server listening on port 3001'));
 
 const io = socketio(server);
 

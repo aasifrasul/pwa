@@ -5,6 +5,7 @@ const webpackCommonConfig = require('../webpack/webpack.common');
 const fs = require('fs');
 const LOADERS = require('../webpack/loaders');
 const PLUGINS = require('../webpack/plugins');
+const vendorlibs = require('./vendor.js');
 const isProduction = process.env.NODE_ENV === 'production';
 const { APP_NAME, publicPath } = require('../webpack/constants');
 
@@ -17,7 +18,6 @@ const makeConfig = () => {
 		parallelism: 1,
 		profile: true,
 		entry: {
-			vendor: paths.appVendor(__dirname),
 			...(fs.existsSync(paths.langEn(__dirname)) && {
 				en: paths.langEn(__dirname),
 				hi: paths.langHi(__dirname),
@@ -72,17 +72,17 @@ const makeConfig = () => {
 					default: false,
 					vendors: false,
 					vendor: {
-						chunks: 'all',
 						name: 'vendor',
-						test: 'vendor',
+						test: new RegExp(`[\\/]node_modules[\\/](${vendorlibs.join('|')})[\\/]`),
 						enforce: true,
-						priority: 2,
+						minChunks: 1,
+						priority: 1,
 					},
 					common: {
 						chunks: 'all',
 						name: 'common',
 						minChunks: 2,
-						priority: 1,
+						priority: 2,
 					},
 				},
 			},

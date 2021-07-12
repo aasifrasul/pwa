@@ -1,36 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
-function Home() {
-	const [bgColour, setBgColour] = useState('#fafafa');
+import { useDraggable } from '../../hooks/useDraggable';
 
-	const appStyles = {
-		height: '100vh',
-		background: `${bgColour}`,
-	};
-
-	const styles = {
-		width: '100px',
-		fontSize: '20px',
-		borderRadius: '40px',
-		border: '1px solid black',
-		color: 'white',
-		margin: '0.5em 1em',
-		padding: '0.25em 1em',
-		background: 'rgb(0 55 255)',
-	};
+const Home = () => {
+	const [[x, y], setCords] = useState([0, 0]);
+	const style = useMemo(
+		() => ({
+			position: 'absolute',
+			top: `${y}px`,
+			left: `${x}px`,
+		}),
+		[x, y]
+	);
+	const [ref, onMouseDown] = useDraggable(setCords);
 
 	return (
-		<div className="App" style={appStyles}>
-			<div
-				style={styles}
-				onMouseEnter={() => setBgColour('rgb(0 55 255)')}
-				onMouseLeave={() => setBgColour('#fafafa')}
-			>
-				{' '}
-				Deep Blue
-			</div>
+		<div ref={ref} onMouseDown={onMouseDown} style={style}>
+			Start Dragging!
 		</div>
 	);
-}
+};
 
 export default Home;

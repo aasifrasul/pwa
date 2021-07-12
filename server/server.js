@@ -111,11 +111,8 @@ server.on('connection', (socket) => socket.on('close', () => log('server.connect
 
 server.on('request', () => log('server.request'));
 
-const bundleConfig = [
-	publicPath + 'en.bundle.js',
-	publicPath + 'vendor.bundle.js',
-	publicPath + 'app.bundle.js',
-];
+// const bundleConfig = [publicPath + 'en.bundle.js', publicPath + 'vendor.bundle.js', publicPath + 'app.bundle.js'];
+const bundleConfig = ['en', 'vendor', 'app'].map((i) => `${publicPath}${i}.bundle.js`);
 
 // start the express server
 

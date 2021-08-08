@@ -1,13 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { Segment, Form, Input, Button } from 'semantic-ui-react';
 
-import { useContactDispatch } from '../../Context/ContactContext';
+import { useDispatch } from '../../Context/ContactContext';
 
-export default function ContactForm() {
+function ContactForm() {
 	const name = useFormInput('');
 	const email = useFormInput('');
 	// eslint-disable-next-line no-unused-vars
-	const dispatch = useContactDispatch();
+	const dispatch = useDispatch();
 
 	const onSubmit = () => {
 		dispatch({
@@ -57,3 +57,5 @@ function useFormInput(initialValue) {
 		onReset: handleReset,
 	};
 }
+
+export default ContactForm;

@@ -1,32 +1,31 @@
 import React, { useState, useContext } from 'react';
 import { Segment, Table, Button, Icon } from 'semantic-ui-react';
-import { useContactStore, useContactDispatch } from '../../Context/ContactContext';
+import { useStore, useDispatch } from '../../Context/ContactContext';
 
-export default function ContactTable() {
+function ContactTable() {
 	// Subscribe to `contacts` state and access dispatch function
-	const state = useContactStore();
-	const dispatch = useContactDispatch();
+	const { contacts } = useStore();
+	const dispatch = useDispatch();
 
 	// Declare a local state to be used internally by this component
 	const [selectedId, setSelectedId] = useState();
 
-	const delContact = (id) => {
+	const delContact = (id) =>
 		dispatch({
 			type: 'DEL_CONTACT',
 			payload: id,
 		});
-	};
 
 	const onRemoveUser = () => {
 		delContact(selectedId);
 		setSelectedId(null); // Clear selection
 	};
 
-	const rows = state.contacts.map((contact) => (
-		<Table.Row key={contact.id} onClick={() => setSelectedId(contact.id)} active={contact.id === selectedId}>
-			<Table.Cell>{contact.id}</Table.Cell>
-			<Table.Cell>{contact.name}</Table.Cell>
-			<Table.Cell>{contact.email}</Table.Cell>
+	const rows = contacts.map(({ id, name, email }) => (
+		<Table.Row key={id} onClick={() => setSelectedId(id)} active={id === selectedId}>
+			<Table.Cell>{id}</Table.Cell>
+			<Table.Cell>{name}</Table.Cell>
+			<Table.Cell>{email}</Table.Cell>
 		</Table.Row>
 	));
 
@@ -63,3 +62,5 @@ export default function ContactTable() {
 		</Segment>
 	);
 }
+
+export default ContactTable;

@@ -2,16 +2,18 @@ import React from 'react';
 import { Segment, Header } from 'semantic-ui-react';
 import Form from './Form';
 import Table from './Table';
-import { ContactContextProvider } from '../../Context/ContactContext';
+import { StoreProvider } from '../../Context/ContactContext';
 
-export default function Contacts() {
+function Contacts() {
 	return (
-		<ContactContextProvider>
+		<StoreProvider>
 			<Segment basic>
 				<Header as="h3">Contacts</Header>
 				<Form />
 				<Table />
 			</Segment>
-		</ContactContextProvider>
+		</StoreProvider>
 	);
 }
+
+export default Contacts;

@@ -70,10 +70,22 @@
 					};
 					script.onerror = function (err) {
 						console.log('Script Rejected', src, err);
-						reject(err);
+						resolve(src);
 					};
+					document.head.appendChild(script);
 				});
 			}
+
+			// loadJS('https://unpkg.com/web-vitals/dist/web-vitals.iife.js', false, )
+		</script>
+
+		<!-- Append the `?module` param to load the module version of `web-vitals` -->
+		<script type="module">
+			import {getCLS, getFID, getLCP} from 'https://unpkg.com/web-vitals?module';
+
+			getCLS(console.log);
+			getFID(console.log);
+			getLCP(console.log);
 		</script>
 
 		<!-- CSS -->
@@ -87,7 +99,7 @@
 					stylesheet.href = src;
 					stylesheet.rel = 'stylesheet';
 					stylesheet.type = 'text/css';
-					document.getElementsByTagName('head')[0].appendChild(stylesheet);
+					document.head.appendChild(stylesheet);
 				}
 			}
 			{{#each css}}

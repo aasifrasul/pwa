@@ -13,7 +13,16 @@ const getArrayCount = (arr) => isArray(arr) && arr.length;
 
 const safeExecFunc = (...params) => {
 	const func = params.shift();
-	isFunction(func) && func.apply(func, params);
+	const context = params.shift();
+	if (!isFunction(func)) {
+		return null;
+	}
+
+	if (isObject(context) && isFunction(context[func.name])) {
+		return func.apply(context, params)
+	}
+
+	return func(...params);
 };
 
 module.exports = {

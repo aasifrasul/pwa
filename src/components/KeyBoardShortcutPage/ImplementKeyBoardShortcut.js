@@ -6,16 +6,18 @@ import Spacer from '../Common/Spacer/Spacer1';
 
 import { useStore } from '../../Context/KeyBoardShortcutContext';
 
+const getBGColor = () => document.body.style.backgroundColor;
+
 function ImplementKeyBoardShortcut(props) {
 	const state = useStore();
 
 	const toggleGreen = () => {
-		document.body.style.backgroundColor = document.body.style.backgroundColor === 'green' ? '' : 'green';
+		document.body.style.backgroundColor = getBGColor() === 'green' ? '' : 'green';
 		alert('toggleGreen Invoked');
 	};
 
 	const shiftP = () => {
-		document.body.style.backgroundColor = document.body.style.backgroundColor === 'red' ? '' : 'red';
+		document.body.style.backgroundColor = getBGColor() === 'red' ? '' : 'red';
 		console.log('shift P invoked');
 	};
 

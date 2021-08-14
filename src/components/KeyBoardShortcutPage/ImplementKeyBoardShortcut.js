@@ -4,12 +4,12 @@ import PropTypes from 'prop-types';
 import KeyBoardShortcut from '../Common/KeyBoardShortcut/KeyBoardShortcut';
 import Spacer from '../Common/Spacer/Spacer1';
 
-import { useStore } from '../../Context/KeyBoardShortcutContext';
+import { useKeyBoardShortcutStore } from '../../Context/KeyBoardShortcutContext';
 
 const getBGColor = () => document.body.style.backgroundColor;
 
 function ImplementKeyBoardShortcut(props) {
-	const state = useStore();
+	const state = useKeyBoardShortcutStore();
 
 	const toggleGreen = () => {
 		document.body.style.backgroundColor = getBGColor() === 'green' ? '' : 'green';

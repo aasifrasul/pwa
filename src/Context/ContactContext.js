@@ -26,6 +26,6 @@ const initialState = {
 	error: null,
 };
 
-const { StoreProvider, useStore, useDispatch } = storeFactory(ContactReducer, initialState);
+const [ContactStoreProvider, useContactStore, useContactDispatch] = storeFactory(ContactReducer, initialState);
 
-export { StoreProvider, useStore, useDispatch };
+export { ContactStoreProvider, useContactStore, useContactDispatch };

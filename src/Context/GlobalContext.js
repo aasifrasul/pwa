@@ -6,6 +6,6 @@ import GlobalReducer from '../reducers/GlobalReducer';
 
 const initialState = {};
 
-const [GlobalContextProvider, useGlobalStore, useGlobalDispatch] = storeFactory(GlobalReducer, initialState);
+const [StoreProvider, useStore, useDispatch] = storeFactory(GlobalReducer, initialState);
 
-export { GlobalContextProvider, useGlobalStore, useGlobalDispatch };
+export { StoreProvider, useStore, useDispatch };

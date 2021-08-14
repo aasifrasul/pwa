@@ -3,7 +3,7 @@ import { Segment, Form, Input, Button } from 'semantic-ui-react';
 
 import { useContactDispatch } from '../../Context/ContactContext';
 
-export default function ContactForm() {
+function ContactForm() {
 	const name = useFormInput('');
 	const email = useFormInput('');
 	// eslint-disable-next-line no-unused-vars
@@ -57,3 +57,5 @@ function useFormInput(initialValue) {
 		onReset: handleReset,
 	};
 }
+
+export default ContactForm;

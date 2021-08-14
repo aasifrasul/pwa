@@ -17,6 +17,7 @@ const path = require('path');
 const webpackConfig = require('../webpack-configs/webpack.config');
 const AppHelper = require('./helper');
 const { userAgentHandler, getCSVData } = require('./middlewares');
+const { onConnection } = require('./socketConnection');
 
 mongoose.connect('mongodb://localhost:27017/test', { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -96,7 +97,7 @@ handlebars.registerHelper({
 
 app.use([cors(), cookieParser(), userAgentHandler]);
 
-const publicPath = webpackConfig.output.publicPath;
+const {publicPath} = webpackConfig.output || {};
 
 // start the webpack dev server
 const devServer = new WebpackDevServer(webpack(webpackConfig), {
@@ -138,65 +139,4 @@ server.listen(port, 'localhost', () => log('webpack-dev-server listening on port
 
 const io = socketio(server);
 
-io.on('connection', (socket) => {
-	const currencyPairs = [
-		{
-			key: 'EURUSD',
-			value: 1.1857,
-		},
-		{
-			key: 'USDEUR',
-			value: 0.8965,
-		},
-		{
-			key: 'INRUSD',
-			value: 75.876,
-		},
-		{
-			key: 'USDINR',
-			value: 0.0567,
-		},
-		{
-			key: 'YENUSD',
-			value: 118.9857,
-		},
-		{
-			key: 'USDYEN',
-			value: 0.0567,
-		},
-		{
-			key: 'EURINR',
-			value: 3.567,
-		},
-		{
-			key: 'INREUR',
-			value: 78.987,
-		},
-		{
-			key: 'EURYEN',
-			value: 3.567,
-		},
-		{
-			key: 'YENEUR',
-			value: 0.00987,
-		},
-	];
-
-	const getRandomInt = (max) => Math.floor(Math.random() * max);
-
-	let IntervalId;
-
-	socket.on('fetchOSStats', () => {
-		const data = os.cpus();
-		socket.emit('oSStatsData', data);
-	});
-
-	//handle the new message event
-	socket.on('fetchCurrencyPair', () => {
-		IntervalId && clearInterval(IntervalId);
-		IntervalId = setInterval(() => {
-			const data = currencyPairs[getRandomInt(10)];
-			socket.emit('currencyPairData', data);
-		}, 1);
-	});
-});
+io.on('connection', onConnection);

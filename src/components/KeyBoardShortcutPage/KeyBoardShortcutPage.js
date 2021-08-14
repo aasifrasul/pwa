@@ -1,13 +1,13 @@
 import React from 'react';
 
 import ImplementKeyBoardShortcut from './ImplementKeyBoardShortcut';
-import { KeyBoardShortcutContextProvider } from '../../Context/KeyBoardShortcutContext';
+import { KeyBoardShortcutStoreProvider } from '../../Context/KeyBoardShortcutContext';
 
 const KeyBoardShortcutPage = (props) => {
 	return (
-		<KeyBoardShortcutContextProvider>
+		<KeyBoardShortcutStoreProvider>
 			<ImplementKeyBoardShortcut />
-		</KeyBoardShortcutContextProvider>
+		</KeyBoardShortcutStoreProvider>
 	);
 };
 

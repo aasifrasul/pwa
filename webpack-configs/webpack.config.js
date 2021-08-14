@@ -27,7 +27,8 @@ const makeConfig = () => {
 		output: {
 			path: isProduction ? path.join(paths.appBuild, APP_NAME) : paths.appBuildDev,
 			filename: isProduction ? '[name].[chunkhash].js' : '[name].bundle.js',
-			publicPath: isProduction ? publicPath : '/public/',
+			// publicPath: isProduction ? publicPath : '/public/',
+			publicPath,
 			pathinfo: !isProduction,
 			chunkFilename: isProduction ? '[name].[chunkhash].js' : '[name].bundle.js',
 			jsonpFunction: 'webpackJsonp',

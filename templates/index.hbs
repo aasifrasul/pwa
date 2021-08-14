@@ -41,20 +41,67 @@
 		<div id='root'></div>
 		<div id='modal-root'></div>
 		<script type='text/javascript' crossorigin='anonymous' nonce='\{{{nonce}}}'>
-			window.loadJS = function (src, crossorigin) { return new Promise(function(resolve, reject) {
-			console.log('Script Invoked', src); const ref = document.querySelectorAll('script')[0]; const script =
-			document.createElement('script'); script.setAttribute('src', src); script.setAttribute('nonce', '\{{{nonce}}}');
-			crossorigin && script.setAttribute('crossorigin', 'anonymous'); ref.parentNode.insertBefore(script, ref);
-			script.onload = function (e) { console.log('Script Resolved', src); resolve(src); }; script.onerror =
-			function (err) { console.log('Script Rejected', src, err); reject(err); }; }) }
+			switch (document.readyState) {
+				case "loading": // The document is still loading. 
+					break;
+				case "interactive": 
+					// The document has finished loading. We can now access the DOM elements. 
+					// But sub-resources such as scripts, images, stylesheets and frames are still loading. 
+					const span = document.createElement("span");
+					span.textContent = "A <span> element.";
+					document.body.appendChild(span);
+					break;
+				case "complete": // The page is fully loaded.
+					console.log("The first CSS rule is: " + document.styleSheets[0].cssRules[0].cssText);
+					break;
+			}
+			window.loadJS = function (src, crossorigin) {
+				return new Promise(function(resolve, reject) {
+					console.log('Script Invoked', src);
+					const ref = document.querySelectorAll('script')[0];
+					const script = document.createElement('script');
+					script.setAttribute('src', src);
+					script.setAttribute('nonce', '\{{{nonce}}}');
+					crossorigin && script.setAttribute('crossorigin', 'anonymous');
+					ref.parentNode.insertBefore(script, ref);
+					script.onload = function (e) {
+						console.log('Script Resolved', src);
+						resolve(src);
+					};
+					script.onerror = function (err) {
+						console.log('Script Rejected', src, err);
+						resolve(src);
+					};
+					document.head.appendChild(script);
+				});
+			}
+
+			// loadJS('https://unpkg.com/web-vitals/dist/web-vitals.iife.js', false, )
+		</script>
+
+		<!-- Append the `?module` param to load the module version of `web-vitals` -->
+		<script type="module">
+			import {getCLS, getFID, getLCP} from 'https://unpkg.com/web-vitals?module';
+
+			getCLS(console.log);
+			getFID(console.log);
+			getLCP(console.log);
 		</script>
 
 		<!-- CSS -->
 		<script type='text/javascript' crossorigin='anonymous' nonce='\{{{nonce}}}'>
-			// load styles sheets function loadStyleSheet(src){ if (document.createStyleSheet)
-			document.createStyleSheet(src); else { var stylesheet = document.createElement('link'); stylesheet.href =
-			src; stylesheet.rel = 'stylesheet'; stylesheet.type = 'text/css';
-			document.getElementsByTagName('head')[0].appendChild(stylesheet); } }
+			// load styles sheets 
+			function loadStyleSheet(src) {
+				if (document.createStyleSheet) {
+					document.createStyleSheet(src);
+				} else {
+					var stylesheet = document.createElement('link');
+					stylesheet.href = src;
+					stylesheet.rel = 'stylesheet';
+					stylesheet.type = 'text/css';
+					document.head.appendChild(stylesheet);
+				}
+			}
 			{{#each css}}
 				loadStyleSheet('{{this}}');
 			{{/each}}

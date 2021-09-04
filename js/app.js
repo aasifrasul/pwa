@@ -35,7 +35,7 @@
 		});
 	};
 
-	const loadDynamically = ['js/states.json', 'js/countries.json'];
+	const loadDynamically = ['js/states.json', 'js/countries.json', 'js/cities.json'];
 
 	loadJS('SWRegistration.js').then((script) => {
 		console.info('script', script);
@@ -45,9 +45,9 @@
 		}
 	});
 	/*
-    loadJS('loadSW.js').then(() => {
-      console.log(`Service Worker Loading script loaded`)
-    });
+	loadJS('loadSW.js').then(() => {
+	  console.log(`Service Worker Loading script loaded`)
+	});
   */
 	loadDynamically.map(loadJS);
 
@@ -68,20 +68,20 @@
 
 	/*
   document
-    .querySelector('.cache-article')
-    .addEventListener('click', (event) => {
-  	event.preventDefault();
-  	var id = this.dataset.articleId;
-  	caches.open('mysite-article-' + id).then((cache) => {
-  	  fetch('/get-article-urls?id=' + id).then((response) => {
-  		// /get-article-urls returns a JSON-encoded array of
-  		// resource URLs that a given article depends on
-  		return response.json();
-  	  }).then((urls) => {
-  		cache.addAll(urls);
-  	  });
-  	});
-    });
+	.querySelector('.cache-article')
+	.addEventListener('click', (event) => {
+	event.preventDefault();
+	var id = this.dataset.articleId;
+	caches.open('mysite-article-' + id).then((cache) => {
+	  fetch('/get-article-urls?id=' + id).then((response) => {
+		// /get-article-urls returns a JSON-encoded array of
+		// resource URLs that a given article depends on
+		return response.json();
+	  }).then((urls) => {
+		cache.addAll(urls);
+	  });
+	});
+	});
   */
 
 	const spawn = (generatorFunc) => {
@@ -136,23 +136,23 @@
 			// returning the result of the promise
 			//let story = yield getJSON('https://api.github.com/users/aasifrasul');
 			/*
-      return [
-        "https://api.github.com/users/aasifrasul/followers",
-        "https://api.github.com/users/aasifrasul/following",
-        "https://api.github.com/users/aasifrasul/gists",
-        "https://api.github.com/users/aasifrasul/subscriptions",
-        "https://api.github.com/users/aasifrasul/repos",
-      ].reduce((sequence, url) => {
-        // Once the last chapter's promise is done…
-        return sequence.then(() => {
-      	// …fetch the next chapter
-      	return getJSON(url);
-        }).then((chapter) => {
-      	// and add it to the page
-      	console.log(chapter);
-        });
-      }, Promise.resolve());
-      */
+	  return [
+		"https://api.github.com/users/aasifrasul/followers",
+		"https://api.github.com/users/aasifrasul/following",
+		"https://api.github.com/users/aasifrasul/gists",
+		"https://api.github.com/users/aasifrasul/subscriptions",
+		"https://api.github.com/users/aasifrasul/repos",
+	  ].reduce((sequence, url) => {
+		// Once the last chapter's promise is done…
+		return sequence.then(() => {
+		// …fetch the next chapter
+		return getJSON(url);
+		}).then((chapter) => {
+		// and add it to the page
+		console.log(chapter);
+		});
+	  }, Promise.resolve());
+	  */
 		} catch (err) {
 			// try/catch just works, rejected promises are thrown here
 			console.log('Argh, broken: ' + err.message);

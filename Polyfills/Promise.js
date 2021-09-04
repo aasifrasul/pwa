@@ -46,27 +46,32 @@ myPromise.prototype.reject = function (err) {
 	this.error = err;
 };
 
+myPromise.prototype.finally = function (callback) {
+	if (!isFunction(callback)) {
+		throw new Error('callback param supplied should be of type function');
+	}
+
+	['fulfilled', 'rejected'].includes(this.state) && callback();
+	return this;
+};
+
 myPromise.resolve = function (data) {
 	console.log('In direct resolve', this);
-	const promise = new this((resolve) => {
-		resolve(data);
-	});
+	const promise = new myPromise((resolve) => resolve(data));
 	console.log('promise', promise);
 	return promise;
 };
 
 myPromise.reject = function (data) {
-	console.log('In direct resolve', this);
-	const promise = new this((reject) => {
-		reject(data);
-	});
+	console.log('In direct reject', this);
+	const promise = new myPromise((reject) => reject(data));
 	console.log('promise', promise);
 	return promise;
 };
 
 myPromise.all = function (arr) {
 	let results = [];
-	return new Promise((resolve, reject) => {
+	return new myPromise((resolve, reject) => {
 		for (var i = arr.length - 1; i >= 0; i--) {
 			(function (idx) {
 				arr[idx].then(
@@ -106,12 +111,8 @@ const promise = new myPromise((resolve, reject) => {
 });
 
 promise
-	.then((data) => {
-		console.log('In then data', data);
-	})
-	.catch((e) => {
-		throw new Error(e);
-	});
+	.then((data) => console.log('In then data', data))
+	.catch((e) => throw new Error(e));
 
 var promises = [];
 
@@ -123,11 +124,10 @@ function promiseFactory(payload) {
 		}, delay);
 	});
 }
-promises.push(promiseFactory({ id: 1, delay: 100 }));
-promises.push(promiseFactory({ id: 2, delay: 50 }));
-promises.push(promiseFactory({ id: 3, delay: 25 }));
-promises.push(promiseFactory({ id: 5, delay: 200, isReject: true }));
-promises.push(promiseFactory({ id: 4, delay: 200 }));
+
+Array.apply(null, { length: 50 }).map(Number.call, Number).forEach( i => {
+	promises.push(promiseFactory({ id: ++i, delay: Math.random() * 200, isReject: (Math.random() * 5) > 1 }));
+});
 
 myPromise
 	.all(promises)

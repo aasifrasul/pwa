@@ -43,4 +43,4 @@ const flatDeep = function (arr) {
 	return resArr;
 };
 
-console.log(flatDeep([1, 2, [5, 6, [9, [10, 11, [67, 78, 89], 12], 8], 7], , 4]));
+console.log(flatDeep([1, 2, [5, 6, [9, [10, 11, [67, [78, [101, [102], 103], 56], 89], 12], 8], 7], , 4]));

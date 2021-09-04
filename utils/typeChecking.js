@@ -9,3 +9,17 @@ const isNumber = (data) => dataType(data) === 'number';
 const isString = (data) => dataType(data) === 'string';
 const isBoolean = (data) => dataType(data) === 'boolean';
 const isFunction = (data) => dataType(data) === 'function';
+
+const safeExecFunc = (...params) => {
+	const func = params.shift();
+	const context = params.shift();
+	if (!isFunction(func)) {
+		return null;
+	}
+
+	if (isObject(context) && isFunction(context[func.name])) {
+		return func.apply(context, params)
+	}
+
+	return func(...params);
+};

@@ -1,4 +1,11 @@
 function getGlobalContext() {
+	if (typeof global !== 'object' || !global || global.Math !== Math || global.Array !== Array) {
+		return getGlobal();
+	}
+	return global;
+}
+
+function getGlobal() {
 	if (typeof self !== 'undefined') {
 		return self;
 	} else if (typeof window !== 'undefined') {

@@ -311,7 +311,7 @@ const getStreamedHtmlResponse = (url, routeMatch) => {
 			})
 		);
 	});
-	*/
+*/
 
 self.addEventListener('push', (e) => {
 	console.log('Received a push message', e);
@@ -351,7 +351,8 @@ self.addEventListener('notificationclick', (e) => {
 					}
 				}
 				if (clients.openWindow) {
-					return clients.openWindow('/');
+					//return clients.openWindow('/');
+					return clients.openWindow(e.notification.data.url);
 				}
 			})
 	);

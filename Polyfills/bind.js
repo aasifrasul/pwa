@@ -1,6 +1,13 @@
 // bind Polyfill
 
 function getGlobalContext() {
+	if (typeof global !== 'object' || !global || global.Math !== Math || global.Array !== Array) {
+		return getGlobal();
+	}
+	return global;
+}
+
+function getGlobal() {
 	if (typeof self !== 'undefined') {
 		return self;
 	} else if (typeof window !== 'undefined') {
@@ -12,11 +19,9 @@ function getGlobalContext() {
 	}
 }
 
-var globalContext = getGlobalContext();
-
 Function.prototype.myBind =
 	Function.prototype.myBind ||
-	function (context = globalContext, ...args) {
+	function (context = getGlobalContext(), ...args) {
 		context.myBind = this;
 		return function () {
 			return context.myBind(...args);

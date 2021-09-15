@@ -54,7 +54,6 @@ subject.notifyAllObservers();
 // Observer 3 is notified!
 // Observer 4 is notified!
 
-
 class Subject {
 	constructor() {
 		this.observers = [];
@@ -79,7 +78,7 @@ class Subject {
 	}
 
 	notifyAllObservers(data) {
-		this.observers.forEach (i => i.notify(data));
+		this.observers.forEach((i) => i.notify(data));
 	}
 }
 
@@ -101,7 +100,6 @@ const observer2 = new Observer('Observer2');
 const observer3 = new Observer('Observer3');
 const observer4 = new Observer('Observer4');
 const observer5 = new Observer('Observer5');
-
 
 subject.subscribe(observer1);
 subject.subscribe(observer2);

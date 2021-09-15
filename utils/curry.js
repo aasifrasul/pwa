@@ -26,7 +26,10 @@ function add(...args) {
 	return args.reduce((accu, value) => accu + value, 0);
 }
 
-const curry = (fn, ...args) => (...params) => fn(...args, ...params);
+const curry =
+	(fn, ...args) =>
+	(...params) =>
+		fn(...args, ...params);
 
 const add = (...args) => args.reduce((accu, value) => accu + value, 0);
 

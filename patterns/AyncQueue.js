@@ -3,7 +3,7 @@ class BaseQueue {
 		this.storage = [];
 	}
 	enqueue(item) {
-		this.storage.push(item)
+		this.storage.push(item);
 	}
 	dequeue() {
 		return this.storage.shift();
@@ -13,12 +13,12 @@ class BaseQueue {
 class AsyncQueue extends BaseQueue {
 	constructor(maxExecutionLimit = 5) {
 		super();
-		this.processingCount = false
+		this.processingCount = false;
 		this.maxExecutionLimit = maxExecutionLimit;
 	}
 	enqueue(action) {
 		return new Promise((resolve, reject) => {
-			super.enqueue({action, resolve, reject});
+			super.enqueue({ action, resolve, reject });
 			this.dequeue();
 		});
 	}
@@ -41,7 +41,7 @@ class AsyncQueue extends BaseQueue {
 			console.log('data', data);
 			this.processingCount--;
 			item.resolve(data);
-		} catch(e) {
+		} catch (e) {
 			item.reject(e);
 		} finally {
 			this.dequeue();
@@ -51,15 +51,20 @@ class AsyncQueue extends BaseQueue {
 
 const asyncQueue = new AsyncQueue();
 
-const promises = Array(50).fill(0).map((item, idx) => () => {
-	return new Promise((resolve, reject) => {
-		const time = Math.random() * 200;
-		setTimeout(() => resolve({
-			id: idx,
-			time,
-		}), time);
+const promises = Array(50)
+	.fill(0)
+	.map((item, idx) => () => {
+		return new Promise((resolve, reject) => {
+			const time = Math.random() * 200;
+			setTimeout(
+				() =>
+					resolve({
+						id: idx,
+						time,
+					}),
+				time
+			);
+		});
 	});
-});
 
-
-promises.forEach(item => asyncQueue.enqueue(item).then(data => console.log(data)));
+promises.forEach((item) => asyncQueue.enqueue(item).then((data) => console.log(data)));

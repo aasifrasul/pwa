@@ -14,7 +14,8 @@ function myPromise(callback) {
 	this.result = null;
 	this.error = null;
 
-	callback(this.resolve.bind(this), this.reject.bind(this));
+	queueMicrotask(() => callback(this.resolve, this.reject));
+
 	console.log('In Constructor, callback => ', callback);
 }
 
@@ -112,7 +113,9 @@ const promise = new myPromise((resolve, reject) => {
 
 promise
 	.then((data) => console.log('In then data', data))
-	.catch((e) => throw new Error(e));
+	.catch((e) => {
+		throw new Error(e);
+	});
 
 var promises = [];
 
@@ -125,9 +128,11 @@ function promiseFactory(payload) {
 	});
 }
 
-Array.apply(null, { length: 50 }).map(Number.call, Number).forEach( i => {
-	promises.push(promiseFactory({ id: ++i, delay: Math.random() * 200, isReject: (Math.random() * 5) > 1 }));
-});
+Array.apply(null, { length: 50 })
+	.map(Number.call, Number)
+	.forEach((i) => {
+		promises.push(promiseFactory({ id: ++i, delay: Math.random() * 200, isReject: Math.random() * 5 > 1 }));
+	});
 
 myPromise
 	.all(promises)

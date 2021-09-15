@@ -13,11 +13,22 @@ const trace = (label) => (value) => {
 };
 
 // pipe(...fns: [...Function]) => x => y
-const pipe = (...fns) => (x) => fns.reduce((y, f) => f(y), x);
+const pipe =
+	(...fns) =>
+	(x) =>
+		fns.reduce((y, f) => f(y), x);
 
-const compose = (...fns) => (x) => fns.reduceRight((v, f) => f(v), x);
+const compose =
+	(...fns) =>
+	(x) =>
+		fns.reduceRight((v, f) => f(v), x);
 
-const compose = (...fns) => fns.reduce((f, g) => (...args) => f(g(...args)));
+const compose = (...fns) =>
+	fns.reduce(
+		(f, g) =>
+			(...args) =>
+				f(g(...args))
+	);
 
 const map = (fn, arr) => arr.reduce((acc, item, index, arr) => acc.concat(fn(item, index, arr)), []);
 
@@ -36,7 +47,10 @@ const objToMap = (obj) => {
 };
 
 // Auto-curry
-const curry = (f, arr = []) => (...args) => ((a) => (a.length === f.length ? f(...a) : curry(f, a)))([...arr, ...args]);
+const curry =
+	(f, arr = []) =>
+	(...args) =>
+		((a) => (a.length === f.length ? f(...a) : curry(f, a)))([...arr, ...args]);
 
 const myReducer = (state = {}, action = {}) => {
 	const { type, payload } = action;

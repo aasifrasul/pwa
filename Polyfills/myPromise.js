@@ -9,7 +9,7 @@ const safeExecFunc = (...params) => {
 
 class myPromise {
 	constructor(callback) {
-		if (typeof callback !== 'function') {
+		if (!isFunction(callback)) {
 			throw new Error('constructor parameter needs to be a function callback');
 		}
 		console.log('Inside constructor');
@@ -20,19 +20,21 @@ class myPromise {
 		};
 		this.resolve = this.resolve.bind(this);
 		this.reject = this.reject.bind(this);
-		callback(this.resolve, this.reject);
+		queueMicrotask(() => callback(this.resolve, this.reject));
 	}
 
 	resolve(data) {
 		console.log('Inside resolve', data);
 		this.state.status = 'fulfilled';
 		this.state.data = data;
+		isFunction(this.onFulfilled) && this.onFulfilled(data);
 	}
 
 	reject(err) {
 		console.log('Inside reject', err);
 		this.state.status = 'rejected';
 		this.state.error = err;
+		isFunction(this.onRejected) && this.onRejected(new Error(err));
 	}
 
 	then(onFulfilled, onRejected) {
@@ -43,9 +45,8 @@ class myPromise {
 		if (onRejected && !isFunction(onRejected)) {
 			throw new Error('If Second Param is supplied it needs to be a function');
 		}
-		const { status, data, error } = this.state;
-		status === 'fulfilled' && safeExecFunc(onFulfilled, data);
-		status === 'rejected' && safeExecFunc(onRejected, data);
+		this.onFulfilled = onFulfilled;
+		this.onRejected = onRejected;
 		return this;
 	}
 
@@ -69,7 +70,8 @@ class myPromise {
 
 const promise = new myPromise(function (resolve, reject) {
 	console.log('Inside myPromise Instance');
-	reject(new Error('Failed'));
+	resolve('Hellooo');
+	setTimeout(() => resolve('Hellooo'), 0);
 });
 
 promise

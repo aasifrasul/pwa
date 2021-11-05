@@ -1,3 +1,5 @@
+const curry = fn => (...args) => fn.bind(null, ...args);
+
 const tap = curry((fn, x) => {
 	fn(x);
 	return x;
@@ -7,10 +9,12 @@ const trace = (label) => {
 	return tap((x) => console.log(`== ${label}:  ${x}`));
 };
 
+/*
 const trace = (label) => (value) => {
 	console.log(`${label}: ${value}`);
 	return value;
 };
+*/
 
 // pipe(...fns: [...Function]) => x => y
 const pipe =
@@ -94,3 +98,12 @@ const exists = (x) => x.valueOf() !== undefined && x.valueOf() !== null;
 const ifExists = (x) => ({
 	map: (fn) => (exists(x) ? x.map(fn) : x),
 });
+
+
+const spy = (func) => {
+	return function(...args) {
+		console.log('function:', func.name);
+		console.log('args:', ...args);
+		return func.apply(this, args);
+	};
+};

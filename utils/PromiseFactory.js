@@ -19,6 +19,10 @@ class Deferred {
 		this.resolve(value);
 	}
 
+	forceReject(msg) {
+		this.reject(new Error(msg));
+	}
+
 	forceUpdateResolvedData(value) {
 		this.data = value;
 	}
@@ -66,6 +70,11 @@ class PromiseFactory {
 	resolve(key, data) {
 		const promise = this.get(key);
 		return promise && promise.forceResolve(data);
+	}
+
+	reject(key, msg) {
+		const promise = this.get(key);
+		return promise && promise.forceReject(msg);
 	}
 
 	remove(key) {

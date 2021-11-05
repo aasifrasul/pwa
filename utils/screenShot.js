@@ -1,6 +1,8 @@
 const { mediaDevices } = window.navigator || {};
+const { getUserMedia } = mediaDevices || {};
+
 function hasGetUserMedia() {
-	return !!(mediaDevices && mediaDevices.getUserMedia);
+	return !!getUserMedia;
 }
 
 const constraints = {

@@ -6,17 +6,12 @@ Array.prototype.myFlat = function () {
 		return [];
 	}
 	const res = [];
-	let temp;
+	let item;
 
 	const flatten = function (obj) {
 		for (var i = 0; i < obj.length; i++) {
-			temp = obj[i];
-			debugger;
-			if (Array.isArray(temp)) {
-				flatten(temp);
-			} else {
-				temp && res.push(temp);
-			}
+			item = obj[i];
+			Array.isArray(item) ? flatten(item) : item && res.push(item);
 		}
 	};
 
@@ -32,12 +27,7 @@ const flatDeep = function (arr) {
 
 	while (stack.length) {
 		item = stack.shift();
-		console.log('item', item);
-		if (Array.isArray(item)) {
-			stack.unshift(...item);
-		} else {
-			item && resArr.push(item);
-		}
+		Array.isArray(item) ? stack.unshift(...item) : resArr.push(item);
 	}
 
 	return resArr;

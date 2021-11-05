@@ -21,9 +21,9 @@ var globalContext = getGlobalContext();
 
 Function.prototype.myApply =
 	Function.prototype.myApply ||
-	function myApply(context = globalContext, args = []) {
+	function myApply(context = getGlobalContext(), args = []) {
 		context.myApply = this;
-		context.myApply(...args);
+		return context.myApply(...args);
 	};
 
 var obj = {

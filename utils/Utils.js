@@ -46,9 +46,12 @@ function addSubtract(n) {
 
 function sum(...args) {
 	const newFunc = sum.bind(null, ...args);
-	const valueOf = () => args.reduce((a, c) => a + c, 0);
-	const updatedFunc = Object.assign(newFunc, { valueOf });
-	return updatedFunc;
+	newFunc.toString = function() {
+		args.reduce((a, c) => a + c, 0);
+	}
+	//const valueOf = () => args.reduce((a, c) => a + c, 0);
+	//const updatedFunc = Object.assign(newFunc, { valueOf });
+	return newFunc;
 }
 
 function infiniteMultiplication(n) {
@@ -479,14 +482,9 @@ print(null); //printing null
 
 // Execute a function only once
 const executeOnce = function executeOnce(func) {
-	let result,
-		executed = false;
+	let result;
 	return function (...params) {
-		if (!executed) {
-			result = func.apply(this, params);
-			executed = true;
-		}
-		return result;
+		return result || (result = func.apply(this, params));
 	};
 };
 

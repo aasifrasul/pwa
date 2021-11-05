@@ -6,22 +6,24 @@ function mySetInterval() {
 	const delay = args.shift();
 
 	function invoke() {
-		mySetInterval.timeoutId = window.setTimeout(() => {
+		mySetInterval.intervalId = window.setTimeout(() => {
 			callback.apply(context, args);
 			invoke();
 		}, delay);
 	}
 
 	invoke();
-	return mySetInterval.timeoutId;
+	return mySetInterval.intervalId;
 }
 
 mySetInterval.cancel = function () {
-	window.clearTimeout(mySetInterval.timeoutId);
+	window.clearTimeout(mySetInterval.intervalId);
 };
+
 function add(a, b) {
 	console.log(a + b);
 }
+
 var mySetIntervalId = mySetInterval(add, 1000, 3, 5);
 
 setTimeout(() => mySetInterval.cancel(), 5000);

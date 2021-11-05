@@ -1,46 +1,37 @@
-function greet(greeting, msg) {
-	return `${greeting}, ${msg}`;
-}
+const arr = [1, 3, 4, 5, 7, 8, 9, 10, 11, 13, 15, 16, 17, 18, 19];
 
-function sumABC(A, B, C) {
-	return A + B + C;
-}
+function findContiguous(arr) {
+	let iscontiguous = false,
+		sidx,
+		i;
+	const res = [arr[0]];
 
-function partial(fn, ...rest) {
-	// need a var to collect all the params passed to the function
-	// so that a decision an be made whether to retutn he computed value
-	// (if the paramaters match with expcted params of the func)
-	// or if the passed params is still less than the expected params
-	// then retutn the function so that additional params cab accepted
-	let allParams = rest;
-	function func(...params) {
-		// In addition to accumulate the params, it also serves to clean off
-		// the empty params.
-		allParams = [...allParams, ...params];
-		return fn.length <= allParams.length ? fn(...allParams) : func;
+	for (i = 1; i < arr.length; i++) {
+		if (arr[i - 1] + 1 === arr[i]) {
+			console.log('Contiguous of the last, ', arr[i]);
+			if (iscontiguous == false) {
+				sidx = i - 1;
+				iscontiguous = true;
+			}
+		} else {
+			console.log('Non Contiguous of the last, ', arr[i]);
+			if (iscontiguous == true) {
+				res.push(`${arr[sidx]}:${arr[i - 1]}`);
+				res.push(arr[sidx - 1]);
+			}
+
+			iscontiguous = false;
+		}
 	}
-	return func();
+
+	if (iscontiguous == true) {
+		res.push(`${arr[sidx]}:${arr[i - 1]}`);
+	}
+
+	return res;
 }
 
-// function partial(fn, ...rest) {
-// 	if (fn.length <= 1) return fn;
-// 	let allParams = rest;
-// 	const generator = (...args) => {
-// 		allParams = [...allParams, ...args];
-// 		if (fn.length <= allParams.length) {
-// 			return fn(...allParams);
-// 		} else {
-// 			return generator;
-// 		}
-// 	};
-// 	return generator();
-// }
+findContiguous(arr);
 
-console.log(partial(greet, 'Hello')('There')); // Hello There
-console.log(partial(greet, 'Hello', 'There')); // Hello There
-console.log(partial(greet, 'Hello', 'There', 'some random')); // Hello There
-console.log(partial(sumABC, 1)(1, 2, 3)); // 4
-console.log(partial(sumABC)(1, 2, 3)); // 6
-console.log(partial(sumABC)(1)(2)(3)); // 6
-console.log(partial(sumABC)(1)()()(2)()(3)); // 6
-console.log(partial(sumABC)(1, 2)()()(2)); // 5
+
+npm install -g better-vsts-npm-auth

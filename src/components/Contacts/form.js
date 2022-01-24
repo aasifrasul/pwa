@@ -3,6 +3,8 @@ import { Segment, Form, Input, Button } from 'semantic-ui-react';
 
 import { useContactDispatch } from '../../Context/ContactContext';
 
+import useFormInput from '../../hooks/useFormInput';
+
 function ContactForm() {
 	const name = useFormInput('');
 	const email = useFormInput('');
@@ -38,24 +40,6 @@ function ContactForm() {
 			</Form>
 		</Segment>
 	);
-}
-
-function useFormInput(initialValue) {
-	const [value, setValue] = useState(initialValue);
-
-	const handleChange = (e) => {
-		setValue(e.target.value);
-	};
-
-	const handleReset = () => {
-		setValue('');
-	};
-
-	return {
-		value,
-		onChange: handleChange,
-		onReset: handleReset,
-	};
 }
 
 export default ContactForm;

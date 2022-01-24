@@ -1,18 +1,20 @@
-import React from 'react';
+import React, { createContext, useReducer, useMemo } from 'react';
 
 import useContextFactory from '../Context/useContextFactory';
 
-export default function storeFactory(reducer, initialState) {
-	const storeContext = React.createContext();
-	const dispatchContext = React.createContext();
+function storeFactory(reducer, initialState) {
+	const storeContext = createContext();
+	const dispatchContext = createContext();
 
 	const StoreProvider = ({ children }) => {
 		let store, dispatch;
+
 		function useMemoCB() {
 			return { store, dispatch };
 		}
-		[store, dispatch] = React.useReducer(reducer, initialState);
-		({ store, dispatch } = React.useMemo(useMemoCB, [store, dispatch]));
+
+		[store, dispatch] = useReducer(reducer, initialState);
+		({ store, dispatch } = useMemo(useMemoCB, [store, dispatch]));
 
 		return (
 			<dispatchContext.Provider value={dispatch}>
@@ -26,3 +28,5 @@ export default function storeFactory(reducer, initialState) {
 
 	return [StoreProvider, useStore, useDispatch];
 }
+
+export default storeFactory;

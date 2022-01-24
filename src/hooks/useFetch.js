@@ -58,15 +58,15 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 				const result = await response.json();
 				if (response.ok) {
 					dispatch({ type: 'FETCH_SUCCESS', payload: result });
-					safeExecFunc(successCallback, result);
+					safeExecFunc(successCallback, null, result);
 				} else {
 					dispatch({ type: 'FETCH_FAILURE' });
-					safeExecFunc(failureCallback, result);
+					safeExecFunc(failureCallback, null, result);
 				}
 			} catch (err) {
 				setErrorMessage(err.message);
 				dispatch({ type: 'FETCH_FAILURE' });
-				safeExecFunc(failureCallback, err);
+				safeExecFunc(failureCallback, null, err);
 			} finally {
 				dispatch({ type: 'FETCH_STOP' });
 			}

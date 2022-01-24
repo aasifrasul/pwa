@@ -19,7 +19,7 @@ const AppHelper = require('./helper');
 const { userAgentHandler, getCSVData } = require('./middlewares');
 const { onConnection } = require('./socketConnection');
 
-mongoose.connect('mongodb://localhost:27017/test', { useNewUrlParser: true, useUnifiedTopology: true });
+// mongoose.connect('mongodb://localhost:27017/test', { useNewUrlParser: true, useUnifiedTopology: true });
 
 const enc = {
 	encoding: 'utf-8',
@@ -28,18 +28,22 @@ const enc = {
 const log = (msg) => console.log.bind(console, msg);
 const error = (msg) => console.error.bind(console, msg);
 
+/*
 const db = mongoose.connection;
 db.on('error', error('connection error:'));
 db.once('open', () => log('connection successfull'));
+*/
 
 const generateBuildTime = async function () {
 	return new Promise((resolve, reject) => {
-		fs.writeFile(path.join(__dirname, '..', 'public', 'server', 'buildtime'), new Date().toUTCString(), function (
-			err
-		) {
-			err && reject('Error occured while writing to generateBuildTime :: ' + err.toString());
-			resolve();
-		});
+		fs.writeFile(
+			path.join(__dirname, '..', 'public', 'server', 'buildtime'),
+			new Date().toUTCString(),
+			function (err) {
+				err && reject('Error occured while writing to generateBuildTime :: ' + err.toString());
+				resolve();
+			}
+		);
 	});
 };
 
@@ -97,7 +101,7 @@ handlebars.registerHelper({
 
 app.use([cors(), cookieParser(), userAgentHandler]);
 
-const {publicPath} = webpackConfig.output || {};
+const { publicPath } = webpackConfig.output || {};
 
 // start the webpack dev server
 const devServer = new WebpackDevServer(webpack(webpackConfig), {

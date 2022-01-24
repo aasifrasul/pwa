@@ -21,6 +21,7 @@ const Stopwatch = lazy(() => import(/* webpackChunkName: "Stopwatch" */ '../stop
 const CurrencyStream = lazy(() => import(/* webpackChunkName: "CurrencyStream" */ '../CurrencyStream/CurrencyStream'));
 const MovieList = lazy(() => import(/* webpackChunkName: "MovieList" */ '../MovieList/MovieList'));
 const TicTacToe = lazy(() => import(/* webpackChunkName: "TicTacToe" */ '../TicTacToe/TicTacToe'));
+const InfiniteScroll = lazy(() => import(/* webpackChunkName: "InfiniteScroll" */ '../InfiniteScroll/InfiniteScroll'));
 const Counter = lazy(() => import(/* webpackChunkName: "Counter" */ '../Counter/view'));
 const Contacts = lazy(() => import(/* webpackChunkName: "Contacts" */ '../Contacts/view'));
 
@@ -69,6 +70,7 @@ function App(props) {
 						<Route exact path="/Stopwatch" component={() => <Stopwatch />} />
 						<Route exact path="/CurrencyStream" component={() => <CurrencyStream />} />
 						<Route exact path="/MovieList" component={() => <MovieList />} />
+						<Route exact path="/InfiniteScroll" component={() => <InfiniteScroll />} />
 					</Switch>
 				</Router>
 			</ErrorBoundary>

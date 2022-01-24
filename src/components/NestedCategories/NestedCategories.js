@@ -24,7 +24,7 @@ export default function NestedCategories(props) {
 	const categoriesHtml = [];
 	let count = 0;
 
-	const { data, isError, isLoading } = useFetch(
+	const { state, errorMessage, updateUrl } = useFetch(
 		'https://okrcentral.github.io/sample-okrs/db.json',
 		Object.create(null),
 		successCallback,

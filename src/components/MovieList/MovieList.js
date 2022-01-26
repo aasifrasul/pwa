@@ -6,10 +6,12 @@ import useInfiniteScrollIO from '../../hooks/useInfiniteScrollIO';
 
 import pageReducer from '../../reducers/pageReducer';
 
+import { FetchStoreProvider } from '../../Context/dataFetchContext';
+
 import Movie from './Movie.js';
 import styles from './MovieList.css';
 
-export default function MovieList() {
+function DisplayList() {
 	const [{ pageNum }, pagerDispatch] = useReducer(pageReducer, { pageNum: 1 });
 	const ioObserverRef = useRef(null);
 	const url = `https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=04c35731a5ee918f014970082a0088b1&page=${pageNum}`;
@@ -42,4 +44,14 @@ export default function MovieList() {
 			<div ref={ioObserverRef}>ABCD</div>
 		</div>
 	);
-}
+};
+
+const MovieList = (props) => {
+	return (
+		<FetchStoreProvider>
+			<DisplayList />
+		</FetchStoreProvider>
+	);
+};
+
+export default MovieList;

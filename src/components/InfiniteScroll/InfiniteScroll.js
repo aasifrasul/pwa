@@ -6,6 +6,8 @@ import useInfiniteScrollIO from '../../hooks/useInfiniteScrollIO';
 
 import pageReducer from '../../reducers/pageReducer';
 
+import { FetchStoreProvider } from '../../Context/dataFetchContext';
+
 import UserCard from './UserCard';
 
 import styles from './InfiniteScroll.css';
@@ -13,7 +15,7 @@ import styles from './InfiniteScroll.css';
 const TOTAL_PAGES = 25;
 const PAGE_SIZE = 10;
 
-const InfiniteScroll = () => {
+const DisplayList = () => {
 	const [{ pageNum }, pagerDispatch] = useReducer(pageReducer, { pageNum: 1 });
 	const url = `https://randomuser.me/api/?page=${pageNum}&results=${PAGE_SIZE}&seed=asf`;
 	const { state, errorMessage, updateUrl } = useFetch(url, Object.create(null), null, null);
@@ -38,6 +40,14 @@ const InfiniteScroll = () => {
 			{pageNum - 1 === TOTAL_PAGES && <p className="text-center my-10">♥</p>}
 			<div ref={ioObserverRef}>ABCD</div>
 		</div>
+	);
+};
+
+const InfiniteScroll = (props) => {
+	return (
+		<FetchStoreProvider>
+			<DisplayList />
+		</FetchStoreProvider>
 	);
 };
 

@@ -1,18 +1,11 @@
 import { useState, useEffect, useReducer, useMemo } from 'react';
 
-import dataFetchReducer from '../reducers/dataFetchReducer';
+import { useFetchStore, useFetchDispatch } from '../Context/dataFetchContext';
 import { safeExecFunc } from '../utils/typeChecking';
 
 const controller = new AbortController();
 
-const initialState = {
-	isLoading: false,
-	isError: false,
-	data: [],
-};
-
 const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallback, skip = false) => {
-	let state, dispatch;
 	const [url, updateUrl] = useState(initialUrl);
 	const [params, updateParams] = useState(initialParams);
 	const [errorMessage, setErrorMessage] = useState('');
@@ -21,11 +14,8 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 		.map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(params[key]))
 		.join('&');
 
-	function useMemoCB() {
-		return [state, dispatch];
-	}
-	[state, dispatch] = useReducer(dataFetchReducer, initialState);
-	//[state, dispatch] = useMemo(useMemoCB, [state, dispatch]);
+	const state = useFetchStore();
+	const dispatch = useFetchDispatch();
 
 	const refetch = () => setRefetchIndex((prevRefetchIndex) => prevRefetchIndex + 1);
 	const abortFetching = () => {

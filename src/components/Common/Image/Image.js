@@ -1,11 +1,21 @@
 import React from 'react';
 
-const Image = ({ src, styles, alt, lazy }) => {
-	return lazy ? (
-		<img data-attr-src={src} className={styles} alt={alt} loading="lazy" decoding="async" />
+const Image = ({ src, styles, alt, lazy, width = 100, height = 100 }) => {
+	const img = lazy ? (
+		<img
+			data-src={src}
+			className={styles}
+			height={height}
+			width={width}
+			alt={alt}
+			loading="lazy"
+			decoding="async"
+		/>
 	) : (
-		<img data-attr-src={src} className={styles} alt={alt} />
+		<img src={src} className={styles} height={height} width={width} alt={alt} />
 	);
+
+	return img;
 };
 
 export default Image;

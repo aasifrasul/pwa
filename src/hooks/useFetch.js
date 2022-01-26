@@ -8,7 +8,7 @@ const controller = new AbortController();
 const initialState = {
 	isLoading: false,
 	isError: false,
-	data: Object.create(null),
+	data: [],
 };
 
 const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallback, skip = false) => {
@@ -25,7 +25,7 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 		return [state, dispatch];
 	}
 	[state, dispatch] = useReducer(dataFetchReducer, initialState);
-	[state, dispatch] = useMemo(useMemoCB, [state, dispatch]);
+	//[state, dispatch] = useMemo(useMemoCB, [state, dispatch]);
 
 	const refetch = () => setRefetchIndex((prevRefetchIndex) => prevRefetchIndex + 1);
 	const abortFetching = () => {

@@ -1,30 +1,32 @@
 const dataFetchReducer = (state = {}, action = {}) => {
 	const { type, payload } = action;
+	const { results } = payload || {};
 	switch (type) {
 		case 'FETCH_INIT':
 			state = {
-				data: [],
+				...state,
 				isLoading: true,
 				isError: false,
 			};
 			return state;
 		case 'FETCH_SUCCESS':
 			state = {
+				...state,
 				isLoading: false,
 				isError: false,
-				data: payload,
+				data: [...state.data, ...results],
 			};
 			return state;
 		case 'FETCH_FAILURE':
 			state = {
-				data: payload,
+				...state,
 				isLoading: false,
 				isError: true,
 			};
 			return state;
 		case 'FETCH_STOP':
 			state = {
-				data: payload,
+				...state,
 				isLoading: false,
 			};
 			return state;

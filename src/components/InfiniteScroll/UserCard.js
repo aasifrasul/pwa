@@ -9,6 +9,8 @@ const UserCard = ({ data }) => {
 				<Image
 					src={data.picture?.medium}
 					styles="w-16 h-16 rounded-full border-2 border-green-600"
+					width="72"
+					height="72"
 					alt="user"
 					lazy="lazy"
 				/>

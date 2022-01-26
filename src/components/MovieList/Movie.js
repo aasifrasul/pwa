@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import Portal from '../Common/Portal/Portal';
+import Image from '../Common/Image/Image';
 
 export default function Movie(props) {
 	const [isShown, setIsShown] = useState(false);
@@ -21,7 +22,7 @@ export default function Movie(props) {
 				onMouseOut={() => setIsShown(false)}
 			>
 				<div className={styles.image}>
-					<img src={imagePath} width="150" height="200" />
+					<Image src={imagePath} width="150" height="200" lazy="lazy" />
 				</div>
 				<div>
 					{title} {vote_average}

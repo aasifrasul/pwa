@@ -3,6 +3,15 @@ p {
 	font-family: Lato;
 }
 
+img:before {
+	content: ' ';
+	display: block;
+	position: absolute;
+	height: 72px;
+	width: 72px;
+	background: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7);
+}
+
 .container {
 	display: flex;
 	flex-direction: row;
@@ -10,7 +19,7 @@ p {
 	flex-wrap: wrap;
 	flex-flow: column wrap;
 	align-items: stretch;
-	align-content: center;
+	align-content: flex-start;
 }
 
 .imageWrapper {

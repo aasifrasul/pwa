@@ -1,6 +1,15 @@
 html {
 }
 
+img:before {
+	content: ' ';
+	display: block;
+	position: absolute;
+	height: 72px;
+	width: 72px;
+	background: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7);
+}
+
 .scrollParent {
 }
 

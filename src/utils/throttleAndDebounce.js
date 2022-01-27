@@ -1,4 +1,4 @@
-const throttle = function throttle(func, delay) {
+const throttleFunction = function throttle(func, delay) {
 	let timerId;
 	const wrapper = function (...args) {
 		if (!timerId) {

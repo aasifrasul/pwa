@@ -1,6 +1,6 @@
 const dataFetchReducer = (state = {}, action = {}) => {
 	const { type, payload } = action;
-	const { results } = payload || {};
+	const { results, filterText } = payload || {};
 	switch (type) {
 		case 'FETCH_INIT':
 			state = {
@@ -28,6 +28,12 @@ const dataFetchReducer = (state = {}, action = {}) => {
 			state = {
 				...state,
 				isLoading: false,
+			};
+			return state;
+		case 'FILTER_BY_TEXT':
+			state = {
+				...state,
+				data: state.data.filter(({ title }) => title.includes(filterText)),
 			};
 			return state;
 		default:

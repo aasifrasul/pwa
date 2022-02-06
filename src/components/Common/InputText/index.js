@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+import { safeExecFunc } from '../../../utils/typeChecking';
+
 const InputText = (props) => {
 	const { label, name, inputTextRef, defaultValue = '', callback } = props;
 	const [value, setValue] = useState(defaultValue);
@@ -9,7 +11,7 @@ const InputText = (props) => {
 		const value = e.target.value;
 		setValue(value);
 		inputTextRef && (inputTextRef.current = value);
-		typeof callback === 'function' && callback(value);
+		safeExecFunc(callback, null, value)
 	};
 
 	return (

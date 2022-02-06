@@ -4,14 +4,11 @@ const toRect = (rect) => {
 };
 
 const useResizeObserver = (ref) => {
-    const [rect, setRect] = useState(
-        toRect(ref.current?.getBoundingClientRect())
-    );
+    const setRectData = () => toRect(ref.current?.getBoundingClientRect());
+    const [rect, setRect] = useState(setRectData());
 
     useeffect(() => {
-        const ob = new ResizeObserver(() =>
-            setRect(toRect(ref.current?.getBoundingClientRect()))
-        );
+        const ob = new ResizeObserver(() => setRect(setRectData()));
 
         ob.observe(ref.current);
 

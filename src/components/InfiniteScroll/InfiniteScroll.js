@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useReducer } from 'react';
+import React, { useEffect, useRef, useReducer } from 'react';
 
 import useFetch from '../../hooks/useFetch';
 import useImageLazyLoadIO from '../../hooks/useImageLazyLoadIO';
@@ -15,21 +15,22 @@ import styles from './InfiniteScroll.css';
 const TOTAL_PAGES = 25;
 const PAGE_SIZE = 10;
 
-const DisplayList = () => {
+const DisplayList = (props) => {
 	const [{ pageNum }, pagerDispatch] = useReducer(pageReducer, { pageNum: 1 });
 	const url = `https://randomuser.me/api/?page=${pageNum}&results=${PAGE_SIZE}&seed=asf`;
 	const { state, errorMessage, updateUrl } = useFetch(url, Object.create(null), null, null);
-	const ioObserverRef = useRef(null);
+	const infiniteScrollRef = useRef(null);
 
 	useEffect(() => {
 		updateUrl(url);
 	}, [pageNum]);
 
-	useInfiniteScrollIO(ioObserverRef, () => pagerDispatch({ type: 'ADVANCE_PAGE' }));
+	useInfiniteScrollIO(infiniteScrollRef, () => pagerDispatch({ type: 'ADVANCE_PAGE' }));
 	useImageLazyLoadIO('img[data-src]', state.data);
 
 	return (
 		<div className={styles.scrollParent}>
+			<div className={styles.profileImagePlaceholder}></div>
 			<h1 className="text-3xl text-center mt-4 mb-10">All users</h1>
 			<div className={styles.scrollArea}>
 				{state.data.map((user, i) => (
@@ -38,7 +39,7 @@ const DisplayList = () => {
 			</div>
 			{state.isLoading && <p className="text-center">isLoading...</p>}
 			{pageNum - 1 === TOTAL_PAGES && <p className="text-center my-10">♥</p>}
-			<div ref={ioObserverRef}>ABCD</div>
+			<div ref={infiniteScrollRef}>Load More...</div>
 		</div>
 	);
 };
@@ -46,7 +47,7 @@ const DisplayList = () => {
 const InfiniteScroll = (props) => {
 	return (
 		<FetchStoreProvider>
-			<DisplayList />
+			<DisplayList {...props} />
 		</FetchStoreProvider>
 	);
 };

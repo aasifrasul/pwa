@@ -2,8 +2,6 @@ import React, { Suspense, lazy, useState } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import regeneratorRuntime from 'regenerator-runtime';
 
-import Spinner from '../Common/Spinner/Spinner';
-
 const Home = lazy(() => import(/* webpackChunkName: "Home" */ '../Home/Home'));
 const ReactQuery = lazy(() => import(/* webpackChunkName: "ReactQuery" */ '../ReactQuery/ReactQuery'));
 const KeyBoardShortcutPage = lazy(() =>
@@ -27,6 +25,7 @@ const Contacts = lazy(() => import(/* webpackChunkName: "Contacts" */ '../Contac
 
 const Modal = lazy(() => import(/* webpackChunkName: "Modal" */ '../Common/Modal/Modal'));
 
+import Spinner from '../Common/Spinner/Spinner';
 import ErrorBoundary from '../Common/ErrorBoundary/ErrorBoundary';
 
 import styles from './App.css';

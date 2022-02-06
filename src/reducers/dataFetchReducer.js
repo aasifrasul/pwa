@@ -1,4 +1,4 @@
-const dataFetchReducer = (state = {}, action = {}) => {
+const dataFetchReducer = (state, action) => {
 	const { type, payload } = action;
 	const { results, filterText } = payload || {};
 	switch (type) {

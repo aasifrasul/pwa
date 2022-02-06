@@ -29,7 +29,6 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 			if (skip) return;
 			dispatch({ type: 'FETCH_INIT' });
 			try {
-				const urlToFetch = `${url}${queryString}`;
 				const options = {
 					method: 'GET',
 					mode: 'cors',
@@ -44,7 +43,7 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 					//body: body ? JSON.stringify(data) : {},
 					signal: controller.signal,
 				};
-				const response = await fetch(urlToFetch, options);
+				const response = await fetch(`${url}${queryString}`, options);
 				const result = await response.json();
 				if (response.ok) {
 					dispatch({ type: 'FETCH_SUCCESS', payload: result });

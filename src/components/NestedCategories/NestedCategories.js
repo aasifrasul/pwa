@@ -29,7 +29,7 @@ function DisplayList(props) {
 	let count = 0;
 
 	const url = `https://okrcentral.github.io/sample-okrs/db.json`;
-	const { state, errorMessage, updateUrl } = useFetch(url, { schema: 'nestedCategories' });
+	const { state, errorMessage, updateUrl } = useFetch(url, { schema });
 
 	useEffect(() => {
 		successCallback();

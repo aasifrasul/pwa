@@ -1,41 +1,31 @@
+import nestedCategoriesReducer from './nestedCategoriesReducer.js';
+import wineConnoisseurReducer from './wineConnoisseurReducer.js';
+import infiniteScrollReducer from './infiniteScrollReducer.js';
+import movieListReducer from './movieListReducer.js';
+
 const dataFetchReducer = (state, action) => {
-	const { type, payload } = action;
-	const { results, filterText } = payload || {};
-	switch (type) {
-		case 'FETCH_INIT':
-			state = {
+	switch (action.schema) {
+		case 'nestedCategories':
+			return {
 				...state,
-				isLoading: true,
-				isError: false,
+				nestedCategories: nestedCategoriesReducer(state['nestedCategories'], action),
 			};
 			return state;
-		case 'FETCH_SUCCESS':
-			state = {
+		case 'wineConnoisseur':
+			return {
 				...state,
-				isLoading: false,
-				isError: false,
-				data: [...state.data, ...results],
+				wineConnoisseur: wineConnoisseurReducer(state['wineConnoisseur'], action),
 			};
-			return state;
-		case 'FETCH_FAILURE':
-			state = {
+		case 'infiniteScroll':
+			return {
 				...state,
-				isLoading: false,
-				isError: true,
+				infiniteScroll: infiniteScrollReducer(state['infiniteScroll'], action),
 			};
-			return state;
-		case 'FETCH_STOP':
-			state = {
+		case 'movieList':
+			return {
 				...state,
-				isLoading: false,
+				movieList: movieListReducer(state['movieList'], action),
 			};
-			return state;
-		case 'FILTER_BY_TEXT':
-			state = {
-				...state,
-				data: state.data.filter(({ title }) => title.includes(filterText)),
-			};
-			return state;
 		default:
 			return {
 				...state,

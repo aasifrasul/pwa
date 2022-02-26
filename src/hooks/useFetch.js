@@ -10,14 +10,21 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 	const [params, updateParams] = useState(initialParams);
 	const [errorMessage, setErrorMessage] = useState('');
 	const [refetchIndex, setRefetchIndex] = useState(0);
+	const { schema } = initialParams;
 	const queryString = Object.keys(params)
+		.filter((key) => key !== 'schema')
 		.map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(params[key]))
 		.join('&');
 
 	const state = useFetchStore();
 	const dispatch = useFetchDispatch();
 
-	const refetch = () => setRefetchIndex((prevRefetchIndex) => prevRefetchIndex + 1);
+	const refetch = () => setRefetchIndex((previousIndex) => previousIndex + 1);
+	const updateQueryParams = (queryParams) =>
+		updateParams((previousParams) => {
+			console.log({ ...previousParams, ...queryParams });
+			return { ...previousParams, ...queryParams };
+		});
 	const abortFetching = () => {
 		console.log('Now aborting');
 		// Abort.
@@ -27,7 +34,7 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 	useEffect(() => {
 		const fetchData = async () => {
 			if (skip) return;
-			dispatch({ type: 'FETCH_INIT' });
+			dispatch({ schema, type: 'FETCH_INIT' });
 			try {
 				const options = {
 					method: 'GET',
@@ -43,21 +50,21 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 					//body: body ? JSON.stringify(data) : {},
 					signal: controller.signal,
 				};
-				const response = await fetch(`${url}${queryString}`, options);
+				const response = await fetch(`${url}?${queryString}`, options);
 				const result = await response.json();
 				if (response.ok) {
-					dispatch({ type: 'FETCH_SUCCESS', payload: result });
+					dispatch({ schema, type: 'FETCH_SUCCESS', payload: result });
 					safeExecFunc(successCallback, null, result);
 				} else {
-					dispatch({ type: 'FETCH_FAILURE' });
+					dispatch({ schema, type: 'FETCH_FAILURE' });
 					safeExecFunc(failureCallback, null, result);
 				}
 			} catch (err) {
 				setErrorMessage(err.message);
-				dispatch({ type: 'FETCH_FAILURE' });
+				dispatch({ schema, type: 'FETCH_FAILURE' });
 				safeExecFunc(failureCallback, null, err);
 			} finally {
-				dispatch({ type: 'FETCH_STOP' });
+				dispatch({ schema, type: 'FETCH_STOP' });
 			}
 		};
 
@@ -66,12 +73,12 @@ const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallba
 		return () => {
 			// abortFetching();
 		};
-	}, [url, params, refetchIndex]);
+	}, [url, queryString, refetchIndex]);
 	return {
-		state,
+		state: state[schema],
 		errorMessage,
 		updateUrl,
-		updateParams,
+		updateQueryParams,
 		refetch,
 		abortFetching,
 	};

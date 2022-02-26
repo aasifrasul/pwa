@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useReducer } from 'react';
+import React, { useState, useEffect, useRef, useReducer, useCallback, Fragment } from 'react';
 
 import useFetch from '../../hooks/useFetch';
 import useImageLazyLoadIO from '../../hooks/useImageLazyLoadIO';
@@ -14,42 +14,67 @@ import styles from './InfiniteScroll.css';
 
 const TOTAL_PAGES = 25;
 const PAGE_SIZE = 10;
+const BASE_URL = `https://randomuser.me/api/`;
+
+const schema = 'infiniteScroll';
+
+const queryParams = {
+	schema,
+	page: 1,
+	results: PAGE_SIZE,
+	seed: 'asf',
+};
 
 const DisplayList = (props) => {
-	const [{ pageNum }, pagerDispatch] = useReducer(pageReducer, { pageNum: 1 });
-	const url = `https://randomuser.me/api/?page=${pageNum}&results=${PAGE_SIZE}&seed=asf`;
-	const { state, errorMessage, updateUrl } = useFetch(url, Object.create(null), null, null);
-	const infiniteScrollRef = useRef(null);
+	const [pagerObject, pagerDispatch] = useReducer(pageReducer, { [schema]: { pageNum: 1 } });
+	const { state, errorMessage, updateQueryParams } = useFetch(BASE_URL, queryParams);
+	const [observerElement, setObserverElement] = useState(null);
+
+	queryParams.page = pagerObject[schema]?.pageNum || 0;
+
+	const observer = useRef(
+		new IntersectionObserver((entries) =>
+			entries.forEach((entry) => entry.intersectionRatio > 0 && pagerDispatch({ schema, type: 'ADVANCE_PAGE' }))
+		)
+	);
 
 	useEffect(() => {
-		updateUrl(url);
-	}, [pageNum]);
+		updateQueryParams(queryParams);
+	}, [queryParams.page]);
 
-	useInfiniteScrollIO(infiniteScrollRef, () => pagerDispatch({ type: 'ADVANCE_PAGE' }));
-	useImageLazyLoadIO('img[data-src]', state.data);
+	useEffect(() => {
+		observerElement && observer.current.observe(observerElement);
+		return () => observerElement && observer.current.unobserve(observerElement);
+	}, [observerElement]);
+
+	useImageLazyLoadIO('img[data-src]', state?.data?.results);
 
 	return (
 		<div className={styles.scrollParent}>
 			<div className={styles.profileImagePlaceholder}></div>
 			<h1 className="text-3xl text-center mt-4 mb-10">All users</h1>
 			<div className={styles.scrollArea}>
-				{state.data.map((user, i) => (
-					<UserCard data={user} key={`${user.name?.first}-${i}`} />
+				{state?.data?.results?.map((user, i) => (
+					<Fragment>
+						{Math.floor(state.data.results.length / 1.2) === i ? (
+							<div ref={setObserverElement} key={`${user.name?.first}-${i}-observer`}>
+								Loading...
+							</div>
+						) : null}
+						<UserCard data={user} key={`${user.name?.first}-${i}`} />
+					</Fragment>
 				))}
 			</div>
-			{state.isLoading && <p className="text-center">isLoading...</p>}
-			{pageNum - 1 === TOTAL_PAGES && <p className="text-center my-10">♥</p>}
-			<div ref={infiniteScrollRef}>Load More...</div>
+			{state?.isLoading && <p className="text-center">isLoading...</p>}
+			{queryParams.page - 1 === TOTAL_PAGES && <p className="text-center my-10">♥</p>}
 		</div>
 	);
 };
 
-const InfiniteScroll = (props) => {
-	return (
-		<FetchStoreProvider>
-			<DisplayList {...props} />
-		</FetchStoreProvider>
-	);
-};
+const InfiniteScroll = (props) => (
+	<FetchStoreProvider>
+		<DisplayList {...props} />
+	</FetchStoreProvider>
+);
 
 export default InfiniteScroll;

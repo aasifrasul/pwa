@@ -2,12 +2,6 @@ import React, { useCallback, useEffect } from 'react';
 
 import { safeExecFunc } from '../utils/typeChecking';
 
-const options = {
-	root: null,
-	rootMargin: '150px',
-	threshold: 0.005,
-};
-
 const useInfiniteScrollIO = (scrollRef, callback) => {
 	const scrollObserver = useCallback(
 		(node) =>

@@ -4,7 +4,6 @@ import cssStyles from './Image.css';
 
 const Image = ({ src, styles, alt, lazy, width = 100, height = 100 }) => {
 	const onLoadCallback = (event) => {
-		console.log(event.target);
 		event.target?.parentElement?.removeChild(event.target.parentElement.children[1]);
 	};
 	const img = lazy ? (

@@ -30,9 +30,14 @@ const movieListReducer = (state, action) => {
 				isLoading: false,
 			};
 		case 'FILTER_BY_TEXT':
+			const filterText = payload?.filterText?.toLowerCase() || '';
+			const filteredData =
+				(filterText && state?.data?.results.filter(({ title }) => title?.toLowerCase().includes(filterText))) ||
+				{};
 			return {
 				...state,
-				data: state?.data?.results.filter(({ title }) => title.includes(payload.filterText)),
+				originalData: filterText ? state?.data : {},
+				data: filterText ? filteredData : state?.originalData,
 			};
 		default:
 			return {

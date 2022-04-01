@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useReducer } from 'react';
-import ReactDataGrid from 'react-data-grid';
+import DataGrid from '../Common/DataGrid/DataGrid';
 
 import useFetch from '../../hooks/useFetch';
 import useInfiniteScrollIO from '../../hooks/useInfiniteScrollIO';
@@ -11,25 +11,28 @@ import styles from './WineConnoisseur.css';
 
 const baseURL = `http://localhost:3100/api/fetchWineData/`;
 
+const schema = 'wineConnoisseur';
+
 function DisplayList(props) {
-	const [{ pageNum }, pagerDispatch] = useReducer(pageReducer, { pageNum: 0 });
+	const [pagerObject, pagerDispatch] = useReducer(pageReducer, { [schema]: { pageNum: 0 } });
 	const ioObserverRef = useRef(null);
 	const dispatch = useFetchDispatch();
+	const pageNum = pagerObject[schema]?.pageNum || 0;
 
 	const url = `http://localhost:3100/api/fetchWineData/${pageNum}`;
-	const { state, errorMessage, updateUrl } = useFetch(url, { schema: 'wineConnoisseur' });
+	const { state, errorMessage, updateUrl } = useFetch(schema, url);
 	const { headers = [], pageData = [] } = state?.data || {};
 
 	useEffect(() => {
 		updateUrl(url);
 	}, [pageNum]);
 
-	useInfiniteScrollIO(ioObserverRef, () => pagerDispatch({ type: 'ADVANCE_PAGE' }));
+	useInfiniteScrollIO(ioObserverRef, () => pagerDispatch({ schema, type: 'ADVANCE_PAGE' }));
 
 	return (
 		<div className={styles.alignCenter}>
 			<span>Wine Connoisseur</span>
-			<ReactDataGrid columns={headers} rows={pageData} rowsCount={10} minHeight={500} />
+			<DataGrid headings={headers} rows={pageData} rowsCount={40} minHeight={1000} />
 			<div ref={ioObserverRef}>Loading...</div>
 		</div>
 	);

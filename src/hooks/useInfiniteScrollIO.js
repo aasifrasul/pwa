@@ -5,8 +5,13 @@ import { safeExecFunc } from '../utils/typeChecking';
 const useInfiniteScrollIO = (scrollRef, callback) => {
 	const scrollObserver = useCallback(
 		(node) =>
-			new IntersectionObserver((entries) =>
-				entries.forEach((entry) => entry.intersectionRatio > 0 && safeExecFunc(callback))
+			new IntersectionObserver(
+				(entries) => entries.forEach((entry) => entry.isIntersecting && safeExecFunc(callback)),
+				{
+					root: null,
+					rootMargin: '2000px',
+					threshold: 0,
+				}
 			).observe(node),
 		[scrollRef]
 	);

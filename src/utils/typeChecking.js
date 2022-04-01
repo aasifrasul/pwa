@@ -19,7 +19,7 @@ const safeExecFunc = (...params) => {
 	}
 
 	if (isObject(context) && isFunction(context[func.name])) {
-		return func.apply(context, params)
+		return func.apply(context, params);
 	}
 
 	return func(...params);

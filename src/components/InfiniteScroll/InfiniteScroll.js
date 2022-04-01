@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useReducer, useCallback, Fragment } from 'react';
+import React, { useState, useEffect, useRef, useReducer, useCallback } from 'react';
 
 import useFetch from '../../hooks/useFetch';
 import useImageLazyLoadIO from '../../hooks/useImageLazyLoadIO';
@@ -19,7 +19,6 @@ const BASE_URL = `https://randomuser.me/api/`;
 const schema = 'infiniteScroll';
 
 const queryParams = {
-	schema,
 	page: 1,
 	results: PAGE_SIZE,
 	seed: 'asf',
@@ -27,7 +26,7 @@ const queryParams = {
 
 const DisplayList = (props) => {
 	const [pagerObject, pagerDispatch] = useReducer(pageReducer, { [schema]: { pageNum: 1 } });
-	const { state, errorMessage, updateQueryParams } = useFetch(BASE_URL, queryParams);
+	const { state, errorMessage, updateQueryParams } = useFetch(schema, BASE_URL, queryParams);
 	const [observerElement, setObserverElement] = useState(null);
 
 	queryParams.page = pagerObject[schema]?.pageNum || 0;
@@ -51,18 +50,18 @@ const DisplayList = (props) => {
 
 	return (
 		<div className={styles.scrollParent}>
-			<div className={styles.profileImagePlaceholder}></div>
+			{/*<div className={`${styles.topElement} ${styles.uni}`}></div>*/}
 			<h1 className="text-3xl text-center mt-4 mb-10">All users</h1>
 			<div className={styles.scrollArea}>
 				{state?.data?.results?.map((user, i) => (
-					<Fragment>
+					<>
 						{Math.floor(state.data.results.length / 1.2) === i ? (
 							<div ref={setObserverElement} key={`${user.name?.first}-${i}-observer`}>
 								Loading...
 							</div>
 						) : null}
 						<UserCard data={user} key={`${user.name?.first}-${i}`} />
-					</Fragment>
+					</>
 				))}
 			</div>
 			{state?.isLoading && <p className="text-center">isLoading...</p>}

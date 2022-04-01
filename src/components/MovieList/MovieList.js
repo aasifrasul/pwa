@@ -17,7 +17,6 @@ import styles from './MovieList.css';
 const BASE_URL = `https://api.themoviedb.org/3/discover/movie`;
 const schema = 'movieList';
 const queryParams = {
-	schema,
 	page: 1,
 	sort_by: 'popularity.desc',
 	api_key: '04c35731a5ee918f014970082a0088b1',
@@ -28,9 +27,9 @@ function DisplayList() {
 	const ioObserverRef = useRef(null);
 	const searchRef = useRef('');
 	const dispatch = useFetchDispatch();
-	const debouncedHandleChange = debounce(handleChange, 500);
+	const debouncedHandleChange = debounce(handleChange, 400);
 
-	const { state, errorMessage, updateQueryParams } = useFetch(BASE_URL, queryParams);
+	const { state, errorMessage, updateQueryParams } = useFetch(schema, BASE_URL, queryParams);
 	const { data, isLoading } = state || {};
 
 	queryParams.page = pagerObject[schema]?.pageNum || 0;
@@ -43,6 +42,7 @@ function DisplayList() {
 	useImageLazyLoadIO('img[data-src]', data?.results);
 
 	function handleChange(value) {
+		value = value.trim();
 		searchRef.current = null;
 		ioObserverRef.current = null;
 		console.log(value);

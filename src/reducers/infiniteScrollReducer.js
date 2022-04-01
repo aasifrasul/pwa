@@ -15,7 +15,7 @@ const infiniteScrollReducer = (state, action) => {
 				isLoading: false,
 				isError: false,
 				data: {
-					results: [...originalData, ...currentData]
+					results: [...originalData, ...currentData],
 				},
 			};
 		case 'FETCH_FAILURE':

@@ -5,14 +5,12 @@ import { safeExecFunc } from '../utils/typeChecking';
 
 const controller = new AbortController();
 
-const useFetch = (initialUrl, initialParams = {}, successCallback, failureCallback, skip = false) => {
+const useFetch = (schema, initialUrl, initialParams = {}, successCallback, failureCallback, skip = false) => {
 	const [url, updateUrl] = useState(initialUrl);
 	const [params, updateParams] = useState(initialParams);
 	const [errorMessage, setErrorMessage] = useState('');
 	const [refetchIndex, setRefetchIndex] = useState(0);
-	const { schema } = initialParams;
 	const queryString = Object.keys(params)
-		.filter((key) => key !== 'schema')
 		.map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(params[key]))
 		.join('&');
 

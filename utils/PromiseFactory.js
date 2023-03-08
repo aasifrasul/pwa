@@ -10,17 +10,9 @@ class Deferred {
 			this.resolve = resolve;
 		});
 		this.data = null;
-		this.forceResolve = this.forceResolve.bind(this);
+		this.resolve = this.resolve.bind(this);
+		this.reject = this.reject.bind(this);
 		this.forceUpdateResolvedData = this.forceUpdateResolvedData.bind(this);
-	}
-
-	forceResolve(value) {
-		this.data = value;
-		this.resolve(value);
-	}
-
-	forceReject(msg) {
-		this.reject(new Error(msg));
 	}
 
 	forceUpdateResolvedData(value) {
@@ -64,17 +56,17 @@ class PromiseFactory {
 
 	updateResolvedData(key, data) {
 		const promise = this.get(key);
-		promise && promise.forceUpdateResolvedData(data);
+		promise?.forceUpdateResolvedData(data);
 	}
 
 	resolve(key, data) {
 		const promise = this.get(key);
-		return promise && promise.forceResolve(data);
+		return promise?.resolve(data);
 	}
 
 	reject(key, msg) {
 		const promise = this.get(key);
-		return promise && promise.forceReject(msg);
+		return promise?.reject(msg);
 	}
 
 	remove(key) {

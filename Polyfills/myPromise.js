@@ -4,6 +4,8 @@ const isFunction = (func) => dataType(func) === 'function';
 
 const safeExecFunc = (...params) => {
 	const func = params.shift();
+	console.log(`func => ${func}`);
+	console.log(`params => ${params}`);
 	isFunction(func) && func.apply(func, params);
 };
 
@@ -12,29 +14,26 @@ class myPromise {
 		if (!isFunction(callback)) {
 			throw new Error('constructor parameter needs to be a function callback');
 		}
-		console.log('Inside constructor');
 		this.state = {
 			data: null,
 			error: null,
-			status: 'pending',
+			status: 'pending', // pending/fulfilled/rejected
 		};
 		this.resolve = this.resolve.bind(this);
 		this.reject = this.reject.bind(this);
-		queueMicrotask(() => callback(this.resolve, this.reject));
+		queueMicrotask(() => safeExecFunc(callback, this.resolve, this.reject));
 	}
 
 	resolve(data) {
-		console.log('Inside resolve', data);
 		this.state.status = 'fulfilled';
 		this.state.data = data;
-		isFunction(this.onFulfilled) && this.onFulfilled(data);
+		safeExecFunc(this.onFulfilled, data);
 	}
 
 	reject(err) {
-		console.log('Inside reject', err);
 		this.state.status = 'rejected';
 		this.state.error = err;
-		isFunction(this.onRejected) && this.onRejected(new Error(err));
+		safeExecFunc(this.onRejected, new Error(err));
 	}
 
 	then(onFulfilled, onRejected) {
@@ -63,7 +62,7 @@ class myPromise {
 		if (!isFunction(callback)) {
 			throw new Error('Param supplied should be of of type fuction');
 		}
-		['fulfilled', 'rejected'].includes(this.state.status) && callback();
+		['fulfilled', 'rejected'].includes(this.state.status) && safeExecFunc(callback);
 		return this;
 	}
 }
@@ -80,4 +79,7 @@ promise
 	})
 	.catch((err) => {
 		console.log('Inside Catch');
+	})
+	.finally(() => {
+		console.log('In Finally');
 	});

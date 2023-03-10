@@ -1,7 +1,7 @@
-import { useState, useEffect, useReducer, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import { useFetchStore, useFetchDispatch } from '../Context/dataFetchContext';
-import { safeExecFunc } from '../utils/typeChecking';
+import { safelyExecuteFunction } from '../utils/typeChecking';
 
 const controller = new AbortController();
 
@@ -52,15 +52,15 @@ const useFetch = (schema, initialUrl, initialParams = {}, successCallback, failu
 				const result = await response.json();
 				if (response.ok) {
 					dispatch({ schema, type: 'FETCH_SUCCESS', payload: result });
-					safeExecFunc(successCallback, null, result);
+					safelyExecuteFunction(successCallback, null, result);
 				} else {
 					dispatch({ schema, type: 'FETCH_FAILURE' });
-					safeExecFunc(failureCallback, null, result);
+					safelyExecuteFunction(failureCallback, null, result);
 				}
 			} catch (err) {
 				setErrorMessage(err.message);
 				dispatch({ schema, type: 'FETCH_FAILURE' });
-				safeExecFunc(failureCallback, null, err);
+				safelyExecuteFunction(failureCallback, null, err);
 			} finally {
 				dispatch({ schema, type: 'FETCH_STOP' });
 			}
@@ -72,14 +72,15 @@ const useFetch = (schema, initialUrl, initialParams = {}, successCallback, failu
 			// abortFetching();
 		};
 	}, [url, queryString, refetchIndex]);
-	return {
-		state: state[schema],
+
+	return useMemo(() => ({
+		state: { ...state[schema] },
 		errorMessage,
 		updateUrl,
 		updateQueryParams,
 		refetch,
 		abortFetching,
-	};
+	}));
 };
 
 export default useFetch;

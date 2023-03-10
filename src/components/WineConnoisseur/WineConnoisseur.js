@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useReducer } from 'react';
+import React, { useEffect, useRef, useReducer } from 'react';
 import DataGrid from '../Common/DataGrid/DataGrid';
 
 import useFetch from '../../hooks/useFetch';
@@ -16,11 +16,10 @@ const schema = 'wineConnoisseur';
 function DisplayList(props) {
 	const [pagerObject, pagerDispatch] = useReducer(pageReducer, { [schema]: { pageNum: 0 } });
 	const ioObserverRef = useRef(null);
-	const dispatch = useFetchDispatch();
 	const pageNum = pagerObject[schema]?.pageNum || 0;
 
-	const url = `http://localhost:3100/api/fetchWineData/${pageNum}`;
-	const { state, errorMessage, updateUrl } = useFetch(schema, url);
+	const url = `${baseURL}${pageNum}`;
+	const { state, updateUrl } = useFetch(schema, url);
 	const { headers = [], pageData = [] } = state?.data || {};
 
 	useEffect(() => {

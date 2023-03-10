@@ -1,19 +1,21 @@
-import React, { useState, useMemo } from 'react';
-
-import useInterval from '../../hooks/useInterval';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Home = (props) => {
-	const [seconds, setSeconds] = useState(0);
-
-	useInterval(() => {
-		setSeconds((n) => ++n);
-	}, 1000);
-
-	const handleClick = () => props.handleShow();
+	const linksHtml = [];
+	for (let name in props.pages) {
+		linksHtml.push(
+			<li>
+				<Link to={`/${name}`}>{name}</Link>
+			</li>
+		);
+	}
 
 	return (
-		<div onClick={handleClick}>
-			<p>{seconds}</p>
+		<div>
+			<nav>
+				<ul>{linksHtml}</ul>
+			</nav>
 		</div>
 	);
 };

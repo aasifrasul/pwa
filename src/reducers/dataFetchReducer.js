@@ -3,7 +3,7 @@ import wineConnoisseurReducer from './wineConnoisseurReducer.js';
 import infiniteScrollReducer from './infiniteScrollReducer.js';
 import movieListReducer from './movieListReducer.js';
 
-import { safeExecFunc } from '../utils/typeChecking';
+import { safelyExecuteFunction } from '../utils/typeChecking';
 
 const reducers = {
 	nestedCategories: nestedCategoriesReducer,
@@ -18,7 +18,7 @@ const dataFetchReducer = (state = {}, action) => {
 		...state,
 	};
 	if (schema) {
-		newState[schema] = safeExecFunc(reducers[schema], null, newState[schema], action);
+		newState[schema] = safelyExecuteFunction(reducers[schema], null, newState[schema], action);
 	}
 	return newState;
 };

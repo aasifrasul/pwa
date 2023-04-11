@@ -4,13 +4,13 @@ const isFunction = (func) => dataType(func) === 'function';
 
 const log = (msg) => console.log(msg);
 
-function spy (func) {
+function spy(func) {
 	return function (...args) {
 		log('function:', func.name);
 		log('args:', ...args);
 		return func.apply(this, args);
 	};
-};
+}
 
 /**
  * Constructor accepts a callback which in turn accpets two functions resolve/reject

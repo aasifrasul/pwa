@@ -13,7 +13,7 @@
 	const getJSON = (url) =>
 		fetch(url).then(
 			(res) => res.json(),
-			(err) => new Error(`Some Error Occurred ${err}`)
+			(err) => new Error(`Some Error Occurred ${err}`),
 		);
 
 	const spawnWorker = (fn, params) => {
@@ -121,7 +121,7 @@
 					} else {
 						return Promise.resolve(value).then(
 							(value) => step('next', value),
-							(err) => step('throw', err)
+							(err) => step('throw', err),
 						);
 					}
 				}
@@ -161,9 +161,10 @@
 
 	const createInlineWorker = () => {
 		const blob = new Blob([
-			//"onmessage = function(e) { postMessage('msg from worker'); }"
 			`self.addEventListener('message', (e) => {
-			  self.postMessage(e.data);
+				const [x, y] = e.data;
+				console.log(x, y);
+				self.postMessage(['dsgvddfgfd', 'sdfdgdfg']);
 			}, false);`,
 		]);
 
@@ -175,14 +176,7 @@
 		worker.onmessage = (e) => console.info(e.data);
 		const arrBuf = new ArrayBuffer(8);
 
-		worker.postMessage(
-			{
-				arrBuf,
-				date,
-				arrBuf,
-			},
-			[arrBuf]
-		);
+		worker.postMessage(['Helloo from createInlineWorker', 'fgdddf']);
 		window.URL.revokeObjectURL(blobURL);
 	};
 
@@ -229,7 +223,7 @@
 		},
 		(Error) => {
 			console.log(Error);
-		}
+		},
 	);
 
 	imgLoad('/static/images/Dubai-Al-Arab.webp').then(
@@ -242,8 +236,8 @@
 		},
 		(Error) => {
 			console.log(Error);
-		}
+		},
 	);
 
-	// createInlineWorker();
+	createInlineWorker();
 })();

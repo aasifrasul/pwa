@@ -62,7 +62,7 @@ const promises = Array(50)
 						id: idx,
 						time,
 					}),
-				time
+				time,
 			);
 		});
 	});

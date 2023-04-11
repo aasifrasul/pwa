@@ -33,7 +33,7 @@ self.addEventListener('install', (event) => {
 			return caches.open(CURRENT_CACHES.offline).then((cache) => {
 				return cache.put(OFFLINE_URL, response);
 			});
-		})
+		}),
 	);
 });
 
@@ -54,7 +54,7 @@ self.addEventListener('activate', (event) => {
 						return client.navigate('offline.html');
 					}
 				});
-			})
+			}),
 	);
 });
 
@@ -74,9 +74,9 @@ self.addEventListener('activate', (event) => {
 						console.log('Deleting out of date cache:', cacheName);
 						return caches.delete(cacheName);
 					}
-				})
+				}),
 			);
-		})
+		}),
 	);
 });
 
@@ -100,7 +100,7 @@ self.addEventListener('fetch', (event) => {
 				// errors, see https://github.com/GoogleChrome/samples/tree/gh-pages/service-worker/fallback-response
 				console.log('Fetch failed; returning offline page instead.', error);
 				return caches.match(OFFLINE_URL);
-			})
+			}),
 		);
 	}
 

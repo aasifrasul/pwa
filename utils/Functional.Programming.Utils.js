@@ -1,4 +1,7 @@
-const curry = fn => (...args) => fn.bind(null, ...args);
+const curry =
+	(fn) =>
+	(...args) =>
+		fn.bind(null, ...args);
 
 const tap = curry((fn, x) => {
 	fn(x);
@@ -11,8 +14,8 @@ const trace = (label) => {
 
 /*
 const trace = (label) => (value) => {
-	console.log(`${label}: ${value}`);
-	return value;
+console.log(`${label}: ${value}`);
+return value;
 };
 */
 
@@ -31,7 +34,7 @@ const compose = (...fns) =>
 	fns.reduce(
 		(f, g) =>
 			(...args) =>
-				f(g(...args))
+				f(g(...args)),
 	);
 
 const map = (fn, arr) => arr.reduce((acc, item, index, arr) => acc.concat(fn(item, index, arr)), []);
@@ -90,7 +93,7 @@ const fRange = (start, end) =>
 			length: end - start + 1,
 		},
 		// change `Identity` to `start.constructor`
-		(x, i) => start.constructor(i + start)
+		(x, i) => start.constructor(i + start),
 	);
 
 const exists = (x) => x.valueOf() !== undefined && x.valueOf() !== null;
@@ -99,9 +102,8 @@ const ifExists = (x) => ({
 	map: (fn) => (exists(x) ? x.map(fn) : x),
 });
 
-
 const spy = (func) => {
-	return function(...args) {
+	return function (...args) {
 		console.log('function:', func.name);
 		console.log('args:', ...args);
 		return func.apply(this, args);

@@ -1,9 +1,48 @@
+var memoize = (function () {
+	const hash = {};
+
+	function memoize(fn) {
+		const funcName = fn?.name;
+		if (!hash[funcName]) {
+			hash[funcName] = {};
+		}
+		return function (...args) {
+			const key = args.reduce((accumulator, currentValue, index) => {
+				return `${accumulator}|${currentValue.toSting()}`;
+			}, '');
+
+			console.log('key, ', key);
+
+			if (key in hash[funcName]) {
+				result = hash[funcName][key];
+			} else {
+				result = fn.apply(this, args);
+				hash[funcName][key] = result;
+				console.log('hashKey after storing calcualted value', hash[funcName]);
+			}
+
+			return result;
+		};
+	}
+
+	return memoize;
+})();
+
+function sum(a, b) {
+	return a + b;
+}
+
+var memoizedSum = memoize(sum);
+
+memoizedSum('abc', 'xyz');
+
 function memoize(fn) {
 	if (typeof fn !== 'function') {
 		throw new Error('Parameter passed to memoize must be a function');
 	}
 
 	const hash = {};
+	//return function (...args) {
 	return function () {
 		let key;
 		let result;

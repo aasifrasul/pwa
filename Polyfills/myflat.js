@@ -34,3 +34,20 @@ const flatDeep = function (arr) {
 };
 
 console.log(flatDeep([1, 2, [5, 6, [9, [10, 11, [67, [78, [101, [102], 103], 56], 89], 12], 8], 7], , 4]));
+
+function* flatten(array, depth) {
+	if (depth === undefined) {
+		depth = 1;
+	}
+	for (const item of array) {
+		if (Array.isArray(item) && depth > 0) {
+			yield* flatten(item, depth - 1);
+		} else {
+			yield item;
+		}
+	}
+}
+
+const arr = [1, 2, 3, 4, 5, [6, [7, 8, 9]]];
+const flattened_arr = [...flatten(arr, Infinity)];
+console.log(flattened_arr); // [1,2,3,4,5,6,7,8,9]

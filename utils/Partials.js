@@ -32,6 +32,3 @@ function findContiguous(arr) {
 }
 
 findContiguous(arr);
-
-
-npm install -g better-vsts-npm-auth

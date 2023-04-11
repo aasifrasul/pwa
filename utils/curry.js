@@ -38,7 +38,7 @@ const curry1 = curry(add, 1);
 console.log(
 	curry1(2), // Logs 3
 	curry1(2, 3), // Logs 6
-	curry1(4, 5, 6) // Logs 16
+	curry1(4, 5, 6), // Logs 16
 );
 
 //You can do this with as many arguments as you want

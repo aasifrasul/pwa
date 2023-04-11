@@ -46,9 +46,9 @@ function addSubtract(n) {
 
 function sum(...args) {
 	const newFunc = sum.bind(null, ...args);
-	newFunc.toString = function() {
+	newFunc.toString = function () {
 		args.reduce((a, c) => a + c, 0);
-	}
+	};
 	//const valueOf = () => args.reduce((a, c) => a + c, 0);
 	//const updatedFunc = Object.assign(newFunc, { valueOf });
 	return newFunc;
@@ -370,24 +370,11 @@ let obj = new Proxy(
 		get: function (item, property, itemProxy) {
 			return property === 'a' ? ++initValue : item[property];
 		},
-	}
+	},
 );
 console.log(obj.a, obj.a, obj.a);
 
 const type_of = (someVariable) => Object.prototype.toString.call(someVariable).slice(8, -1).toLowerCase();
-
-function copyObject(obj) {
-	const prototype = Object.getPrototypeOf(obj);
-	const copy = Object.create(prototype);
-	const propNames = Object.getOwnPropertyNames(obj);
-
-	propNames.forEach(function (name) {
-		const desc = Object.getOwnPropertyDescriptor(obj, name);
-		Object.defineProperty(copy, name, desc);
-	});
-
-	return copy;
-}
 
 function throttled(delay, fn) {
 	let lastCall = 0;
@@ -424,12 +411,15 @@ function debounced(delay, fn) {
 				lastRan = Date.now();
 			} else {
 				clearTimeout(lastFunc);
-				lastFunc = setTimeout(function () {
-					if (Date.now() - lastRan >= limit) {
-						func.apply(context, args);
-						lastRan = Date.now();
-					}
-				}, limit - (Date.now() - lastRan));
+				lastFunc = setTimeout(
+					function () {
+						if (Date.now() - lastRan >= limit) {
+							func.apply(context, args);
+							lastRan = Date.now();
+						}
+					},
+					limit - (Date.now() - lastRan),
+				);
 			}
 		};
 	};
@@ -498,3 +488,21 @@ const memoize = function memoize(func) {
 		return hash.get(key);
 	};
 };
+
+/**
+ * Returns a function that, when called,
+ * returns a generator object that is immediately
+ * ready for input via `next()`
+ */
+function coroutine(generatorFunction) {
+	return function (...args) {
+		const generatorObject = generatorFunction(...args);
+		generatorObject.next();
+		return generatorObject;
+	};
+}
+
+const wrapped = coroutine(function* () {
+	console.log(`First input: ${yield}`);
+	return 'DONE';
+});

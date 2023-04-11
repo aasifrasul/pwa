@@ -41,7 +41,7 @@ if (!Cache.prototype.addAll) {
 						}
 
 						return fetch(request.clone());
-					})
+					}),
 				);
 			})
 			.then((responses) => {

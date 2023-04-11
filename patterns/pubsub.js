@@ -32,8 +32,7 @@ const PubSub = (function () {
 		};
 	};
 
-	const publish = (eventName, data) =>
-		isArray(subscribers[eventName]) && subscribers[eventName].forEach((callback) => callback(data));
+	const publish = (eventName, data) => subscribers[eventName]?.forEach((cb) => cb(data));
 
 	return {
 		subscribe,

@@ -12,8 +12,8 @@ const constraints = {
 const video = document.querySelector('video');
 
 try {
-	if (hasGetUserMedia()) {
-		mediaDevices.getUserMedia(constraints).then((stream) => {
+	if (window.navigator.mediaDevices.getUserMedia) {
+		window.navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
 			video.srcObject = stream;
 		});
 	} else {

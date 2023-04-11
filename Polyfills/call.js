@@ -17,11 +17,9 @@ function getGlobal() {
 	}
 }
 
-var globalContext = getGlobalContext();
-
 Function.prototype.myCall =
 	Function.prototype.myCall ||
-	function myCall(context = globalContext, ...args) {
+	function myCall(context = getGlobalContext(), ...args) {
 		context.myCall = this;
 		return context.myCall(...args);
 	};

@@ -9,7 +9,7 @@ Object.defineProperty(userOne, 'lastName', {
 	configurable: true,
 	enumerable: true,
 	get() {
-		// return document.querySelector('#lastName').value;
+		return document.querySelector('#lastName').value;
 	},
 	set(value) {
 		document.querySelector('#lastName').value = value;
@@ -20,7 +20,7 @@ Object.defineProperty(userOne, 'firstName', {
 	configurable: true,
 	enumerable: true,
 	get() {
-		//return document.querySelector('#firstName').value;
+		return document.querySelector('#firstName').value;
 	},
 	set(value) {
 		document.querySelector('#firstName').value = value;
@@ -36,3 +36,14 @@ document.addEventListener('keyup', (e) => {
 });
 
 // userOne.firstName = 'Aasif'
+
+var person = (function (el) {
+	return {
+		set age(v) {
+			el.value = v;
+		},
+		get age() {
+			return el.value;
+		},
+	};
+})(document.getElementById('age'));

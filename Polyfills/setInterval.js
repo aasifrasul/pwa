@@ -27,3 +27,9 @@ function add(a, b) {
 var mySetIntervalId = mySetInterval(add, 1000, 3, 5);
 
 setTimeout(() => mySetInterval.cancel(), 5000);
+
+// Implement setInterval using nested setTimeout
+let timerId = setTimeout(function tick() {
+	alert('tick');
+	timerId = setTimeout(tick, 2000); // (*)
+}, 2000);

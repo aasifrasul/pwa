@@ -4,7 +4,7 @@
 	const getJSON = (url) =>
 		fetch(url).then(
 			(res) => res.json(),
-			(err) => new Error(`Some Error Occurred ${err}`)
+			(err) => new Error(`Some Error Occurred ${err}`),
 		);
 
 	const getApi = (url) => {

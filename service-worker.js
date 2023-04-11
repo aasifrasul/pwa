@@ -144,7 +144,7 @@ self.addEventListener('install', (e) => {
 
 				return Promise.all(cachePromises).then(() => console.log('Pre-fetching complete.'));
 			})
-			.catch((error) => console.error('Pre-fetching failed:', error))
+			.catch((error) => console.error('Pre-fetching failed:', error)),
 	);
 });
 
@@ -164,7 +164,7 @@ self.addEventListener('activate', (e) => {
 				}
 			});
 			return Promise.all(promises);
-		})
+		}),
 	);
 	e.waitUntil(self.clients.claim().then(() => checkVersion()));
 });
@@ -196,7 +196,7 @@ self.addEventListener('fetch', (e) => {
 					return response;
 				})
 				.catch(handleError);
-		})
+		}),
 	);
 });
 
@@ -326,7 +326,7 @@ self.addEventListener('push', (e) => {
 			body,
 			icon,
 			tag,
-		})
+		}),
 	);
 });
 
@@ -354,7 +354,7 @@ self.addEventListener('notificationclick', (e) => {
 					//return clients.openWindow('/');
 					return clients.openWindow(e.notification.data.url);
 				}
-			})
+			}),
 	);
 });
 
@@ -375,7 +375,7 @@ self.addEventListener('foreignFetch', (event) => {
 					response,
 					origin: event.origin, // Make this a CORS response
 				};
-			})
+			}),
 	);
 });
 

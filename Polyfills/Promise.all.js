@@ -64,7 +64,7 @@ class AsyncQueue extends BaseQueue {
 				},
 				(e) => {
 					reject(e);
-				}
+				},
 			)
 			.catch((e) => {
 				reject(e);
@@ -84,7 +84,7 @@ const asyncGenerator = ({ ms, ...rest } = {}) => new Promise((resolve) => setTim
 
 // creates a N items promise array
 const promises = Array.apply(null, { length: 50 }).map(Function.call, (i) =>
-	asyncGenerator.bind(null, { ms: Math.random() * 200, url: `(${i})`, data: `payload(${i})` })
+	asyncGenerator.bind(null, { ms: Math.random() * 200, url: `(${i})`, data: `payload(${i})` }),
 );
 
 // start proformance timing
@@ -113,8 +113,8 @@ function myPromiseAll(promises) {
 				},
 				(e) => {
 					reject(e);
-				}
-			)
+				},
+			),
 		);
 	});
 }

@@ -15,13 +15,16 @@ var Subject = function () {
 		notifyObserver: function (observer) {
 			var index = this.observers.indexOf(observer);
 			if (index > -1) {
-				this.observers[index].notify(index);
+				this.notifyObserverAtIndex(index);
 			}
 		},
 		notifyAllObservers: function () {
 			for (var i = 0; i < this.observers.length; i++) {
-				this.observers[i].notify(i);
+				this.notifyObserverAtIndex(i);
 			}
+		},
+		notifyObserverAtIndex: function (index) {
+			this.observers[index]?.notify(index);
 		},
 	};
 };

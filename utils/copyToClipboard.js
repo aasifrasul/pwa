@@ -6,8 +6,10 @@ const copyToClipboard = (str) => {
 	el.style.left = '-9999px';
 	document.body.appendChild(el);
 	const selected = document.getSelection().rangeCount > 0 ? document.getSelection().getRangeAt(0) : false;
+	console.log('selected=>', selected);
 	el.select();
 	document.execCommand('copy');
+	debugger;
 	document.body.removeChild(el);
 	if (selected) {
 		document.getSelection().removeAllRanges();

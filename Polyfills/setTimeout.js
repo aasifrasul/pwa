@@ -60,7 +60,7 @@ const createInlineWorker = () => {
 				self.postMessage(sleep(e.data));
 			}, false);`,
 		],
-		{ type: 'text/javascript' }
+		{ type: 'text/javascript' },
 	);
 
 	// Obtain a blob URL reference to our worker 'file'.

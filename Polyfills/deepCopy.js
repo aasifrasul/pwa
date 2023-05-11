@@ -1,4 +1,4 @@
-function copyObject(obj) {
+function clone(obj) {
 	const prototype = Object.getPrototypeOf(obj);
 	const copy = Object.create(prototype);
 	const propNames = Object.getOwnPropertyNames(obj);
@@ -11,7 +11,7 @@ function copyObject(obj) {
 	return copy;
 }
 
-function cloneDeep(obj) {
+function clone(obj) {
 	return Object.create(Object.getPrototypeOf(obj), Object.getOwnPropertyDescriptors(obj));
 }
 
@@ -22,15 +22,15 @@ let clone = Object.defineProperties({}, Object.getOwnPropertyDescriptors(obj));
 function deepClone(obj) {
 	const type = Object.prototype.toString.call(obj).slice(8, -1).toLowerCase();
 
-	if (type !== 'object') {
-		return obj;
-	}
-
 	if (type === 'date') {
 		return new Date(obj);
 	}
 
-	let newObj = type === 'array' ? [] : {};
+	if (['object', 'array'].indexOf(type) < 0) {
+		return obj;
+	}
+
+	let newObj = obj.constructor();
 
 	for (let prop in obj) {
 		if (obj.hasOwnProperty(prop)) {
@@ -41,40 +41,28 @@ function deepClone(obj) {
 	return newObj;
 }
 
-// For circular depdency
+// For circular depdency we use a WeakMap
 
-function deepClone(obj, map = new WeakMap()) {
-	const type = Object.prototype.toString.call(obj).slice(8, -1).toLowerCase();
-
-	if (type !== 'object') {
+function deepCopy(obj) {
+	if (typeof obj === 'undefined' || typeof obj !== 'object' || 'isActiveClone' in obj) {
 		return obj;
 	}
 
-	if (type === 'date') {
-		return new Date(obj);
-	}
+	let newObj = obj instanceof Date ? new obj.constructor(obj) : obj.constructor();
 
-	if (map.has(obj)) {
-		return map.get(obj);
-	}
-
-	let newObj = Array.isArray(obj) ? [] : {};
-
-	map.set(obj, newObj);
-
-	for (let prop in obj) {
-		if (obj.hasOwnProperty(prop)) {
-			newObj[prop] = deepClone(obj[prop], map);
-		}
-	}
+	Reflect.ownKeys(obj).forEach(key => {
+		obj['isActiveClone'] = true;
+		newObj[key] = deepCopy(obj[key]);
+		delete obj['isActiveClone'];
+	});
 
 	return newObj;
 }
 
-var obj = {
+const obj = {
 	a: 1,
 	b: 'string',
-	c: [1, 2, 3, 4],
+	c: [1, { m: 1 }, { n: [1, 2, 3, 4] }, { 0: 7 }],
 	d: {
 		x: 1,
 		y: [5, 6, 7, 8],
@@ -84,8 +72,9 @@ var obj = {
 			a3: {
 				time: new Date(),
 			},
+			[Symbol.toPrimitive]: (hint) => alert('Hi'),
 		},
 	},
 };
 
-deepClone(obj);
+deepCopy(obj);

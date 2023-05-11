@@ -1,35 +1,37 @@
-function mySetInterval() {
-	const context = this;
-	const args = Array.prototype.slice.call(arguments);
+const { setIntervalPollyfill, clearIntervalPollyfill } = (function () {
+	let uniqueInvocationCount = 0;
+	let intervalMap = {};
 
-	const callback = args.shift();
-	const delay = args.shift();
+	function setIntervalPollyfill(callback, delay = 0, ...args) {
+		let id = ++uniqueInvocationCount;
 
-	function invoke() {
-		mySetInterval.intervalId = window.setTimeout(() => {
-			callback.apply(context, args);
-			invoke();
-		}, delay);
+		function repeat() {
+			intervalMap[id] && clearTimeout(id);
+			intervalMap[id] = setTimeout(() => {
+				callback(...args);
+				intervalMap[id] && repeat();
+			}, delay);
+		}
+
+		repeat();
+		return id;
 	}
 
-	invoke();
-	return mySetInterval.intervalId;
-}
+	function clearIntervalPollyfill(intervalid) {
+		clearTimeout(intervalMap[intervalid]);
+		delete intervalMap[intervalid];
+	}
+	return {
+		setIntervalPollyfill,
+		clearIntervalPollyfill,
+	};
+})();
 
-mySetInterval.cancel = function () {
-	window.clearTimeout(mySetInterval.intervalId);
-};
 
 function add(a, b) {
-	console.log(a + b);
+	console.log(`${a}+${b} =>`, a + b);
 }
 
-var mySetIntervalId = mySetInterval(add, 1000, 3, 5);
+const intervalid = setIntervalPollyfill(add, 200, 2, 3);
+setTimeout(() => clearIntervalPollyfill(intervalid), 1000);
 
-setTimeout(() => mySetInterval.cancel(), 5000);
-
-// Implement setInterval using nested setTimeout
-let timerId = setTimeout(function tick() {
-	alert('tick');
-	timerId = setTimeout(tick, 2000); // (*)
-}, 2000);

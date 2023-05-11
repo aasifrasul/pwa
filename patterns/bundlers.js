@@ -63,21 +63,6 @@ function resolveDependencies(filePath, dependencyGraph, visitedFiles) {
 	});
 }
 
-// entry point for the bundler
-function bundle(entryPoint) {
-	// initialize an empty dependency graph
-	const dependencyGraph = new DependencyGraph();
-
-	// resolve all dependencies of the entry point
-	resolveDependencies(entryPoint, dependencyGraph, new Set());
-
-	// generate the bundled output
-	const output = generateOutput(dependencyGraph);
-
-	// write the output to a file
-	writeFile(outputPath, output);
-}
-
 // DependencyGraph class
 class DependencyGraph {
 	constructor() {
@@ -126,4 +111,20 @@ function findDependencies(fileContents) {
 	}
 
 	return dependencies;
+}
+
+
+// entry point for the bundler
+function bundle(entryPoint) {
+	// initialize an empty dependency graph
+	const dependencyGraph = new DependencyGraph();
+
+	// resolve all dependencies of the entry point
+	resolveDependencies(entryPoint, dependencyGraph, new Set());
+
+	// generate the bundled output
+	const output = generateOutput(dependencyGraph);
+
+	// write the output to a file
+	writeFile(outputPath, output);
 }

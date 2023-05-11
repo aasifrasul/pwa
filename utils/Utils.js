@@ -27,6 +27,8 @@ range(1, 10, 2);
 range('A'.charCodeAt(0), 'Z'.charCodeAt(0), 1).map((x) => String.fromCharCode(x));
 // ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
+const generateRandomNumber = (min = 0, max = 100) => Math.round((Math.random() * (max - min)) + min);
+
 function addSubtract(n) {
 	let sum = n;
 	let count = 0;

@@ -3,9 +3,7 @@ const isArray = (arr) => dataType(arr) === 'array';
 const isFunction = (func) => dataType(func) === 'function';
 const isObject = (obj) => dataType(obj) === 'object';
 
-const safelyExecuteFunction = (...params) => {
-	const func = params.shift();
-	const context = params.shift();
+const safelyExecuteFunction = (func, context, ...params) => {
 	if (!isFunction(func)) {
 		return null;
 	}
@@ -16,6 +14,22 @@ const safelyExecuteFunction = (...params) => {
 
 	return func(...params);
 };
+
+/**
+ * 
+	class Promise {
+	  constructor(executor: (resolve: Function, reject: Function) => void): Promise;
+	  then(onFulfilled: Function, onRejected: Function): Promise;
+	  catch(onRejected: Function): Promise;
+	  finally(onFinally: Function): Promise;
+	  static resolve(x: any): Promise;
+	  static reject(r: any): Promise;
+	  static all(iterable: Iterable): Promise;
+	  static allSettled(iterable: Iterable): Promise;
+	  static any(promises: Iterable): Promise<any>;
+	  static race(iterable: Iterable): Promise;
+	}
+*/
 
 class myPromise {
 	constructor(callback) {
@@ -116,11 +130,11 @@ myPromise.all = function (promises) {
 				reject();
 				throw new Error('expected Parameter is array of promises');
 			}
-			result[index] = promise;
+			result[i] = promise;
 			promise.then(
 				(data) => {
 					countOfResolvedPromises++;
-					result[index] = data;
+					result[i] = data;
 					if (promises.length == countOfResolvedPromises) {
 						resolve(Object.values(result));
 					}

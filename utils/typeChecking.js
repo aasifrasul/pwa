@@ -8,7 +8,6 @@ const isUndefined = (data) => dataType(data) === 'undefined';
 const isNumber = (data) => dataType(data) === 'number';
 const isString = (data) => dataType(data) === 'string';
 const isBoolean = (data) => dataType(data) === 'boolean';
-const isFunction = (data) => dataType(data) === 'function';
 
 const safeExecFunc = (...params) => {
 	const func = params.shift();

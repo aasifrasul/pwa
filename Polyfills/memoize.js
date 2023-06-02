@@ -1,32 +1,37 @@
-var memoize = (function () {
-	const hash = {};
+function memoize(func) {
+	const hashMap = new Map();
 
-	function memoize(fn) {
-		const funcName = fn?.name;
-		if (!hash[funcName]) {
-			hash[funcName] = {};
+	function wrapper(...args) {
+		const self = this;
+		let result;
+		const key = JSON.stringify(args);
+
+		const localhash = hashMap.get(func.name) || new Map();
+		console.log('localhash', localhash);
+		if (localhash.has(key)) {
+			console.log('InCache');
+			result = localhash.get(key);
+		} else {
+			console.log('Computing');
+			result = func.apply(self, args);
+			localhash.set(key, result);
 		}
-		return function (...args) {
-			const key = args.reduce((accumulator, currentValue, index) => {
-				return `${accumulator}|${currentValue.toSting()}`;
-			}, '');
 
-			console.log('key, ', key);
+		hashMap.set(func.name, localhash);
 
-			if (key in hash[funcName]) {
-				result = hash[funcName][key];
-			} else {
-				result = fn.apply(this, args);
-				hash[funcName][key] = result;
-				console.log('hashKey after storing calcualted value', hash[funcName]);
-			}
-
-			return result;
-		};
+		return result;
 	}
 
-	return memoize;
-})();
+	wrapper.cancel = function () {
+		hashMap.set(func.name, new Map());
+	};
+
+	wrapper.getHashMap = function () {
+		return hashMap;
+	};
+
+	return wrapper;
+}
 
 function sum(a, b) {
 	return a + b;
@@ -34,107 +39,18 @@ function sum(a, b) {
 
 var memoizedSum = memoize(sum);
 
-memoizedSum('abc', 'xyz');
+memoizedSum(1, 2);
+memoizedSum(1, 2);
+memoizedSum(3, 2);
+memoizedSum(1, 2);
 
-function memoize(fn) {
-	if (typeof fn !== 'function') {
-		throw new Error('Parameter passed to memoize must be a function');
-	}
-
-	const hash = {};
-	//return function (...args) {
-	return function () {
-		let key;
-		let result;
-		const args = Array.prototype.slice.call(arguments);
-		console.log(args);
-		const item = args[0];
-		const itemType = typeof item;
-		console.log('itemType', itemType);
-		if (itemType === 'undefined') {
-			throw new Error("You haven't passed paarameter to ur function");
-		}
-		if (args.length > 1) {
-			// if there are more than one parameters to the memoized function
-			// and it is either numbers/strings then it becomes necessary to
-			// sort so as to optimize the look up.
-			// [1,2,3] and [2,3,1] should create a single key
-			// ['a', 'b', 'c'] ['c', 'a', 'b'] similary this too should create one key
-			if (itemType === 'string') {
-				key = args.sort().toString();
-			} else if (itemType === 'number') {
-				key = args.sort((a, b) => a - b).toString();
-			} else if (itemType === 'function') {
-				key = args.toString();
-			} else {
-				key = JSON.stringify(args);
-			}
-		} else {
-			key = ['string', 'number', 'function'].includes(itemType) ? args.toString() : JSON.stringify(args);
-		}
-		// This is to make distiction across diff function calls
-		key = `${func.name}.${key}`;
-		console.log('key', key);
-		console.log('hash', hash);
-		if (key in hash) {
-			console.log('Served from cache');
-			result = hash[key];
-		} else {
-			result = fn.apply(this, args);
-			hash[key] = result;
-		}
-
-		return result;
-	};
+function compare(obj1, obj2) {
+	return obj1.a > obj2.a;
 }
-function memoize(fn) {
-	if (typeof fn !== 'function') {
-		throw new Error('Parameter passed to memoize must be a function');
-	}
 
-	const keyMaps = new Map();
-	let map;
-	return function () {
-		// This is to make distiction across diff function calls
-		if (keyMaps.has(fn)) {
-			map = keyMaps.get(fn);
-		} else {
-			map = new Map();
-		}
+var memoizedCompare = memoize(compare);
 
-		console.log('keyMaps', keyMaps);
-
-		let args = Array.prototype.slice.call(arguments);
-		console.log(args);
-		const itemType = typeof args[0];
-		console.log('itemType', itemType);
-		if (itemType === 'undefined') {
-			throw new Error("You haven't passed paarameter to ur function");
-		}
-		if (args.length > 1) {
-			// if there are more than one parameters to the memoized function
-			// and it is either numbers/strings then it becomes necessary to
-			// sort so as to optimize the look up.
-			// [1,2,3] and [2,3,1] should create a single KEY
-			// ['a', 'b', 'c'] ['c', 'a', 'b'] similary this too should create one KEY
-			if (itemType === 'string') {
-				args = args.sort();
-			} else if (itemType === 'number') {
-				args = args.sort((a, b) => a - b);
-			}
-		}
-
-		console.log('args', args);
-		console.log('map', map);
-		console.log('map.get(args)', map.get(args));
-		if (map.has(args)) {
-			console.log('Served from cache');
-		} else {
-			map.set(args, fn.apply(this, args));
-		}
-
-		keyMaps.set(fn, map);
-
-		return map.get(args);
-	};
-}
+memoizedCompare({ a: 1 }, { a: 1 });
+memoizedCompare({ a: 1 }, { a: 1 });
+memoizedCompare({ a: 2 }, { a: 2 });
+memoizedCompare({ a: 2 }, { a: 2 });

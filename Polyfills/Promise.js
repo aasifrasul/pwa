@@ -5,10 +5,11 @@ const isFunction = (func) => dataType(func) === 'function';
 const log = (msg) => console.log(msg);
 
 function spy(func) {
+	const self = this;
 	return function (...args) {
 		log('function:', func.name);
 		log('args:', ...args);
-		return func.apply(this, args);
+		return func.apply(self, args);
 	};
 }
 
@@ -35,7 +36,7 @@ function myPromise(callback) {
 	/**
 	 * This is imp as resolve/reject should be invoked at a later stage (async)
 	 * */
-	queueMicrotask(() => callback(this.resolve, this.reject));
+	callback && callback(this.resolve, this.reject);
 }
 
 myPromise.prototype.resolve = spy(function resolve(data) {
@@ -77,6 +78,15 @@ myPromise.prototype.then = spy(function then(onFulfilled, onRejected) {
 	}
 	this.onFulfilled = onFulfilled;
 	this.onRejected = onRejected;
+
+	if (this.data) {
+		onFulfilled && onFulfilled(this.data);
+	}
+
+	if (this.error) {
+		onRejected && onRejected(new Error(this.error));
+	}
+
 	return this;
 });
 
@@ -103,7 +113,7 @@ myPromise.reject = spy(function reject(data) {
 	return new myPromise((resolve, reject) => reject(data));
 });
 
-const promise = new myPromise(function (resolve, reject) {
+var promise = new myPromise(function (resolve, reject) {
 	log('Inside myPromise Instance');
 	reject('Hellooo');
 	setTimeout(() => reject('Hellooo'), 0);
@@ -116,7 +126,7 @@ promise
 	.catch((err) => {
 		log('Inside Catch');
 	});
-/*
+
 myPromise.all = function all(arr) {
 	let results = [];
 	return new myPromise((resolve, reject) => {
@@ -140,7 +150,7 @@ myPromise.all = function all(arr) {
 	});
 };
 
-const promise = new myPromise((resolve, reject) => {
+var promise = new myPromise((resolve, reject) => {
 	fetch('https://api.github.com/users/aasifrasul/followers').then(
 		(data) => {
 			const { status, ok, body, statusText } = data;
@@ -197,4 +207,3 @@ myPromise
 		fetch('https://api.github.com/users/aasifrasul/repos'),
 	])
 	.then((data) => log(data));
-*/

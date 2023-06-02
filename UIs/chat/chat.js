@@ -18,7 +18,7 @@ if (window.WebSocket === undefined) {
 }
 
 function onLoad() {
-	var wsUri = 'ws://127.0.0.1:7777';
+	const wsUri = 'ws://127.0.0.1:7777';
 	websocket = new WebSocket(wsUri);
 	websocket.onopen = function (evt) {
 		onOpen(evt);
@@ -49,7 +49,7 @@ function onMessage(evt) {
 	// There are two types of messages:
 	// 1. a chat participant message itself
 	// 2. a message with a number of connected chat participants
-	var message = evt.data;
+	const message = evt.data;
 
 	if (message.startsWith('log:')) {
 		message = message.slice('log:'.length);
@@ -66,20 +66,20 @@ function onError(evt) {
 }
 
 function addMessage() {
-	var message = chat.value;
+	const message = chat.value;
 	chat.value = '';
 	websocket.send(message);
 }
-var canvas = document.querySelector('#canvas');
-var ctx = canvas.getContext('2d');
+const canvas = document.querySelector('#canvas');
+const ctx = canvas.getContext('2d');
 
 // Set display size (css pixels).
-var size = 200;
+const size = 200;
 canvas.style.width = size + 'px';
 canvas.style.height = size + 'px';
 
 // Set actual size in memory (scaled to account for extra pixel density).
-var scale = window.devicePixelRatio; // Change to 1 on retina screens to see blurry canvas.
+const scale = window.devicePixelRatio; // Change to 1 on retina screens to see blurry canvas.
 canvas.width = size * scale;
 canvas.height = size * scale;
 
@@ -93,8 +93,8 @@ ctx.font = '18px Arial';
 ctx.textAlign = 'center';
 ctx.textBaseline = 'middle';
 
-var x = size / 2;
-var y = size / 2;
+const x = size / 2;
+const y = size / 2;
 
-var textString = 'I love MDN';
+const textString = 'I love MDN';
 ctx.fillText(textString, x, y);

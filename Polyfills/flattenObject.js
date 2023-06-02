@@ -22,12 +22,15 @@ const obj = {
 
 function flattenObject(obj, result = {}) {
 	if (isObject(obj)) {
+		if ('isActiveClone' in obj) {
+			return obj;
+		}
 		Reflect.ownKeys(obj).forEach((key) => {
 			const item = obj[key];
-			if (isArray(item)) {
-				result[key] = item.map((value) => flattenObject(value, result));
-			} else if (isObject(item)) {
+			if (isObject(item)) {
+				obj['isActiveClone'] = true;
 				flattenObject(item, result);
+				delete obj['isActiveClone'];
 			} else {
 				result[key] = item;
 			}
@@ -35,5 +38,5 @@ function flattenObject(obj, result = {}) {
 	}
 	return result;
 }
-
+obj.c.push(obj);
 flattenObject(obj);

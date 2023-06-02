@@ -1,3 +1,25 @@
+class Database {
+	constructor() {
+		if (Database.instance) {
+			return Database.instance;
+		}
+		Database.instance = this;
+	}
+
+	connect() {
+		// Connection logic
+	}
+
+	getInstance() {
+		return Database.instance;
+	}
+}
+
+const db1 = new Database();
+const db2 = new Database();
+
+console.log(db1 === db2); // true
+
 var Singleton = (function () {
 	function Singleton() {
 		//Write your usual code here

@@ -1,37 +1,31 @@
-const { setIntervalPollyfill, clearIntervalPollyfill } = (function () {
-	let uniqueInvocationCount = 0;
-	let intervalMap = {};
+(function() {
+	let counter = 0;
+	const hashmap = {};
 
-	function setIntervalPollyfill(callback, delay = 0, ...args) {
-		let id = ++uniqueInvocationCount;
-
-		function repeat() {
-			intervalMap[id] && clearTimeout(id);
-			intervalMap[id] = setTimeout(() => {
-				callback(...args);
-				intervalMap[id] && repeat();
-			}, delay);
-		}
-
-		repeat();
-		return id;
+	function repeat(context, intervalId, func, delay, args) {
+		counter in hashmap && clearTimeout(hashmap[intervalId]);
+		hashmap[counter] = setTimeout(() => {
+			func.apply(context, args);
+			repeat(context, intervalId, func, delay, args)
+		}, delay);
 	}
 
-	function clearIntervalPollyfill(intervalid) {
-		clearTimeout(intervalMap[intervalid]);
-		delete intervalMap[intervalid];
-	}
-	return {
-		setIntervalPollyfill,
-		clearIntervalPollyfill,
+	window.setIntervalPolyfill = function (func, delay, ...args) {
+		counter++;
+		repeat(this, counter, func, delay, args);
+		return counter;
 	};
-})();
 
+	window.clearIntervalPolyfill = function (intervalId) {
+		if (hashmap[intervalId]) {
+			clearTimeout(hashmap[intervalId]);
+			delete hashmap[intervalId];
+		}
+	};
+}());
 
-function add(a, b) {
-	console.log(`${a}+${b} =>`, a + b);
-}
+const multiply = (a, b) => console.log('(a * b) =>', a * b);
 
-const intervalid = setIntervalPollyfill(add, 200, 2, 3);
-setTimeout(() => clearIntervalPollyfill(intervalid), 1000);
+const intervalId = setIntervalPolyfill(multiply, 150, 4, 5);
 
+setTimeout(() => clearIntervalPolyfill(intervalId), 1000);

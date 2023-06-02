@@ -1,91 +1,83 @@
-const mySetTimeout = (function () {
-	const hash = {};
-	let requestID;
-	let key;
+(function () {
+	let timeoutId = 0;
+	timeoutIdsMap = {};
 
-	function mySetTimeout() {
-		let start;
-		const args = Array.prototype.slice.call(arguments);
-		const callback = args.shift() || function () {};
-		const delay = args.shift() || 0;
-		const callbackType = typeof callback;
-		key = callback.toString();
-
-		if (!['string', 'function'].includes(callbackType)) {
-			throw new Error('Callback should be either function or a string');
-		}
-
-		function simulateDelay(timestamp) {
-			if (typeof start === 'undefined') {
-				start = timestamp;
-			}
-			const elapsed = timestamp - start;
-
-			if (elapsed >= delay) {
-				if (callbackType === 'function') {
-					callback.apply(callback, args);
-				} else {
-					eval(callback);
-				}
+	function repeat(id) {
+		const { delay, initiated, self, args, callback } = timeoutIdsMap[id] || {};
+		if (delay) {
+			if (delay + initiated < Date.now()) {
+				typeof callback === 'function' && callback.apply(self, args);
 			} else {
-				requestID = window.requestAnimationFrame(simulateDelay);
-				hash[key] = requestID;
+				requestAnimationFrame(() => repeat(id));
 			}
 		}
-
-		requestID = window.requestAnimationFrame(simulateDelay);
-		hash[key] = requestID;
 	}
-	mySetTimeout.cancel = () => {
-		requestID = hash[key];
-		window.cancelAnimationFrame(requestID);
+
+	window.setTimeoutPolyfill = function (callback, delay, ...args) {
+		timeoutId++;
+		timeoutIdsMap[timeoutId] = {
+			delay,
+			self: this,
+			callback,
+			args,
+			initiated: Date.now(),
+		};
+		requestAnimationFrame(() => repeat(timeoutId));
+		return timeoutId;
 	};
-	return mySetTimeout;
+
+	window.clearTimeoutPolyfill = function (id) {
+		delete timeoutIdsMap[id];
+	};
 })();
 
-mySetTimeout(() => {
+setTimeoutPolyfill(() => {
 	console.log('executed after 4000 ms');
 }, 4000);
 
-// Using web worker
-const createInlineWorker = () => {
-	const blob = new Blob(
-		[
-			//"onmessage = function(e) { postMessage('msg from worker'); }"
-			`self.addEventListener('message', (e) => {
+(function () {
+	// Using web worker
+	const createInlineWorker = () => {
+		const blob = new Blob(
+			[
+				`self.addEventListener('message', (e) => {
 				function sleep(delay) {
 					const ms = new Date().getTime();
 					while(new Date().getTime() < ms + delay) {}
 				}
 				self.postMessage(sleep(e.data));
 			}, false);`,
-		],
-		{ type: 'text/javascript' },
-	);
+			],
+			{ type: 'text/javascript' }
+		);
 
-	// Obtain a blob URL reference to our worker 'file'.
-	const blobURL = window.URL.createObjectURL(blob);
-	return new Worker(blobURL);
-};
+		// Obtain a blob URL reference to our worker 'file'.
+		const blobURL = window.URL.createObjectURL(blob);
+		return new Worker(blobURL);
+	};
 
-const mySetTimeout = (function () {
-	const worker = createInlineWorker();
-	function simulateTimeout() {
-		const args = Array.prototype.slice.call(arguments);
-		const callback = args.shift() || function () {};
-		const delay = args.shift() || 0;
+	let uniqueInvocationId = 0;
+	const timeoutIdsMap = {};
+
+	window.setTimeoutPolyfill = function (callback, delay, ...args) {
+		const worker = createInlineWorker();
+		uniqueInvocationId++;
+		timeoutIdsMap[uniqueInvocationId] = uniqueInvocationId;
+
 		worker.postMessage(delay);
 		worker.onmessage = (e) => {
-			callback.apply(callback, args);
+			timeoutIdsMap[uniqueInvocationId] && callback.apply(callback, args);
 		};
+		return uniqueInvocationId;
 	}
 
-	simulateTimeout.cancel = () => {
-		worker.onmessage = () => {};
-	};
-	return simulateTimeout;
+	window.cancelTimeoutPolyfill = function (timeoutId) {
+		if (timeoutId in timeoutIdsMap) {
+			delete timeoutIdsMap[timeoutId];
+		}
+	}
 })();
 
-mySetTimeout(() => {
+setTimeoutPolyfill(() => {
 	console.log('executed after 4000 ms');
-}, 4000);
+}, 1000);

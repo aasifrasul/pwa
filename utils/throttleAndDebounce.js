@@ -2,7 +2,7 @@ const throttle = function throttle(func, delay) {
 	let timerId;
 	const wrapper = function (...args) {
 		if (!timerId) {
-			func.apply(null, ...args);
+			func.apply(this, ...args);
 			timerId = setTimeout(() => {
 				clearTimeout(timerId);
 				timerId = false;
@@ -20,7 +20,7 @@ const debounceFunction = function (func, delay) {
 		clearTimeout(timerId);
 
 		// Executes the func after delay time.
-		timerId = setTimeout(func, delay, ...args);
+		timerId = setTimeout(func.bind(this), delay, ...args);
 	};
 	wrapper.cancel = () => clearTimeout(timerId);
 	return wrapper;
@@ -31,7 +31,7 @@ const debounce = function debounce(func, delay) {
 	const wrapper = function wrapper(...args) {
 		timerId && clearTimeout(timerId);
 		timerId = setTimeout(() => {
-			func(...args);
+			func.apply(this, ...args);
 			clearTimeout(timerId);
 			timerId = null;
 		}, delay);
@@ -49,7 +49,7 @@ const throttle = function throttle(func, delay) {
 			timerId = setTimeout(
 				() => {
 					if (Date.now() - lastRan >= delay) {
-						func.apply(null, ...args);
+						func.apply(this, ...args);
 						lastRan = Date.now();
 						clearTimeout(timerId);
 					}
@@ -57,7 +57,7 @@ const throttle = function throttle(func, delay) {
 				delay - (Date.now() - lastRan),
 			);
 		} else {
-			func.apply(null, args);
+			func.apply(this, args);
 			lastRan = Date.now();
 		}
 	};

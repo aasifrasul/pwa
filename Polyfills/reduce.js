@@ -16,11 +16,7 @@ Array.prototype.myReduce =
 		let accumulator = isUndefined(initialValue) ? null : initialValue;
 
 		for (let i = 0; i < items.length; i++) {
-			if (isNull(accumulator)) {
-				accumulator = items[i];
-			} else {
-				accumulator = callback.call(undefined, accumulator, items[i], i, items);
-			}
+			accumulator = isNull(accumulator) ? items[i] : callback.call(this, accumulator, items[i], i, items);
 		}
 		return accumulator;
 	};

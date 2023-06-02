@@ -4,9 +4,7 @@ const isArray = (arr) => dataType(arr) === 'array';
 
 Array.prototype.myMap =
 	Array.prototype.myMap ||
-	function (...args) {
-		const callback = args.shift();
-		const thisParam = args.shift() || undefined;
+	function (callback, thisParam) {
 		if (!isFunction(callback)) {
 			throw new Error(callback + 'is not a function');
 		}

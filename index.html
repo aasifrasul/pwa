@@ -40,8 +40,10 @@
 					console.log('Script Rejected', src, err);
 				};
 			};
-			loadJS('js/app.js');
-			new Worker('worker.js');
+			window.addEventListener('DOMContentLoaded', () => {
+				loadJS('js/app.js');
+				new Worker('worker.js');
+			});
 		</script>
 	</head>
 	<body>

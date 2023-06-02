@@ -11,7 +11,8 @@
 		loaderCount > 1 && queue.push(loaderCount);
 		let key = `loader${loaderCount}`;
 		let loader = document.querySelector(`#${key}`);
-		const startLoader = (key) => (timeIntervalIds[key] = setInterval(displayLoader, 100, key));
+		const startLoader = (key) =>
+			(timeIntervalIds[key] = setInterval(displayLoader, 100, key));
 		const displayLoader = (key) => {
 			loader.style.maxWidth = `${count * 20}px`;
 			if (++count === 30) {
@@ -36,14 +37,16 @@
 		loaders.appendChild(div);
 	};
 
-	loadJS('../PromiseFactory.js').then(() => {
+	Promise.all([
+		loadJS(`${window.location.origin}/utils/PromiseFactory.js`),
+		loadJS(`${window.location.origin}/patterns/AyncQueue.js`),
+	]).then(() => {
 		const factory = new PromiseFactory();
 		factory.add('ABC');
 		const promise = factory.get('ABC');
-		promise.forceResolve(1234);
-		promise.fetchResolvedData('ABC');
+		promise.resolve(1234);
+		//promise.fetchResolvedData('ABC');
 		// loadJSON('https://api.github.com/users/aasifrasul').then(data => console.log(data));
-		// showLoader();
 		document.querySelector('#button').addEventListener('click', showLoader);
 	});
 })();

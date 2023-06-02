@@ -1,18 +1,24 @@
 // bind Polyfill
+const dataType = (data) => Object.prototype.toString.call(data).slice(8, -1).toLowerCase();
+
+const isFunction = (data) => dataType(data) === 'function';
+const isArray = (data) => dataType(data) === 'array';
+const isObject = (data) => dataType(data) === 'object';
+const isUndefined = (data) => dataType(data) === 'undefined';
 
 function getGlobalContext() {
-	if (typeof global !== 'object' || !global || global.Math !== Math || global.Array !== Array) {
+	if (isUndefined(global) || !isObject(global) || global.Math !== Math || global.Array !== Array) {
 		return getGlobal();
 	}
 	return global;
 }
 
 function getGlobal() {
-	if (typeof self !== 'undefined') {
+	if (!isUndefined(self)) {
 		return self;
-	} else if (typeof window !== 'undefined') {
+	} else if (!isUndefined(window)) {
 		return window;
-	} else if (typeof global !== 'undefined') {
+	} else if (!isUndefined(global)) {
 		return global;
 	} else {
 		return new Function('return this')();

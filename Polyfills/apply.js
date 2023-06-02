@@ -3,20 +3,21 @@ const dataType = (data) => Object.prototype.toString.call(data).slice(8, -1).toL
 const isFunction = (data) => dataType(data) === 'function';
 const isArray = (data) => dataType(data) === 'array';
 const isObject = (data) => dataType(data) === 'object';
+const isUndefined = (data) => dataType(data) === 'undefined';
 
 function getGlobalContext() {
-	if (typeof global !== 'object' || !global || global.Math !== Math || global.Array !== Array) {
+	if (isUndefined(global) || !isObject(global) || global.Math !== Math || global.Array !== Array) {
 		return getGlobal();
 	}
 	return global;
 }
 
 function getGlobal() {
-	if (typeof self !== 'undefined') {
+	if (!isUndefined(self)) {
 		return self;
-	} else if (typeof window !== 'undefined') {
+	} else if (!isUndefined(window)) {
 		return window;
-	} else if (typeof global !== 'undefined') {
+	} else if (!isUndefined(global)) {
 		return global;
 	} else {
 		return new Function('return this')();
@@ -27,17 +28,19 @@ Function.prototype.myApply =
 	Function.prototype.myApply ||
 	function myApply(context = getGlobalContext(), args = []) {
 		context.myApply = this;
-		return context.myApply(...args);
+		const result = context.myApply(...args);
+		delete context.myApply;
+		return result;
 	};
 
 Function.prototype.myApply = function (obj, args = []) {
-	if (typeof this !== 'function') {
+	if (!isFunction(this)) {
 		throw new TypeError('Attempt to call apply on non-function');
 	}
-	if (typeof obj !== 'object' && typeof obj !== 'function') {
+	if (!isObject(obj) && !isFunction(obj)) {
 		throw new TypeError('Function.prototype.apply: Arguments list has wrong type');
 	}
-	if (args && !Array.isArray(args)) {
+	if (!isArray(args)) {
 		throw new TypeError('CreateListFromArrayLike called on non-object');
 	}
 

@@ -1,24 +1,19 @@
-// [1,2,5,6,7,4]
 
-Array.prototype.myFlat = function () {
-	const arr = Array.from(this);
-	if (!Array.isArray(arr) || arr.length === 0) {
-		return [];
-	}
-	const res = [];
-	let item;
-
-	const flatten = function (obj) {
-		for (var i = 0; i < obj.length; i++) {
-			item = obj[i];
-			Array.isArray(item) ? flatten(item) : item && res.push(item);
+(function () {
+	const arr = [];
+	window.flattenArray = function (item) {
+		if (Array.isArray(item)) {
+			for (var value of item) {
+				flattenArray(value);
+			}
+		} else {
+			arr.push(item);
 		}
-	};
+		return arr;
+	}
+})();
 
-	flatten(arr);
-
-	return res;
-};
+flattenArray([1, 2, [5, 6, [9, [10, 11, [67, [78, [101, [102], 103], 56], 89], 12], 8], 7], , 4])
 
 const flatDeep = function (arr) {
 	let stack = [...arr],
@@ -48,6 +43,6 @@ function* flatten(array, depth) {
 	}
 }
 
-const arr = [1, 2, 3, 4, 5, [6, [7, 8, 9]]];
+const arr = [1, 2, [5, 6, [9, [10, 11, [67, [78, [101, [102], 103], 56], 89], 12], 8], 7], , 4];
 const flattened_arr = [...flatten(arr, Infinity)];
 console.log(flattened_arr); // [1,2,3,4,5,6,7,8,9]

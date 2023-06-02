@@ -56,16 +56,22 @@
 				});
 			};
 			window.addEventListener('DOMContentLoaded', function () {
-				//window.loadJS('js/test.js');
+				window.loadJS('js/test.js');
 
+				var loaders = document.querySelector('#loaders');
+				loaders.innerHTML = '';
 				var list = document.querySelector('#list');
 				var fruits = ['Apple', 'Orange', 'Banana', 'Melon'];
+				list.onclick = function(e) {
+					alert(e.target.innerText);
+				};
 
 				var fragment = new DocumentFragment();
 
 				fruits.forEach(function (fruit) {
 					var li = document.createElement('li');
 					li.innerHTML = fruit;
+
 					fragment.appendChild(li);
 				});
 
@@ -75,7 +81,7 @@
 	</head>
 	<body>
 		<div id="app"></div>
-		<div id="loaders"></div>
+		<div id="loaders">Loading...</div>
 		<ul id="list"></ul>
 		<div class="container">
 			<div>

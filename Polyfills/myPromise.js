@@ -18,20 +18,124 @@ const safelyExecuteFunction = (func, context, ...params) => {
 /**
  * 
 	class Promise {
-	  constructor(executor: (resolve: Function, reject: Function) => void): Promise;
-	  then(onFulfilled: Function, onRejected: Function): Promise;
-	  catch(onRejected: Function): Promise;
-	  finally(onFinally: Function): Promise;
-	  static resolve(x: any): Promise;
-	  static reject(r: any): Promise;
-	  static all(iterable: Iterable): Promise;
-	  static allSettled(iterable: Iterable): Promise;
-	  static any(promises: Iterable): Promise<any>;
-	  static race(iterable: Iterable): Promise;
+		status // pending/fulfilled/rejected
+		data
+		constructor(executor: (resolve: Function, reject: Function) => void): Promise;
+		then(onFulfilled: Function, onRejected: Function): Promise;
+		catch(onRejected: Function): Promise;
+		finally(onFinally: Function): Promise;
+		static resolve(x: any): Promise;
+		static reject(r: any): Promise;
+		static all(iterable: Iterable): Promise;
+		static allSettled(iterable: Iterable): Promise;
+		static any(promises: Iterable): Promise<any>;
+		static race(iterable: Iterable): Promise;
 	}
 */
 
 class myPromise {
+
+	static resolve (data) {
+		return new myPromise(function (resolve) {
+			resolve(data);
+		});
+	};
+
+	static reject  (error) {
+		return new myPromise(function (undefined, reject) {
+			reject(error);
+		});
+	};
+
+	static all (promises) {
+		if (!isArray(promises)) {
+			throw new Error('Parameter expected of type array');
+		}
+
+		return new myPromise((resolve, reject) => {
+			const result = {};
+			let countOfResolvedPromises = 0;
+
+			for (let i = 0; i < promises.length; i++) {
+				const promise = promises[i];
+				if (!isFunction(promise.then)) {
+					reject();
+					throw new Error('expected Parameter is array of promises');
+				}
+				result[i] = promise;
+				promise.then(
+					(data) => {
+						countOfResolvedPromises++;
+						result[i] = data;
+						if (promises.length == countOfResolvedPromises) {
+							resolve(Object.values(result));
+						}
+					},
+					(err) => {
+						reject(err);
+						throw new Error(err);
+					},
+				);
+			}
+		});
+	};
+
+	static allSettled  (promises) {
+		if (!isArray(promises)) {
+			throw new Error('Parameter expected of type array');
+		}
+
+		return new myPromise((resolve, reject) => {
+			const result = {};
+			let countOfResolvedPromises = 0;
+
+			promises.forEach((promise, index) => {
+				if (!isFunction(promise.then)) {
+					reject();
+					throw new Error('expected Parameter is array of promises');
+				}
+				result[index] = promise;
+				promise.then(
+					(data) => {
+						countOfResolvedPromises++;
+						result[index] = data;
+						if (promises.length == countOfResolvedPromises) {
+							resolve(Object.values(result));
+						}
+					},
+					(err) => {
+						countOfResolvedPromises++;
+						result[index] = err;
+						if (promises.length == countOfResolvedPromises) {
+							reject(Object.values(result));
+						}
+					},
+				);
+			});
+		});
+	};
+
+	static race  (promises) {
+		if (!isArray(promises)) {
+			throw new Error('Parameter expected of type array');
+		}
+
+		return new myPromise((resolve, reject) => {
+			for (let promise of promises) {
+				promise.then(
+					(data) => {
+						resolve(data);
+						return;
+					},
+					(err) => {
+						reject(new Error());
+						return;
+					},
+				);
+			}
+		});
+	};
+
 	constructor(callback) {
 		if (!isFunction(callback)) {
 			throw new Error('constructor parameter needs to be a function callback');
@@ -76,9 +180,7 @@ class myPromise {
 
 		if (this.data) {
 			safelyExecuteFunction(onFulfilled, this, this.data);
-		}
-
-		if (this.error) {
+		} else if (this.error) {
 			safelyExecuteFunction(onRejected, this, new Error(this.error));
 		}
 
@@ -99,110 +201,8 @@ class myPromise {
 			throw new Error('Param supplied should be of of type fuction');
 		}
 		['fulfilled', 'rejected'].includes(this.status) && safelyExecuteFunction(callback);
-		return this;
 	}
 }
-
-myPromise.resolve = function (data) {
-	return new myPromise(function (resolve) {
-		resolve(data);
-	});
-};
-
-myPromise.reject = function (error) {
-	return new myPromise(function (undefined, reject) {
-		reject(error);
-	});
-};
-
-myPromise.all = function (promises) {
-	if (!isArray(promises)) {
-		throw new Error('Parameter expected of type array');
-	}
-
-	return new myPromise((resolve, reject) => {
-		const result = {};
-		let countOfResolvedPromises = 0;
-
-		for (let i = 0; i < promises.length; i++) {
-			const promise = promises[i];
-			if (!isFunction(promise.then)) {
-				reject();
-				throw new Error('expected Parameter is array of promises');
-			}
-			result[i] = promise;
-			promise.then(
-				(data) => {
-					countOfResolvedPromises++;
-					result[i] = data;
-					if (promises.length == countOfResolvedPromises) {
-						resolve(Object.values(result));
-					}
-				},
-				(err) => {
-					reject(err);
-					throw new Error(err);
-				},
-			);
-		}
-	});
-};
-
-myPromise.allSettled = function (promises) {
-	if (!isArray(promises)) {
-		throw new Error('Parameter expected of type array');
-	}
-
-	return new myPromise((resolve, reject) => {
-		const result = {};
-		let countOfResolvedPromises = 0;
-
-		promises.forEach((promise, index) => {
-			if (!isFunction(promise.then)) {
-				reject();
-				throw new Error('expected Parameter is array of promises');
-			}
-			result[index] = promise;
-			promise.then(
-				(data) => {
-					countOfResolvedPromises++;
-					result[index] = data;
-					if (promises.length == countOfResolvedPromises) {
-						resolve(Object.values(result));
-					}
-				},
-				(err) => {
-					countOfResolvedPromises++;
-					result[index] = err;
-					if (promises.length == countOfResolvedPromises) {
-						reject(Object.values(result));
-					}
-				},
-			);
-		});
-	});
-};
-
-myPromise.race = function (promises) {
-	if (!isArray(promises)) {
-		throw new Error('Parameter expected of type array');
-	}
-
-	return new myPromise((resolve, reject) => {
-		for (let promise of promises) {
-			promise.then(
-				(data) => {
-					resolve(data);
-					return;
-				},
-				(err) => {
-					reject(new Error());
-					return;
-				},
-			);
-		}
-	});
-};
 
 const promise = new myPromise(function (resolve, reject) {
 	console.log('Inside myPromise Instance');

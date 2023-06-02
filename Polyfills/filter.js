@@ -5,7 +5,7 @@ Array.prototype.myFilter =
 		const result = [];
 		let returnResult;
 
-		for (let i = 0; i < items.length; i++) {
+		for (let value of items) {
 			returnResult = callback.call(thisParam, items[i], i, items);
 
 			if (returnResult) {

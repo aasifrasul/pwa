@@ -84,9 +84,7 @@ var cornify_add = function (options) {
 	}
 
 	// Construct our unicorn & rainbow request.
-	var url = `https://www.cornify.com/corns/${Math.random() > 0.5 ? 'r' : 'u'}${Math.ceil(
-		Math.random() * 7
-	)}.gif`;
+	var url = `https://www.cornify.com/corns/${Math.random() > 0.5 ? 'r' : 'u'}${Math.ceil(Math.random() * 7)}.gif`;
 
 	// Add younicorns if requested.
 	if (options && (options.y || options.younicorns)) {
@@ -269,9 +267,7 @@ var cornify_replace = function () {
 		for (i = 0; i < headerElements.length; i++) {
 			headerElement = headerElements[i];
 			headerElement.innerHTML =
-				magicalWords[Math.floor(Math.random() * magicalWords.length)] +
-				' ' +
-				headerElement.innerHTML;
+				magicalWords[Math.floor(Math.random() * magicalWords.length)] + ' ' + headerElement.innerHTML;
 		}
 
 		headerTypeIndex -= 1;

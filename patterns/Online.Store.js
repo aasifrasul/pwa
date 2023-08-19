@@ -133,6 +133,4 @@ Product.prototype.getDiscountedPrice = function (discount) {
 const discountedProduct = Object.create(product1);
 discountedProduct.discount = 0.1;
 
-console.log(
-	`Discounted price: ${discountedProduct.getDiscountedPrice(discountedProduct.discount)}`
-);
+console.log(`Discounted price: ${discountedProduct.getDiscountedPrice(discountedProduct.discount)}`);

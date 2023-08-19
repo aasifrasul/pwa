@@ -21,7 +21,9 @@ Function.prototype.myCall =
 	Function.prototype.myCall ||
 	function myCall(context = getGlobalContext(), ...args) {
 		context.myCall = this;
-		return context.myCall(...args);
+		const result = context.myCall(...args);
+		delete context.myCall;
+		return result;
 	};
 
 var obj = {

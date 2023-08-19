@@ -48,7 +48,7 @@ setTimeoutPolyfill(() => {
 				self.postMessage(sleep(e.data));
 			}, false);`,
 			],
-			{ type: 'text/javascript' }
+			{ type: 'text/javascript' },
 		);
 
 		// Obtain a blob URL reference to our worker 'file'.
@@ -69,13 +69,13 @@ setTimeoutPolyfill(() => {
 			timeoutIdsMap[uniqueInvocationId] && callback.apply(callback, args);
 		};
 		return uniqueInvocationId;
-	}
+	};
 
 	window.cancelTimeoutPolyfill = function (timeoutId) {
 		if (timeoutId in timeoutIdsMap) {
 			delete timeoutIdsMap[timeoutId];
 		}
-	}
+	};
 })();
 
 setTimeoutPolyfill(() => {

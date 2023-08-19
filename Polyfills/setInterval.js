@@ -1,28 +1,41 @@
-(function() {
+const { setIntervalPolyfill, clearIntervalPolyfill } = (function () {
 	let counter = 0;
 	const hashmap = {};
 
-	function repeat(context, intervalId, func, delay, args) {
-		counter in hashmap && clearTimeout(hashmap[intervalId]);
+	function repeat(intervalId, func, delay, args) {
 		hashmap[counter] = setTimeout(() => {
-			func.apply(context, args);
-			repeat(context, intervalId, func, delay, args)
+			if (intervalId in hashmap) {
+				clearTimeout(hashmap[intervalId]);
+				func.apply(null, args);
+				repeat(intervalId, func, delay, args);
+			}
 		}, delay);
 	}
 
-	window.setIntervalPolyfill = function (func, delay, ...args) {
+	const setIntervalPolyfill = function (func, delay, ...args) {
 		counter++;
-		repeat(this, counter, func, delay, args);
+
+		if (typeof func === 'function') {
+			repeat(counter, func, delay, args);
+		} else {
+			eval(func);
+		}
+
 		return counter;
 	};
 
-	window.clearIntervalPolyfill = function (intervalId) {
-		if (hashmap[intervalId]) {
+	const clearIntervalPolyfill = function (intervalId) {
+		if (intervalId in hashmap) {
 			clearTimeout(hashmap[intervalId]);
 			delete hashmap[intervalId];
 		}
 	};
-}());
+
+	return {
+		setIntervalPolyfill,
+		clearIntervalPolyfill,
+	};
+})();
 
 const multiply = (a, b) => console.log('(a * b) =>', a * b);
 

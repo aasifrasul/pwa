@@ -4,9 +4,7 @@ const DealerA = {
 		return 'Dealer A';
 	},
 	pay(amount) {
-		console.log(
-			`Set up configuration using username: ${this.username} and password: ${this.password}`
-		);
+		console.log(`Set up configuration using username: ${this.username} and password: ${this.password}`);
 		return `Payment for service ${amount} is successful using ${this.title()}`;
 	},
 };
@@ -17,9 +15,7 @@ const DealerB = {
 		return 'Dealer B';
 	},
 	pay(amount) {
-		console.log(
-			`Set up configuration using username: ${this.username} and password: ${this.password}`
-		);
+		console.log(`Set up configuration using username: ${this.username} and password: ${this.password}`);
 		return `Payment for service ${amount} is successful using ${this.title()}`;
 	},
 };

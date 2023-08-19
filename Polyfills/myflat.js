@@ -1,19 +1,22 @@
+function flattenArray(data) {
+	const result = [];
 
-(function () {
-	const arr = [];
-	window.flattenArray = function (item) {
-		if (Array.isArray(item)) {
-			for (var value of item) {
-				flattenArray(value);
+	function wrapper(arr) {
+		if (Array.isArray(arr)) {
+			for (const value of arr) {
+				wrapper(value);
 			}
 		} else {
-			arr.push(item);
+			result.push(arr);
 		}
-		return arr;
 	}
-})();
 
-flattenArray([1, 2, [5, 6, [9, [10, 11, [67, [78, [101, [102], 103], 56], 89], 12], 8], 7], , 4])
+	wrapper(data);
+
+	return result;
+}
+
+flattenArray([1, 2, [5, 6, [9, [10, 11, [67, [78, [101, [102], 103], 56], 89], 12], 8], 7], , 4]);
 
 const flatDeep = function (arr) {
 	let stack = [...arr],

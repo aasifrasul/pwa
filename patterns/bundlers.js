@@ -113,7 +113,6 @@ function findDependencies(fileContents) {
 	return dependencies;
 }
 
-
 // entry point for the bundler
 function bundle(entryPoint) {
 	// initialize an empty dependency graph

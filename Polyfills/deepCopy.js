@@ -26,7 +26,7 @@ function deepCopy(obj) {
 
 	let newObj = obj instanceof Date ? new obj.constructor(obj) : obj.constructor();
 
-	Reflect.ownKeys(obj).forEach(key => {
+	Reflect.ownKeys(obj).forEach((key) => {
 		obj['isActiveClone'] = true;
 		newObj[key] = deepCopy(obj[key]);
 		delete obj['isActiveClone'];

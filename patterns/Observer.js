@@ -1,115 +1,41 @@
-var Subject = function () {
-	this.observers = [];
-
-	return {
-		observers: this.observers,
-		subscribeObserver: function (observer) {
-			this.observers.push(observer);
-		},
-		unsubscribeObserver: function (observer) {
-			var index = this.observers.indexOf(observer);
-			if (index > -1) {
-				this.observers.splice(index, 1);
-			}
-		},
-		notifyObserver: function (observer) {
-			var index = this.observers.indexOf(observer);
-			if (index > -1) {
-				this.notifyObserverAtIndex(index);
-			}
-		},
-		notifyAllObservers: function () {
-			for (var i = 0; i < this.observers.length; i++) {
-				this.notifyObserverAtIndex(i);
-			}
-		},
-		notifyObserverAtIndex: function (index) {
-			this.observers[index]?.notify(index);
-		},
-	};
-};
-
-var Observer = function () {
-	return {
-		notify: function (index) {
-			console.log('Observer ' + index + ' is notified!');
-		},
-	};
-};
-
-var subject = new Subject();
-
-var observer1 = new Observer();
-var observer2 = new Observer();
-var observer3 = new Observer();
-var observer4 = new Observer();
-
-subject.subscribeObserver(observer1);
-subject.subscribeObserver(observer2);
-subject.subscribeObserver(observer3);
-subject.subscribeObserver(observer4);
-
-subject.notifyObserver(observer2); // Observer 2 is notified!
-
-subject.notifyAllObservers();
-// Observer 1 is notified!
-// Observer 2 is notified!
-// Observer 3 is notified!
-// Observer 4 is notified!
-
 class Subject {
 	constructor() {
 		this.observers = [];
 	}
 
-	subscribe(observer) {
+	addObserver(observer) {
 		this.observers.push(observer);
 	}
 
-	unSubscribe(observer) {
-		const index = this.observers.indexOf(observer);
-		if (index > -1) {
-			this.observers.splice(index, 1);
-		}
+	removeObserver(observer) {
+		this.observers = this.observers.filter((obs) => obs !== observer);
 	}
 
-	notifyObserver(observer, data) {
-		const index = this.observers.indexOf(observer);
-		if (index > -1) {
-			this.observers[index].notify(data);
-		}
-	}
-
-	notifyAllObservers(data) {
-		this.observers.forEach((i) => i.notify(data));
+	notifyObservers(data) {
+		this.observers.forEach((observer) => observer.update(data));
 	}
 }
 
 class Observer {
-	constructor(name) {
-		this.name = name;
-		//this.notify = this.notify.bind(this);
-	}
-
-	notify(data) {
-		console.log(`Notfied ${this.name} with data`, data);
+	update(data) {
+		console.log(`Received update: ${data}`);
+		// Perform necessary actions based on the update data
 	}
 }
 
+// Usage example:
 const subject = new Subject();
+const observer1 = new Observer();
+const observer2 = new Observer();
 
-const observer1 = new Observer('Observer1');
-const observer2 = new Observer('Observer2');
-const observer3 = new Observer('Observer3');
-const observer4 = new Observer('Observer4');
-const observer5 = new Observer('Observer5');
+subject.addObserver(observer1);
+subject.addObserver(observer2);
 
-subject.subscribe(observer1);
-subject.subscribe(observer2);
-subject.subscribe(observer3);
-subject.subscribe(observer4);
-subject.subscribe(observer5);
+subject.notifyObservers('Hello, observers!'); // Output will be:
+// Received update: Hello, observers!
+// Received update: Hello, observers!
 
-subject.notifyObserver(observer3, 'Hello');
+subject.removeObserver(observer1);
 
-subject.notifyAllObservers('Hello to All');
+subject.notifyObservers('Observers reduced!'); // Output will be:
+// Received update: Observers reduced!

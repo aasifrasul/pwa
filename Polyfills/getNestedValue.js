@@ -1,5 +1,4 @@
-const typeCheck = (data, type) =>
-	Object.prototype.toString.call(data).slice(8, -1).toLowerCase() === type;
+const typeCheck = (data, type) => Object.prototype.toString.call(data).slice(8, -1).toLowerCase() === type;
 
 const isArray = (data) => typeCheck(data, 'array');
 const isObject = (data) => typeCheck(data, 'object');
@@ -27,10 +26,7 @@ const getNestedValue = (obj, path) => {
 */
 	return (
 		isArray(accessorPaths) &&
-		accessorPaths.reduce(
-			(accu, value) => (!isEmpty(value) && isObject(accu) ? accu[value] : null),
-			{}
-		)
+		accessorPaths.reduce((accu, value) => (!isEmpty(value) && isObject(accu) ? accu[value] : null), {})
 	);
 };
 

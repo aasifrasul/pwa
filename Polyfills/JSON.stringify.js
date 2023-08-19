@@ -13,9 +13,9 @@ const isDate = (data) => typeCheck(data) === 'date';
 const isEmpty = (data) => isUndefined(data) || isNull(data) || data === '';
 
 function stringify(obj) {
-	const dataType = typeChechk(obj);
+	const dataType = typeCheck(obj);
 
-	switch(dataType) {
+	switch (dataType) {
 		case 'string':
 			return `"${obj}"`;
 		case 'undefined':
@@ -35,16 +35,15 @@ function stringify(obj) {
 			return `[${result.join(',')}]`;
 		case 'object':
 			var result = [];
-			Object.keys(obj).map(key => {
-				const strKey = typeChechk(key) === 'symbol' ? key.toString() : key;
-				result.push(`"${strKey}":${stringify(obj[key])}`);
-			});
+			for (let key in obj) {
+				result.push(`${stringify(key)}: ${stringify(obj[key])}`);
+			}
 			return `{${result.join(',')}}`;
 		default:
 			return String(null);
 	}
 }
-
+/*
 function stringify(obj, replacer, space) {
 	if (isString(obj)) {
 		return '"' + obj + '"';
@@ -81,7 +80,7 @@ function stringify(obj, replacer, space) {
 		}
 	}
 }
-
+*/
 const obj = {
 	a: 1,
 	b: 'string',

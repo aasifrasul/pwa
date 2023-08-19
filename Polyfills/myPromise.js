@@ -1,20 +1,3 @@
-const dataType = (data) => Object.prototype.toString.call(data).slice(8, -1).toLowerCase();
-const isArray = (arr) => dataType(arr) === 'array';
-const isFunction = (func) => dataType(func) === 'function';
-const isObject = (obj) => dataType(obj) === 'object';
-
-const safelyExecuteFunction = (func, context, ...params) => {
-	if (!isFunction(func)) {
-		return null;
-	}
-
-	if (isObject(context) && isFunction(context[func.name])) {
-		return func.apply(context, params);
-	}
-
-	return func(...params);
-};
-
 /**
  * 
 	class Promise {
@@ -26,30 +9,55 @@ const safelyExecuteFunction = (func, context, ...params) => {
 		finally(onFinally: Function): Promise;
 		static resolve(x: any): Promise;
 		static reject(r: any): Promise;
+
 		static all(iterable: Iterable): Promise;
+		// takes an iterable (such as an array or a Map) of promises as input and returns a new promise. 
+		// This returned promise fulfills with an array of all the resolved values of the input promises in 
+		// the same order as the input. However, if any of the input promises reject, the returned promise 
+		// will immediately reject with the reason of the first rejecting promise encountered. In other words, 
+		// if any one promise fails, the entire Promise.all operation fails.
+
 		static allSettled(iterable: Iterable): Promise;
-		static any(promises: Iterable): Promise<any>;
+		// takes an iterable of promises as input and returns a new promise that fulfills with an array of objects. 
+		// Each object represents the outcome of each input promise, whether it was fulfilled or rejected. 
+		// The objects contain two properties: status and value or reason. 
+		// The status property can be either "fulfilled" for resolved promises or "rejected" for rejected promises. 
+		// The value property holds the resolved value if the promise was fulfilled, 
+		// and the reason property holds the rejection reason if the promise was rejected.
+
+		static any(promises: Iterable): Promise<any>; 
+		// takes an iterable of promises as input and returns a new promise that fulfills with the value of the 
+		// first promise that fulfills successfully. If all the input promises reject, the returned promise is 
+		// rejected with an AggregateError, which is a specialized error object containing an array of rejection 
+		// reasons.
+
 		static race(iterable: Iterable): Promise;
+		// takes an iterable of promises as input and returns a new promise that is settled with the outcome 
+		// of the first promise that settles, whether it's fulfilled or rejected. It doesn't matter if the other 
+		// promises fulfill or reject later.
 	}
 */
 
 class myPromise {
-
-	static resolve (data) {
+	static resolve(data) {
 		return new myPromise(function (resolve) {
 			resolve(data);
 		});
-	};
+	}
 
-	static reject  (error) {
-		return new myPromise(function (undefined, reject) {
+	static reject(error) {
+		return new myPromise(function (resolve, reject) {
 			reject(error);
 		});
-	};
+	}
 
-	static all (promises) {
-		if (!isArray(promises)) {
+	static all(promises) {
+		if (!Array.isArray(promises)) {
 			throw new Error('Parameter expected of type array');
+		}
+
+		if (promises.length === 0) {
+			return myPromise.resolve([]);
 		}
 
 		return new myPromise((resolve, reject) => {
@@ -58,149 +66,174 @@ class myPromise {
 
 			for (let i = 0; i < promises.length; i++) {
 				const promise = promises[i];
-				if (!isFunction(promise.then)) {
-					reject();
-					throw new Error('expected Parameter is array of promises');
-				}
-				result[i] = promise;
-				promise.then(
-					(data) => {
+
+				try {
+					promise.then((data) => {
 						countOfResolvedPromises++;
 						result[i] = data;
-						if (promises.length == countOfResolvedPromises) {
-							resolve(Object.values(result));
+						if (promises.length === countOfResolvedPromises) {
+							resolve(result);
+							return;
 						}
-					},
-					(err) => {
-						reject(err);
-						throw new Error(err);
-					},
-				);
+					});
+				} catch (err) {
+					throw new Error(err);
+				}
 			}
 		});
-	};
+	}
 
-	static allSettled  (promises) {
-		if (!isArray(promises)) {
+	static allSettled(promises) {
+		if (!Array.isArray(promises)) {
 			throw new Error('Parameter expected of type array');
 		}
 
 		return new myPromise((resolve, reject) => {
-			const result = {};
+			const result = [];
 			let countOfResolvedPromises = 0;
 
-			promises.forEach((promise, index) => {
-				if (!isFunction(promise.then)) {
-					reject();
-					throw new Error('expected Parameter is array of promises');
-				}
-				result[index] = promise;
+			for (let i = 0; i < promises.length; i++) {
+				const promise = promises[i];
+
 				promise.then(
-					(data) => {
+					(value) => {
 						countOfResolvedPromises++;
-						result[index] = data;
-						if (promises.length == countOfResolvedPromises) {
-							resolve(Object.values(result));
+						result[i] = { status: 'fulfilled', value };
+						if (promises.length === countOfResolvedPromises) {
+							resolve(result);
 						}
 					},
-					(err) => {
+					(reason) => {
 						countOfResolvedPromises++;
-						result[index] = err;
-						if (promises.length == countOfResolvedPromises) {
-							reject(Object.values(result));
+						result[i] = { status: 'rejected', reason };
+						if (promises.length === countOfResolvedPromises) {
+							resolve(result);
 						}
 					},
 				);
-			});
+			}
 		});
-	};
+	}
 
-	static race  (promises) {
-		if (!isArray(promises)) {
+	static any(promises) {
+		if (!Array.isArray(promises)) {
+			throw new Error('Parameter expected of type array');
+		}
+
+		if (promises.length === 0) {
+			return myPromise.resolve([]);
+		}
+
+		return new Promise((resolve, reject) => {
+			let resultData;
+			let countOfCompletedPromises = 0;
+
+			for (let promise of promises) {
+				promise
+					.then((data) => {
+						if (!resultData) {
+							resultData = data;
+						}
+					})
+					.finally(() => {
+						++countOfCompletedPromises;
+
+						if (countOfCompletedPromises === promises.length) {
+							if (resultData) {
+								resolve(resultData);
+							} else {
+								reject(new Error('AggregateError'));
+							}
+						}
+					});
+			}
+		});
+	}
+
+	static race(promises) {
+		if (!Array.isArray(promises)) {
 			throw new Error('Parameter expected of type array');
 		}
 
 		return new myPromise((resolve, reject) => {
 			for (let promise of promises) {
-				promise.then(
-					(data) => {
-						resolve(data);
-						return;
-					},
-					(err) => {
-						reject(new Error());
-						return;
-					},
-				);
+				promise
+					.then((data) => resolve(data))
+					.catch((err) => {
+						reject(err);
+						throw new Error(err);
+					});
 			}
 		});
-	};
+	}
 
 	constructor(callback) {
-		if (!isFunction(callback)) {
-			throw new Error('constructor parameter needs to be a function callback');
-		}
-
+		this.validateFunction(callback);
+		this.state = 'pending'; //pending/fulfilled/rejected
 		this.data = null;
 		this.error = null;
-		this.status = 'pending'; // pending/fulfilled/rejected
+
+		this.finallyCallback = () => {};
+		this.successCallback = () => {};
+		this.errorCallback = () => {};
 
 		this.resolve = this.resolve.bind(this);
 		this.reject = this.reject.bind(this);
-		safelyExecuteFunction(callback, null, this.resolve, this.reject);
+
+		callback(this.resolve, this.reject);
 	}
 
 	resolve(data) {
-		if (this.status === 'pending') {
-			this.status = 'fulfilled';
+		if (this.state === 'pending') {
+			this.state = 'fulfilled';
 			this.data = data;
-			safelyExecuteFunction(this.onFulfilled, this, this.data);
+
+			this.successCallback(data);
+			this.finallyCallback();
 		}
 	}
 
-	reject(err) {
-		if (this.status === 'pending') {
-			this.status = 'rejected';
-			this.error = err;
-			safelyExecuteFunction(this.onRejected, this, this.error);
+	reject(error) {
+		if (this.state === 'pending') {
+			this.state = 'rejected';
+			this.error = error;
+
+			this.errorCallback(error);
+			this.finallyCallback();
 		}
 	}
 
-	then(onFulfilled, onRejected) {
-		if (!isFunction(onFulfilled)) {
-			throw new Error('First Param is required and should be a function');
-		}
+	then(successCallback, errorCallback) {
+		this.validateFunction(successCallback, 'successCallback');
+		errorCallback && this.validateFunction(errorCallback, 'errorCallback');
 
-		if (onRejected && !isFunction(onRejected)) {
-			throw new Error('If Second Param is supplied it needs to be a function');
-		}
-
-		this.onFulfilled = onFulfilled;
-		this.onRejected = onRejected;
-
-		if (this.data) {
-			safelyExecuteFunction(onFulfilled, this, this.data);
-		} else if (this.error) {
-			safelyExecuteFunction(onRejected, this, new Error(this.error));
-		}
+		this.data && this.successCallback(this.data);
+		this.error && errorCallback && this.errorCallback(this.error);
+		this.finallyCallback();
 
 		return this;
 	}
 
-	catch(onRejected) {
-		if (!isFunction(onRejected)) {
-			throw new Error('Param supplied should be of type Function');
-		}
+	catch(errorCallback) {
+		this.validateFunction(errorCallback, 'errorCallback');
+		this.error && this.errorCallback(this.error);
+		this.finallyCallback();
 
-		this.status === 'rejected' && safelyExecuteFunction(onRejected, null, this.data);
 		return this;
 	}
 
-	finally(callback) {
-		if (!isFunction(callback)) {
-			throw new Error('Param supplied should be of of type fuction');
+	finally(finallyCallback) {
+		this.validateFunction(finallyCallback, 'finallyCallback');
+	}
+
+	validateFunction(func, funcName) {
+		if (typeof func !== 'function') {
+			throw new Error('Invalid function', funcName);
 		}
-		['fulfilled', 'rejected'].includes(this.status) && safelyExecuteFunction(callback);
+
+		if (typeof funcName === 'string' && funcName.length > 0) {
+			this[funcName] = func;
+		}
 	}
 }
 
@@ -227,6 +260,16 @@ myPromise
 	.all([
 		new myPromise((resolve) => setTimeout(() => resolve(5)), 5000),
 		new myPromise((resolve) => setTimeout(() => resolve(1)), 1000),
+		new myPromise((resolve) => setTimeout(() => resolve(4)), 4000),
+		new myPromise((resolve) => setTimeout(() => resolve(6)), 6000),
+		new myPromise((resolve) => setTimeout(() => resolve(2)), 2000),
+		new myPromise((resolve) => setTimeout(() => resolve(3)), 3000),
+	])
+	.then(console.log);
+
+myPromise
+	.any([
+		new myPromise((resolve, reject) => setTimeout(() => reject(1)), 1000),
 		new myPromise((resolve) => setTimeout(() => resolve(4)), 4000),
 		new myPromise((resolve) => setTimeout(() => resolve(6)), 6000),
 		new myPromise((resolve) => setTimeout(() => resolve(2)), 2000),

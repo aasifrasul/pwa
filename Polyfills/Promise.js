@@ -143,7 +143,7 @@ myPromise.all = function all(arr) {
 					(e) => {
 						reject(e);
 						// throw new Error(e);
-					}
+					},
 				);
 			})(i);
 		}
@@ -164,7 +164,7 @@ var promise = new myPromise((resolve, reject) => {
 		},
 		(e) => {
 			reject(e);
-		}
+		},
 	);
 });
 
@@ -195,7 +195,7 @@ myPromise
 	.all(promises)
 	.then(
 		(data) => log('In then', data),
-		(e) => log('In Error', e)
+		(e) => log('In Error', e),
 	)
 	.catch((e) => {
 		log('In catch', e);

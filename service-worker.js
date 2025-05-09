@@ -1,10 +1,11 @@
-'use srict';
+'use strict';
 
 const SWVERSION = 10;
 const CURRENT_CACHES = {
 	prefetch: 'prefetch-cache-v' + SWVERSION,
 };
 
+// URLs to prefetch during installation
 const urlsToPrefetch = [
 	'/',
 	'/static/images/Dubai-Al-Arab.webp',
@@ -16,6 +17,7 @@ const urlsToPrefetch = [
 	'/web-Worker.js',
 ];
 
+// Application routes for streaming HTML responses
 const routes = [
 	{
 		url: '/',
@@ -24,48 +26,38 @@ const routes = [
 	},
 ];
 
-importScripts('./getApi.js');
+// If you need external scripts, ensure they're available
+// importScripts('./getApi.js');
 
-const fetchCacheByKey = (name) => ({
-	cache: {
-		name,
-		maxAgeSeconds: null,
-		maxEntries: null,
-	},
-});
-
-const openCache = (options) => {
-	let cacheName;
-	const {
-		cache: { name },
-	} = options || {};
-	cacheName = name || null;
-	return caches.open(cacheName);
-};
-
-const createCacheBustedRequest = (url) => {
-	const request = new Request(url, {
-		cache: 'reload',
-	});
-	if ('cache' in request) {
-		return request;
-	}
-
-	const bustedUrl = new URL(url, self.location.href);
-	bustedUrl.search += (bustedUrl.search ? '&' : '') + 'cachebust=' + Date.now();
-	return new Request(bustedUrl);
-};
-
+/**
+ * Helper to handle errors consistently
+ * @param {Error} err - Error object
+ */
 const handleError = (err) => {
-	console.log(err);
+	console.error('Service worker error:', err);
 	throw err;
 };
 
+/**
+ * Get the cache for storing service worker version
+ * @returns {Promise<Cache>} - Cache object
+ */
 const fetchSWVersionFromCache = () => caches.open('SWVERSION');
 
+/**
+ * Save current service worker version in cache
+ * @param {Request} req - Request object
+ * @param {Response} resp - Response object
+ * @returns {Promise} - Promise that resolves when version is saved
+ */
 const saveCurrentVersionInCache = (req, resp) =>
 	fetchSWVersionFromCache().then((cache) => cache.put(req.url, resp).catch(handleError));
 
+/**
+ * Fetch cached service worker version
+ * @param {Request} req - Request object
+ * @returns {Promise<number|null>} - Promise that resolves with cached version or null
+ */
 const fetchCachedVersion = (req) =>
 	fetchSWVersionFromCache()
 		.then((cache) => {
@@ -78,48 +70,89 @@ const fetchCachedVersion = (req) =>
 							.then((cacheversion) => cacheversion)
 							.catch(handleError);
 					} else {
-						return Promise.resolve();
+						return Promise.resolve(null);
 					}
 				})
 				.catch(handleError);
 		})
 		.catch(handleError);
 
-const notifyClients = (response) =>
+/**
+ * Notify all clients with a message
+ * @param {Object} message - Message to send to clients
+ * @returns {Promise} - Promise that resolves when all clients are notified
+ */
+const notifyClients = (message) =>
 	self.clients
 		.matchAll()
 		.then((clients) => {
-			const promises = clients.map((client) => client.postMessage(JSON.stringify(response)));
+			if (clients.length === 0) return Promise.resolve();
+
+			const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
+			const promises = clients.map((client) => client.postMessage(messageStr));
 			return Promise.all(promises);
 		})
 		.catch(handleError);
 
+/**
+ * Check service worker version and notify clients of changes
+ * @returns {Promise} - Promise that resolves when version check is complete
+ */
 const checkVersion = () => {
 	const req = new Request('https://foo.bar/swversion');
 	return fetchCachedVersion(req.clone())
 		.then((cacheversion) => {
-			const obj = {};
-			obj['newVersion'] = SWVERSION;
-			obj['oldVersion'] = cacheversion || null;
+			const versionInfo = {
+				newVersion: SWVERSION,
+				oldVersion: cacheversion || null,
+			};
+
 			if (cacheversion !== SWVERSION) {
-				const resp = new Response(SWVERSION);
+				const resp = new Response(JSON.stringify(SWVERSION));
 				saveCurrentVersionInCache(req, resp).catch(handleError);
 			}
+
 			return notifyClients({
 				type: 'VERSION_TRACKING',
-				data: obj,
+				data: versionInfo,
 			});
 		})
 		.catch(handleError);
 };
 
+/**
+ * Create a cache-busted request
+ * @param {string} url - URL to create a cache-busted request for
+ * @returns {Request} - Cache-busted request
+ */
+const createCacheBustedRequest = (url) => {
+	const request = new Request(url, { cache: 'reload' });
+	if ('cache' in request) {
+		return request;
+	}
+
+	const bustedUrl = new URL(url, self.location.href);
+	bustedUrl.search += (bustedUrl.search ? '&' : '') + 'cachebust=' + Date.now();
+	return new Request(bustedUrl);
+};
+
+// ==== EVENT LISTENERS ====
+
+/**
+ * Handle install event - precache resources
+ */
 self.addEventListener('install', (e) => {
+	console.log('Service Worker installing');
+
+	// Skip waiting to activate immediately
 	e.waitUntil(self.skipWaiting());
 
+	// Pre-cache specified URLs
 	e.waitUntil(
 		caches
 			.open(CURRENT_CACHES.prefetch)
 			.then((cache) => {
+				console.log('Opened cache for prefetching');
 				const cachePromises = urlsToPrefetch.map((urlToPrefetch) => {
 					const url = new URL(urlToPrefetch, self.location.href);
 					url.search += (url.search ? '&' : '?') + 'cache-bust=' + Date.now();
@@ -128,11 +161,12 @@ self.addEventListener('install', (e) => {
 						mode: 'no-cors',
 						cache: 'no-cache',
 					});
+
 					return fetch(request)
 						.then((response) => {
 							const { status, statusText } = response || {};
 							if (status >= 400) {
-								throw new Error(`request for ${urlToPrefetch} failed with status ${statusText}`);
+								throw new Error(`Request for ${urlToPrefetch} failed with status ${statusText}`);
 							}
 
 							return cache.put(urlToPrefetch, response);
@@ -148,14 +182,20 @@ self.addEventListener('install', (e) => {
 	);
 });
 
+/**
+ * Handle activate event - clean up old caches and claim clients
+ */
 self.addEventListener('activate', (e) => {
-	notifyClients('Hello From SW');
+	console.log('Service Worker activating');
 
+	// Notify clients of activation
+	notifyClients('Service Worker Activated');
+
+	// Clean up old caches
 	const expectedCacheNames = Object.values(CURRENT_CACHES);
-
 	e.waitUntil(
 		caches.keys().then((cacheNames) => {
-			const promises = cacheNames.map((cacheName) => {
+			const deletePromises = cacheNames.map((cacheName) => {
 				if (expectedCacheNames.indexOf(cacheName) === -1 && cacheName !== 'SWVERSION') {
 					console.log('Deleting out of date cache:', cacheName);
 					return caches.delete(cacheName);
@@ -163,56 +203,20 @@ self.addEventListener('activate', (e) => {
 					return Promise.resolve();
 				}
 			});
-			return Promise.all(promises);
+			return Promise.all(deletePromises);
 		}),
 	);
+
+	// Claim any clients and check version
 	e.waitUntil(self.clients.claim().then(() => checkVersion()));
 });
 
-self.addEventListener('fetch', (e) => {
-	const { request } = e;
-	const { method, url } = request || {};
-
-	fetchHandler(e);
-
-	// Skip cross-origin requests, like those for Google Analytics.
-	// if (e.request.url.startsWith(self.location.origin)) {
-
-	if (!url.startsWith(self.location.origin) && method !== 'GET') {
-		console.log('WORKER: fetch event ignored.', method, url);
-		return;
-	}
-	e.respondWith(
-		caches.match(request.clone()).then((response) => {
-			if (response) {
-				return response;
-			}
-			return fetch(request)
-				.then((response) => {
-					const clonedResponse = response.clone();
-					caches.open(CURRENT_CACHES.prefetch).then((cache) => {
-						cache.put(request.url, clonedResponse);
-					});
-					return response;
-				})
-				.catch(handleError);
-		}),
-	);
-});
-
-const fetchHandler = async (e) => {
-	const { request } = e;
-	const { url, method } = request;
-	const { pathname } = new URL(url);
-	const routeMatch = routes.find(({ url }) => url === pathname);
-
-	if (routeMatch) {
-		e.respondWith(getStreamedHtmlResponse(url, routeMatch));
-	} else {
-		e.respondWith(caches.match(request).then((response) => (response ? response : fetch(request))));
-	}
-};
-
+/**
+ * Generate a streamed HTML response for route-based templating
+ * @param {string} url - URL of the request
+ * @param {Object} routeMatch - Route configuration
+ * @returns {Response} - Streamed HTML response
+ */
 const getStreamedHtmlResponse = (url, routeMatch) => {
 	const stream = new ReadableStream({
 		async start(controller) {
@@ -228,98 +232,91 @@ const getStreamedHtmlResponse = (url, routeMatch) => {
 				});
 			};
 
-			const [header, footer, content, script] = await Promise.all([
-				caches.match('/src/templates/header.html'),
-				caches.match('/src/templates/footer.html'),
-				caches.match(routeMatch.template),
-				caches.match(routeMatch.script),
-			]);
+			try {
+				const [header, footer, content, script] = await Promise.all([
+					caches.match('/src/templates/header.html'),
+					caches.match('/src/templates/footer.html'),
+					caches.match(routeMatch.template),
+					caches.match(routeMatch.script),
+				]);
 
-			await pushToStream(header.body);
-			await pushToStream(content.body);
-			await pushToStream(footer.body);
-			await pushToStream(script.body);
+				if (header) await pushToStream(header.body);
+				if (content) await pushToStream(content.body);
+				if (footer) await pushToStream(footer.body);
+				if (script) await pushToStream(script.body);
+			} catch (error) {
+				console.error('Error streaming HTML:', error);
+			}
 
 			controller.close();
 		},
 	});
-	// here we return the response whose body is the stream
+
 	return new Response(stream, {
 		headers: { 'Content-Type': 'text/html; charset=utf-8' },
 	});
 };
 
-/*
-	// This sample illustrates an aggressive approach to caching, in which every valid response is
-	// cached and every request is first checked against the cache.
-	// This may not be an appropriate approach if your web application makes requests for
-	// arbitrary URLs as part of its normal operation (e.g. a RSS client or a news aggregator),
-	// as the cache could end up containing large responses that might not end up ever being accessed.
-	// Other approaches, like selectively caching based on response headers or only caching
-	// responses served from a specific domain, might be more appropriate for those use cases.
-	self.addEventListener('fetch', function(event) {
-		console.log('Handling fetch event for', event.request.url);
+/**
+ * Handle fetch event with caching strategy
+ */
+self.addEventListener('fetch', (e) => {
+	const { request } = e;
+	const { method, url } = request || {};
+	const urlObj = new URL(url);
 
-		event.respondWith(
-			caches.open(CURRENT_CACHES['prefetch']).then(function(cache) {
-				return cache.match(event.request).then(function(response) {
-					if (response) {
-						// If there is an entry in the cache for event.request, then response will be defined
-						// and we can just return it.
-						console.log(' Found response in cache:', response);
+	// Skip cross-origin requests for non-GET methods
+	if (!urlObj.origin.startsWith(self.location.origin) && method !== 'GET') {
+		return;
+	}
 
+	// Check if this is a route that needs HTML streaming
+	const routeMatch = routes.find((route) => route.url === urlObj.pathname);
+	if (routeMatch) {
+		e.respondWith(getStreamedHtmlResponse(url, routeMatch));
+		return;
+	}
+
+	// Standard cache-first strategy
+	e.respondWith(
+		caches.match(request).then((cachedResponse) => {
+			if (cachedResponse) {
+				return cachedResponse;
+			}
+
+			return fetch(request)
+				.then((response) => {
+					// Don't cache bad responses
+					if (!response || response.status !== 200 || response.type !== 'basic') {
 						return response;
 					}
 
-					// Otherwise, if there is no entry in the cache for event.request, response will be
-					// undefined, and we need to fetch() the resource.
-					console.log(' No response for %s found in cache. ' +
-						'About to fetch from network...', event.request.url);
-
-					// We call .clone() on the request since we might use it in the call to cache.put() later on.
-					// Both fetch() and cache.put() "consume" the request, so we need to make a copy.
-					// (see https://fetch.spec.whatwg.org/#dom-request-clone)
-					return fetch(event.request.clone()).then(function(response) {
-						console.log('  Response for %s from network is: %O',
-							event.request.url, response);
-
-						// Optional: add in extra conditions here, e.g. response.type == 'basic' to only cache
-						// responses from the same domain. See https://fetch.spec.whatwg.org/#concept-response-type
-						if (response.status < 400) {
-							// This avoids caching responses that we know are errors (i.e. HTTP status code of 4xx or 5xx).
-							// One limitation is that, for non-CORS requests, we get back a filtered opaque response
-							// (https://fetch.spec.whatwg.org/#concept-filtered-response-opaque) which will always have a
-							// .status of 0, regardless of whether the underlying HTTP call was successful. Since we're
-							// blindly caching those opaque responses, we run the risk of caching a transient error response.
-							//
-							// We need to call .clone() on the response object to save a copy of it to the cache.
-							// (https://fetch.spec.whatwg.org/#dom-request-clone)
-							cache.put(event.request, response.clone());
-						}
-
-						// Return the original response object, which will be used to fulfill the resource request.
-						return response;
+					// Clone the response before caching
+					const responseToCache = response.clone();
+					caches.open(CURRENT_CACHES.prefetch).then((cache) => {
+						cache.put(request, responseToCache);
 					});
-				}).catch(function(error) {
-					// This catch() will handle exceptions that arise from the match() or fetch() operations.
-					// Note that a HTTP error response (e.g. 404) will NOT trigger an exception.
-					// It will return a normal response object that has the appropriate error code set.
-					console.error('  prefetch caching failed:', error);
 
-					throw error;
+					return response;
+				})
+				.catch((error) => {
+					console.error('Fetch failed:', error);
+					// Could return a custom offline page here
 				});
-			})
-		);
-	});
-*/
+		}),
+	);
+});
 
+/**
+ * Handle push notifications
+ */
 self.addEventListener('push', (e) => {
 	console.log('Received a push message', e);
 
-	const title = 'Yay a message.';
+	const title = 'App Notification';
 	const body = 'We have received a push message.';
 	const icon = '/images/icon-192x192.png';
-	const tag = 'simple-push-demo-notification-tag';
+	const tag = 'app-notification-tag';
 
 	e.waitUntil(
 		self.registration.showNotification(title, {
@@ -330,60 +327,57 @@ self.addEventListener('push', (e) => {
 	);
 });
 
+/**
+ * Handle notification clicks
+ */
 self.addEventListener('notificationclick', (e) => {
 	console.log('On notification click: ', e.notification.tag);
-	// Android doesn’t close the notification when you click on it
-	// See: http://crbug.com/463146
 	e.notification.close();
 
-	// This looks to see if the current is already open and
-	// focuses if it is
+	// Focus existing window or open new one
 	e.waitUntil(
 		clients
 			.matchAll({
 				type: 'window',
 			})
 			.then((clientList) => {
+				// Try to focus an existing window
 				for (let i = 0; i < clientList.length; i++) {
 					const client = clientList[i];
 					if (client.url === '/' && 'focus' in client) {
 						return client.focus();
 					}
 				}
+
+				// Open a new window if needed
 				if (clients.openWindow) {
-					//return clients.openWindow('/');
-					return clients.openWindow(e.notification.data.url);
+					const url = e.notification.data && e.notification.data.url ? e.notification.data.url : '/';
+					return clients.openWindow(url);
 				}
 			}),
 	);
 });
 
-self.addEventListener('install', (event) => {
-	event.registerForeignFetch({
-		scopes: ['/random'], // or self.registration.scope to handle everything
-		origins: ['*'], // or ['https://example.com'] to limit the remote origins
-	});
-});
+/**
+ * Handle messages from clients
+ */
+self.addEventListener('message', (event) => {
+	const { data, ports } = event;
+	console.log(`Received a message from client: ${data}`);
 
-self.addEventListener('foreignFetch', (event) => {
-	event.respondWith(
-		fetch(event.request) // Try to make a network request
-			.catch(() => new Response('34')) // Offline? Your random number is 34!
-			.then((response) => {
-				console.log('response', response);
-				return {
-					response,
-					origin: event.origin, // Make this a CORS response
-				};
-			}),
-	);
-});
-
-self.addEventListener('message', ({ data, ports }) => {
-	console.log(`Received a message from main thread: ${data}`);
+	// Check version and notify clients of any updates
 	checkVersion();
-	console.log(ports);
-	Array.isArray(ports) && ports[0] && ports[0].postMessage(`Roger that! - "${data}"`);
+
+	// Respond through the message port if available
+	if (Array.isArray(ports) && ports[0]) {
+		ports[0].postMessage(`Service worker received: "${data}"`);
+	}
 });
 
-self.addEventListener('sync', (e) => console.log(e));
+/**
+ * Handle background sync
+ */
+self.addEventListener('sync', (e) => {
+	console.log('Background sync event:', e.tag);
+	// Implement sync logic here
+});

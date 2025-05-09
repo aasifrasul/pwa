@@ -1,7 +1,7 @@
 function partial(func, ...argsBound) {
 	return function (...args) {
 		// (*)
-		return func.call(this, ...argsBound, ...args);
+		return func.apply(this, [...argsBound, ...args]);
 	};
 }
 

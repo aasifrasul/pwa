@@ -5,6 +5,15 @@ const CURRENT_CACHES = {
 	prefetch: 'prefetch-cache-v' + SWVERSION,
 };
 
+// Retry configuration
+const RETRY_CONFIG = {
+	maxRetries: 3, // Maximum number of retry attempts
+	initialBackoff: 1000, // Initial backoff delay in milliseconds (1 second)
+	maxBackoff: 30000, // Maximum backoff delay in milliseconds (30 seconds)
+	backoffFactor: 2, // Exponential backoff factor
+	retryStatusCodes: [408, 429, 500, 502, 503, 504], // Status codes to retry
+};
+
 // URLs to prefetch during installation
 const urlsToPrefetch = [
 	'/',
@@ -136,6 +145,75 @@ const createCacheBustedRequest = (url) => {
 	return new Request(bustedUrl);
 };
 
+/**
+ * Implements retry logic with exponential backoff
+ * @param {Request} request - The request to fetch
+ * @param {Object} options - Retry options
+ * @param {number} options.maxRetries - Maximum number of retries
+ * @param {number} options.initialBackoff - Initial backoff in ms
+ * @param {number} options.maxBackoff - Maximum backoff in ms
+ * @param {number} options.backoffFactor - Factor to increase backoff
+ * @param {Array} options.retryStatusCodes - Status codes that trigger retry
+ * @returns {Promise<Response>} - Promise that resolves with response
+ */
+const fetchWithRetry = async (request, options = RETRY_CONFIG) => {
+	const { maxRetries, initialBackoff, maxBackoff, backoffFactor, retryStatusCodes } = options;
+
+	let retries = 0;
+	let lastError = null;
+	let backoff = initialBackoff;
+
+	while (retries <= maxRetries) {
+		try {
+			const response = await fetch(request.clone());
+
+			// If response is ok or not in retry status codes, return it
+			if (response.ok || !retryStatusCodes.includes(response.status)) {
+				return response;
+			}
+
+			// Log the retry attempt for status codes we want to retry
+			console.log(
+				`Request failed with status ${response.status}. Retry ${retries + 1}/${maxRetries} in ${backoff}ms`,
+			);
+
+			lastError = new Error(`Request failed with status ${response.status}`);
+		} catch (error) {
+			// Network error or other fetch failures
+			console.log(`Fetch error: ${error.message}. Retry ${retries + 1}/${maxRetries} in ${backoff}ms`);
+			lastError = error;
+		}
+
+		// If this was the last retry, throw the error
+		if (retries >= maxRetries) {
+			break;
+		}
+
+		// Wait for backoff period
+		await new Promise((resolve) => setTimeout(resolve, backoff));
+
+		// Increase backoff for next attempt (with max limit)
+		backoff = Math.min(backoff * backoffFactor, maxBackoff);
+		retries++;
+
+		// Notify clients about retry
+		notifyClients({
+			type: 'FETCH_RETRY',
+			data: {
+				url: request.url,
+				attempt: retries,
+				maxRetries,
+				backoff,
+			},
+		}).catch(() => {
+			/* Ignore notification errors */
+		});
+	}
+
+	// If we got here, all retries failed
+	throw lastError || new Error(`Request failed after ${maxRetries} retries`);
+};
+
 // ==== EVENT LISTENERS ====
 
 /**
@@ -162,7 +240,7 @@ self.addEventListener('install', (e) => {
 						cache: 'no-cache',
 					});
 
-					return fetch(request)
+					return fetchWithRetry(request)
 						.then((response) => {
 							const { status, statusText } = response || {};
 							if (status >= 400) {
@@ -258,7 +336,24 @@ const getStreamedHtmlResponse = (url, routeMatch) => {
 };
 
 /**
- * Handle fetch event with caching strategy
+ * Check if a URL is for analytics or tracking
+ * @param {string} url - The URL to check
+ * @returns {boolean} - True if the URL is for analytics
+ */
+const isAnalyticsRequest = (url) => {
+	const urlObj = new URL(url);
+	// Common analytics endpoints patterns
+	return (
+		['analytics', 'collect', 'track', 'pixel', 'stats', 'metrics'].some((item) =>
+			urlObj.pathname.includes(`/${item}`),
+		) ||
+		urlObj.search.includes('analytics') ||
+		urlObj.hostname.includes('analytics')
+	);
+};
+
+/**
+ * Handle fetch event with appropriate caching strategy
  */
 self.addEventListener('fetch', (e) => {
 	const { request } = e;
@@ -277,14 +372,53 @@ self.addEventListener('fetch', (e) => {
 		return;
 	}
 
-	// Standard cache-first strategy
+	// Check if this is an analytics request
+	if (isAnalyticsRequest(url)) {
+		// Network-only strategy with retry for analytics
+		e.respondWith(
+			fetchWithRetry(request)
+				.then((response) => response)
+				.catch((error) => {
+					console.error('Analytics request failed after retries:', error);
+
+					// For analytics, we might want to queue the failed request for later
+					// rather than showing an error to the user
+					notifyClients({
+						type: 'ANALYTICS_FAILED',
+						data: {
+							url: request.url,
+							error: error.message,
+						},
+					});
+
+					// Return a "success" response to the client so the app continues normally
+					// but log that the analytics call failed
+					return new Response(
+						JSON.stringify({
+							success: false,
+							message: 'Analytics request queued for retry',
+						}),
+						{
+							status: 200,
+							headers: {
+								'Content-Type': 'application/json',
+							},
+						},
+					);
+				}),
+		);
+		return;
+	}
+
+	// Standard cache-first strategy with retry mechanism for normal requests
 	e.respondWith(
 		caches.match(request).then((cachedResponse) => {
 			if (cachedResponse) {
 				return cachedResponse;
 			}
 
-			return fetch(request)
+			// No cached response, try network with retry
+			return fetchWithRetry(request)
 				.then((response) => {
 					// Don't cache bad responses
 					if (!response || response.status !== 200 || response.type !== 'basic') {
@@ -300,8 +434,26 @@ self.addEventListener('fetch', (e) => {
 					return response;
 				})
 				.catch((error) => {
-					console.error('Fetch failed:', error);
-					// Could return a custom offline page here
+					console.error('Fetch failed after retries:', error);
+
+					// Notify clients about the complete failure
+					notifyClients({
+						type: 'FETCH_FAILED',
+						data: {
+							url: request.url,
+							error: error.message,
+						},
+					});
+
+					// Return custom offline page or fallback
+					// For now, just return an error response
+					return new Response('Network request failed after multiple retries', {
+						status: 503,
+						statusText: 'Service Unavailable',
+						headers: {
+							'Content-Type': 'text/plain',
+						},
+					});
 				});
 		}),
 	);
@@ -367,6 +519,30 @@ self.addEventListener('message', (event) => {
 
 	// Check version and notify clients of any updates
 	checkVersion();
+
+	// Handle retry configuration updates from clients
+	if (data && typeof data === 'object' && data.type === 'UPDATE_RETRY_CONFIG') {
+		const newConfig = data.config || {};
+
+		// Update retry configuration with valid values
+		if (typeof newConfig.maxRetries === 'number' && newConfig.maxRetries > 0) {
+			RETRY_CONFIG.maxRetries = newConfig.maxRetries;
+		}
+		if (typeof newConfig.initialBackoff === 'number' && newConfig.initialBackoff > 0) {
+			RETRY_CONFIG.initialBackoff = newConfig.initialBackoff;
+		}
+		if (typeof newConfig.maxBackoff === 'number' && newConfig.maxBackoff > 0) {
+			RETRY_CONFIG.maxBackoff = newConfig.maxBackoff;
+		}
+		if (typeof newConfig.backoffFactor === 'number' && newConfig.backoffFactor > 1) {
+			RETRY_CONFIG.backoffFactor = newConfig.backoffFactor;
+		}
+		if (Array.isArray(newConfig.retryStatusCodes)) {
+			RETRY_CONFIG.retryStatusCodes = newConfig.retryStatusCodes;
+		}
+
+		console.log('Updated retry configuration:', RETRY_CONFIG);
+	}
 
 	// Respond through the message port if available
 	if (Array.isArray(ports) && ports[0]) {

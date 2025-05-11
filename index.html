@@ -33,7 +33,6 @@
 				script.setAttribute('crossorigin', 'anonymous');
 				ref.parentNode.insertBefore(script, ref);
 				script.onload = await function (e) {
-					console.log('load', e);
 					console.log('Script Resolved', src);
 				};
 				script.onerror = await function (err) {
@@ -50,6 +49,7 @@
 		<canvas id="canvas" height="100" width="100" style="display: inline" class="ripple"></canvas>
 		<input type="text" id="firstName" />
 		<input type="text" id="lastName" />
+		<button id="enableNotifications">Enable notifications</button>
 		<div class="sun">Sun</div>
 	</body>
 </html>

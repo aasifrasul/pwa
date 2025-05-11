@@ -1,6 +1,17 @@
 'use srict';
 
 (function () {
+	document.querySelector('#enableNotifications').addEventListener('click', (e) => {
+		Notification.requestPermission().then((permission) => {
+			if (permission === 'granted') {
+				alert('Notification permission granted.');
+			} else {
+				alert('Notification permission denied.');
+			}
+		});
+	});
+
+/*
 	let docElement = document.documentElement;
 	console.log('docElement', docElement);
 
@@ -9,6 +20,7 @@
 		docElement.style.setProperty('--mouse-x', e.clientX + 'px');
 		docElement.style.setProperty('--mouse-y', e.clientY + 'px');
 	});
+*/
 
 	const getJSON = (url) =>
 		fetch(url).then(

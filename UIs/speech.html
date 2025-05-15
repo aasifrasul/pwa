@@ -208,8 +208,9 @@
 					.filter((voice) => voice.lang.includes('en'))
 					.forEach((voice) => {
 						const option = document.createElement('option');
-						option.appendChild(document.createTextNode(`${voice.name} (${voice.lang}`));
-						option.value = voice.name;
+						const textNode = document.createTextNode(`${voice.name} (${voice.lang}`);
+						option.appendChild(textNode);
+						option.setAttribute('value', voice.name);
 						fragment.appendChild(option);
 					});
 				voicesDropdown.appendChild(fragment);

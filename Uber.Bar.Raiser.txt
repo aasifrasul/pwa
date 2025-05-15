@@ -1,0 +1,286 @@
+
+
+Bar Raiser Interview has 2 focus areas:
+
+1.Design & Architecture previously solved problem: Discover Surface
+This round focuses on complex, organization-wide architectural challenges that require strategic decision-making. You will be expected to choose one of your previous projects that has gone live.
+Discuss highly complex, multi-team projects that demand global scalability and cross-regional coordination.
+Define architectural direction, standards, and trade-offs for systems across teams.
+Consider business-aligned trade-offs, balancing long-term maintainability, extensibility, and multi-team dependencies.
+Solve high-impact, organization-wide issues that require cross-team alignment, architectural standards, or infrastructure changes.
+Describe impact on enterprise-wide metrics such as service-level objectives (SLOs) across regions.
+Strategically design for enterprise-level scalability, ensuring long-term adaptability across global systems.
+
+Problem Statement:
+Microsoft Teams had an existing "Feeds & Notifications" section that displayed real-time updates for logged-in users (mentions, likes on comments, etc.). The product team wanted to expand this capability to show personalized feeds based on user interests, similar to LinkedIn feeds, requiring integration with an LLM model for personalization.
+
+Initial Requirements:
+Create a new page to display personalized content feeds
+Integrate with an LLM model that would analyze user preferences
+Display the latest five feeds with infinite scrolling for additional content,
+These feeds were shortened with a link to the actual story.
+It also had like/dislike option to enhance the LLM Model
+Support across multiple platforms (Web, Desktop, Mobile)
+
+Cross-Functional Complexity
+The project involved multiple teams across different geographical locations:
+
+Web, Desktop, and Mobile client teams
+LLM Model team
+Personalization team
+Data handling team
+
+Initial Implementation & Challenges
+Our first implementation was straightforward:
+
+Add a navigation link to the "Discover Surface"
+Fetch personalized feeds data from the LLM API, and saved it to localStorage.
+Display feeds with infinite scrolling
+
+Key Challenge: The LLM API had a 7-second response time, creating a poor user experience.
+Iterative Solutions
+Phase 1: Client-Side Optimizations
+We implemented several front-end optimizations:
+
+Prefetched data before users navigated to the page
+Showed cached data while fetching fresh content in the background
+Added a "New feeds available" button when fresh content was received.
+This was calcluated by just comparing the first five items, rest were simply updated.
+Prefetched two additional pages of data to improve scrolling experience
+Implemented a 5-minute polling mechanism to fetch updated content
+Added a retry mechanism with 3 attempts using linear backoff for resilience against API failures
+Persisted feed data in localStorage to maintain user experience during connectivity issues
+
+New Challenge: The Mobile team objected to the polling mechanism due to battery drain concerns, creating divergence between clients.
+Phase 2: Refined Polling Strategy
+To address platform-specific concerns:
+
+Modified the polling to only occur when users were actively on the personalized feeds page
+This compromise was accepted by the Mobile team
+
+Continued Challenge: The LLM team reported they couldn't significantly reduce response time as they needed to run the model against the entire dataset.
+Phase 3: Architecture Review & Optimization
+After reviewing the architecture, I identified several issues:
+
+We were fetching duplicate data frequently
+The 5-minute polling interval was too short for average users (unnecessary data fetching).
+So I proposed to increse the time say 15/30 mins.
+But Product insisted it as necessary for power users (target audience).
+
+
+Polling was inefficient and resource-intensive, especially for mobile devices
+
+I proposed a lightweight API to check for updates before fetching full data, but the LLM team explained that even this check would require running the full model.
+Final Solution: Middleware Architecture
+Recognizing the need for an intermediate layer, I:
+
+Engaged the Java team to develop a middleware solution
+After brainstorming on couple of options, we zeroed on Middleware would build and maintain personalized feed caches.
+Client UIs would request data from middleware instead of directly from LLM
+But ran to a raodblock, creatiing cache for each and every user would require alot of infrastructure, and not all users will be using this feature.
+
+I propsoed Cahce generation would only occur for users who visited the page at least once
+
+But Cold starts would still be slow (7 seconds), which product management found unacceptable.
+Final Architecture
+We arrived at an elegant solution:
+
+Split the page into two tabs:
+
+Default tab: Displayed immediately available relevant data
+Second tab: Showed the personalized feeds
+
+Implemented intelligent event-driven architecture:
+
+UI signals when a user lands on the primary page to trigger middleware cache preparation
+Middleware independently refreshes data at appropriate intervals based on user context
+Server-Sent Events (SSE)/WebSockets replaced polling, allowing middleware to push notifications about new content
+UI only needed to provide presence cues (which tab/page the user was viewing)
+Middleware handled all data refresh logic and proactively notified clients when new data was available
+
+This solution eliminated unnecessary polling and significantly improved the system:
+
+Product team got fast initial page load
+Power users received real-time personalized content updates without polling overhead
+Mobile team's battery concerns were fully addressed with server-initiated updates
+Network traffic was reduced by eliminating redundant requests
+User experience remained responsive across all platforms
+
+Additional Improvements & Future Considerations
+While our solution effectively addressed the initial requirements and challenges, several potential improvements could be considered:
+
+Advanced Caching Strategy:
+
+Implement predictive caching based on user activity patterns
+Explore differential updates to reduce payload size when synchronizing
+
+Performance Optimizations:
+
+Adopt a more efficient data serialization format to reduce payload size
+Expand server-sent events/WebSockets capabilities for other real-time features
+Implement content compression for data transfers
+
+
+Scalability Enhancements:
+
+Batch processing feeds for users in similar interest groups
+Implement horizontal scaling for the middleware layer with distributed caching
+
+
+User Experience Refinements:
+
+Add user controls for feed refresh frequency based on their preferences
+Implement progressive loading with content prioritization to show most relevant items first
+
+
+Analytics & Monitoring:
+
+Add telemetry to track load times, refresh patterns, and API reliability
+Implement feedback mechanisms to improve feed relevance over time
+
+
+Offline Capabilities:
+
+Enhance the localStorage implementation with service workers for full offline experience
+Provide visual indicators for content freshness
+
+
+These improvements would further enhance the system's performance, reliability, and user satisfaction while maintaining the architectural boundaries established in the final solution.
+Lessons Learned
+
+Early cross-team collaboration is essential when dealing with distributed systems
+Finding the right architectural boundaries can solve seemingly contradictory requirements
+Proactive middleware can bridge performance gaps between frontend requirements and backend capabilities
+User segmentation (power users vs. average users) should inform technical approaches
+Resilience mechanisms like retries, local storage caching, and graceful degradation are crucial for enterprise applications
+Event-driven architectures can significantly reduce network overhead and improve battery life
+Server-initiated updates (SSE/WebSockets) are superior to polling for real-time data needs
+Iterative design with continuous feedback leads to better architecture decisions
+
+
+2.Impact & efficiency: 
+Process Improvement & Efficiency: Can you share an example of when you identified inefficiencies in your team’s processes and implemented changes to improve productivity? What was the impact?
+Shortly after joining Flipkart's mobile web team, I discovered our application wasn't functioning on Firefox—showing only a blank page while working perfectly on Chrome and UC Browser. The team had deprioritized this issue, assuming Firefox traffic was negligible.
+
+Rather than accepting this assumption, I gathered browser usage data and demonstrated that we were caught in a circular problem: potential Firefox users couldn't access our site, which artificially suppressed our Firefox traffic metrics. I presented this data-driven feedback to the team and volunteered to investigate the issue myself.
+
+Our application used CSP to enforce security against XSS attacks by generating a unique hash (nonce) on the server, which was passed back as part of the CSP headers and added as an attribute to each script tag in the HTML. Browsers verify this nonce between the CSP headers and script tags before rendering the page.
+
+The prblem was our server was generating a new security nonce for each request, but Firefox strictly enforced matching between the initial CSP headers and subsequent script tags. When these didn't match, Firefox blocked rendering, interpreting it as a potential XSS attack. Chrome and UC Browser were more lenient, honoured the first, ignoring the subsequent.
+
+Solution was simple yet elegant: I modified our implementation to store the initial nonce in a session cookie. When the server received subsequent requests, it checked for an existing nonce in the header and returned it consistently throughout the user session instead of generating new ones.
+
+This simple fix had remarkable results: within two weeks, we saw a 10% increase in overall mobile web traffic, primarily from newly-enabled Firefox users, translating to millions in additional revenue. Even more importantly, it prevented a potential crisis when Chrome later tightened its security standards to match Firefox—a change that would have affected our largest user segment had we not implemented this fix.
+
+This experience demonstrated the value of challenging assumptions with data, proposing solutions rather than just identifying problems, and taking ownership of implementation. The approach proved so effective that I was subsequently asked to implement similar fixes across multiple Flipkart properties.
+
+
+Cross-Team Collaboration: Describe a time when you played a key role in streamlining a cross-team project or initiative. How did you approach it, and what were the results?
+I was approached by a manager from another team to help streamline their release process. After analyzing their situation, I found several critical issues:
+
+Four separate applications with different codebases
+No staging environment for pre-release testing
+Lack of automated tests
+No standardized release process
+Dependency on ad-hoc support from other teams (often mine)
+Manual, error-prone rollbacks
+
+This system clearly wasn't scalable or robust, so I developed a comprehensive solution:
+First, I proposed converting the architecture to a micro-frontend approach, each app covered by unit/Integration tests.
+A single Node.js server serving all applications. 
+I extracted duplicated UI elements across apps into a unified design system backed by Storybook for visual regression testing.
+I then built a complete CI/CD pipeline with:
+
+A staging environment for pre-release testing
+Jenkins pipeline with a dropdown to select which application to deploy
+Automated process to pull code from GitHub, bundle with webpack, and push static assets to CDN
+PM2 process manager for near-zero downtime deployments
+
+The architecture leveraged Node.js's non-blocking event-driven capabilities. When requests came in, the server would:
+
+Select the appropriate shell (.hbs file) based on URL
+Extract cookie details
+Fetch necessary user data
+Inject data into pre-compiled shells
+Return to the client
+
+This significantly improved system reliability and scalability. We implemented:
+
+Four AWS machines behind the Load balancer with ability to scale during high-traffic periods
+Real-time load monitoring through PM2
+Comprehensive telemetry and health monitoring
+Automated alerts for errors and issues
+
+The result was a dramatically more efficient, reliable release process that eliminated cross-team dependencies and improved overall product stability.
+
+
+Feedback & Execution: Tell me about a project where your feedback on a plan or timeline resulted in measurable improvements in execution or outcomes. How did you approach giving the feedback?
+When our e-commerce platform was planning a major analytics system upgrade, I reviewed the engineering team's initial implementation plan and timeline. Their proposal included a basic "fire-and-forget" approach for tracking user interactions, with a 6-week development timeline.
+
+After careful analysis, I identified critical vulnerabilities in the proposed architecture - particularly that roughly 15% of purchase events would likely be lost when users navigated between subdomains during checkout. This data loss would significantly impact our ability to optimize conversion rates.
+
+I approached giving feedback in three structured steps:
+
+First, I validated my concerns by running tests on our staging environment that demonstrated the exact user flows where analytics data would be lost.
+
+Second, I scheduled a collaborative meeting with the engineering and product teams rather than just submitting written feedback. During this session, I presented my findings objectively, focusing on business impact rather than technical shortcomings. I acknowledged the team's constraints while explaining how improved data accuracy would directly increase revenue.
+
+Third, I came prepared with a comprehensive alternative solution: a robust analytics module featuring an event queue manager, batch processing, and service worker integration (with retry attempst) that would ensure near-perfect data capture even during page navigation. Storage manager to store failed Events, and a Retry Manager to re-attempt, these being behind a Web Worker to minimize the impact on Main Thread.
+
+The team incorporated my feedback and revised their implementation plan. While this extended the timeline from 6 to 8 weeks, leadership approved the change after I demonstrated the ROI of more accurate analytics data.
+
+The results were significant: data capture accuracy improved from an estimated 85% to over 99%, frontend performance improved due to reduced API overhead, and the unified analytics solution worked seamlessly across all platforms. Most importantly, with complete purchase funnel visibility, our marketing team optimized campaigns that increased conversion rates by 5% in the following quarter.
+
+
+
+Problem-Solving & Project Planning: Describe a time when you resolved a project planning issue that was impeding progress. What steps did you take to address the issue, and what was the result?
+While leading development of a significant feature, our team hit a roadblock regarding a complex component. We were divided on whether to build from scratch or adapt existing components. The existing code wasn't perfectly suited for our needs, but starting over would mean significant development time.
+As deadlines approached and team members were occupied with other priorities, I volunteered to break this impasse. I conducted a thorough analysis of the current implementation, weighing various factors including timeline constraints, maintainability, and technical debt.
+After careful consideration, I determined that refactoring the existing components was the optimal approach. While this would require some upfront investment in restructuring, it would ultimately save us time compared to rebuilding everything. I presented my analysis to the team, explaining both the technical rationale and timeline benefits.
+With their support, I extracted common functionality into a higher-level abstraction layer, allowing specialized implementations to fill in the gaps as needed. I also eliminated several hardcoded conditionals that were limiting extensibility, replacing them with a more flexible design pattern. This approach made the components more adaptable for both current and future requirements.
+Once the foundation was established, I created documentation and conducted knowledge-sharing sessions to ensure smooth handover to the developers who would implement the remaining pieces. I remained available for consultation and directly contributed to some of the more intricate sections.
+This approach proved successful on multiple fronts: we unblocked the planning process, met our delivery timeline, and avoided creating parallel components that would have increased our maintenance burden. The refactored components have since been reused in several other features, validating our decision to invest in improving rather than replacing them.
+This experience reinforced my belief in balancing pragmatism with technical excellence. Sometimes the best solution isn't starting fresh, but thoughtfully evolving what already exists.
+
+
+Mentorship & Team Support: Can you give an example of when you helped a struggling team or team member improve efficiency or achieve a critical goal? What actions did you take, and what was the outcome? 
+I was tasked with mentoring a junior developer who was placed on a Performance Improvement Plan. First, I created a safe environment by meeting privately and asking if she felt comfortable discussing any factors affecting her work.
+
+When she shared that family issues were impacting her performance, I acknowledged the difficulty while establishing clear boundaries. I explained that while I couldn't directly help with personal matters, I could recommend company resources like our EAP program, and I would fully support her professional development.
+
+We began by breaking down her assignments into smaller, manageable tasks with clear expectations and deadlines. I implemented a daily 15-minute check-in to monitor progress without micromanaging. 
+
+My approach focused on building problem-solving skills rather than providing solutions. When she faced technical challenges with our API integration work, I asked her to articulate the issue thoroughly and outline potential solutions before offering guidance. Initially hesitant, she gradually developed confidence in her analytical abilities.
+
+I provided constructive feedback using the "situation-behavior-impact" framework, which helped her understand specific areas for improvement while recognizing her progress. Over ten weeks, she transitioned from requiring step-by-step guidance to independently completing tasks with minimal supervision.
+
+The outcome was significant: she successfully completed her PIP, reduced her bug rate by approximately 40%, and improved her code review response time from 3 days to 1 day. Beyond individual metrics, her increased confidence positively influenced team dynamics, particularly during our sprint planning sessions where she began actively contributing ideas.
+
+This experience reinforced my belief that effective mentorship requires balancing support with accountability while adapting to individual learning styles.
+
+Driving Change & Adoption: Suppose you’re tasked with standardizing a process across multiple teams to enhance efficiency and collaboration. What steps would you take to implement and gain adoption for the new process?
+I'd follow a structured yet adaptable approach focused on collaboration and clear communication.
+First, I'd invest time understanding the current landscape. 
+I'd meet with representatives from each team to learn about their existing processes, pain points, and what's working well. 
+This would give me valuable insights and help build relationships from the start. 
+Based on these findings, I'd define clear objectives and success metrics for the effort.
+Next, I'd form a cross-functional working group with key members from each team. Together, we'd co-create the standardized process, ensuring it addresses the challenges we identified while preserving what's already working well. 
+I believe this collaborative approach creates better solutions and builds early buy-in.
+For the actual implementation, I'd start with a pilot in one or two receptive teams.
+If time permits I would like to do an iterative pilot on all teams starting with least affected and completing with the most affected.
+This allows to face and fix challenges incrementally, instaed of getting bogged down with a large piece.
+Also helps to work out issues before a broader rollout and creates success stories we can leverage. Based on the pilot feedback, we'd refine our approach and develop comprehensive training materials.
+When rolling out more widely, communication would be my priority. 
+I'd clearly articulate the 'why' behind the change, highlighting specific benefits for individuals and teams. 
+I'd identify champions within each group who could model the new process and support their colleagues. I've found that peer advocacy is often more effective than top-down directives.
+Throughout implementation, 
+I'd establish multiple support channels like training sessions, documentation, and regular office hours to help teams transition. 
+I'd also create opportunities to celebrate early wins and recognize teams making good progress.
+Finally, I'd gather ongoing feedback and make iterative improvements. 
+In my experience, no process is perfect at launch, and showing willingness to adapt based on real-world experience helps maintain credibility and momentum.
+In a previous role, I used this approach when standardizing our client onboarding process across three regional teams. 
+By focusing on collaboration and clear communication, we achieved 90% adoption within two months and ultimately reduced onboarding time by 40%, while improving client satisfaction scores.
+
+
+
+

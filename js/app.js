@@ -49,7 +49,7 @@
 
 	const loadDynamically = ['js/states.json', 'js/countries.json', 'js/cities.json'];
 
-	loadJS('SWRegistration.js').then((script) => {
+	ScriptLoader.load('SWRegistration.js').then((script) => {
 		console.info('script', script);
 		if (navigator.serviceWorker) {
 			navigator.serviceWorker.ready.then(console.log);
@@ -57,11 +57,11 @@
 		}
 	});
 	/*
-	loadJS('loadSW.js').then(() => {
+	ScriptLoader.load('loadSW.js').then(() => {
 	  console.log(`Service Worker Loading script loaded`)
 	});
   */
-	loadDynamically.map(loadJS);
+	loadDynamically.map(ScriptLoader.load);
 
 	if (!Worker) {
 		const importScriptWorker = new Worker('importScriptWorker.js');

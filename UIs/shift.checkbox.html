@@ -11,7 +11,6 @@
 				font-family: sans-serif;
 				background: #ffc600;
 			}
-
 			.inbox {
 				max-width: 400px;
 				margin: 50px auto;
@@ -19,26 +18,21 @@
 				border-radius: 5px;
 				box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.1);
 			}
-
 			.item {
 				display: flex;
 				align-items: center;
 				border-bottom: 1px solid #f1f1f1;
 			}
-
 			.item:last-child {
 				border-bottom: 0;
 			}
-
 			input:checked + p {
 				background: #f9f9f9;
 				text-decoration: line-through;
 			}
-
 			input[type='checkbox'] {
 				margin: 20px;
 			}
-
 			p {
 				margin: 0;
 				padding: 20px;
@@ -52,78 +46,76 @@
 		</style>
 		<!--
    The following is a common layout you would see in an email client.
-
    When a user clicks a checkbox, holds Shift, and then clicks another checkbox a few rows down, all the checkboxes in-between those two checkboxes should be checked.
-
   -->
 		<div class="inbox">
 			<div class="item">
-				<input type="checkbox" />
+				<input type="checkbox" id="checkbox-0" data-index="0" />
 				<p>This is an inbox layout.</p>
 			</div>
 			<div class="item">
-				<input type="checkbox" />
+				<input type="checkbox" id="checkbox-1" data-index="1" />
 				<p>Check one item</p>
 			</div>
 			<div class="item">
-				<input type="checkbox" />
+				<input type="checkbox" id="checkbox-2" data-index="2" />
 				<p>Hold down your Shift key</p>
 			</div>
 			<div class="item">
-				<input type="checkbox" />
+				<input type="checkbox" id="checkbox-3" data-index="3" />
 				<p>Check a lower item</p>
 			</div>
 			<div class="item">
-				<input type="checkbox" />
+				<input type="checkbox" id="checkbox-4" data-index="4" />
 				<p>Everything in between should also be set to checked</p>
 			</div>
 			<div class="item">
-				<input type="checkbox" />
+				<input type="checkbox" id="checkbox-5" data-index="5" />
 				<p>Try do it without any libraries</p>
 			</div>
 			<div class="item">
-				<input type="checkbox" />
+				<input type="checkbox" id="checkbox-6" data-index="6" />
 				<p>Just regular JavaScript</p>
 			</div>
 			<div class="item">
-				<input type="checkbox" />
+				<input type="checkbox" id="checkbox-7" data-index="7" />
 				<p>Good Luck!</p>
 			</div>
 			<div class="item">
-				<input type="checkbox" />
+				<input type="checkbox" id="checkbox-8" data-index="8" />
 				<p>Don't forget to tweet your result!</p>
 			</div>
 		</div>
-
 		<script>
 			const checkboxes = document.querySelectorAll('.inbox input[type="checkbox"]');
-
-			let lastChecked;
+			let lastCheckedIndex = null;
 
 			function handleCheck(e) {
-				// Check if they had the shift key down
-				// AND check that they are checking it
-				let inBetween = false;
-				if (e.shiftKey && this.checked) {
-					// go ahead and do what we please
-					// loop over every single checkbox
-					checkboxes.forEach((checkbox) => {
-						console.log(checkbox);
-						if (checkbox === this || checkbox === lastChecked) {
-							inBetween = !inBetween;
-							console.log('Starting to check them in between!');
-						}
-
-						if (inBetween) {
-							checkbox.checked = true;
-						}
-					});
+				// Only proceed if the target is a checkbox
+				if (!e.target.matches('input[type="checkbox"]')) {
+					return;
 				}
-
-				lastChecked = this;
+				
+				const checkbox = e.target;
+				const currentIndex = parseInt(checkbox.dataset.index);
+				
+				// Check if they had the shift key down AND they are checking the box
+				if (e.shiftKey && checkbox.checked && lastCheckedIndex !== null) {
+					// Determine the range of checkboxes to check
+					const start = Math.min(currentIndex, lastCheckedIndex);
+					const end = Math.max(currentIndex, lastCheckedIndex);
+					
+					// Check all boxes between the current and last checked
+					for (let i = start; i <= end; i++) {
+						document.querySelector(`#checkbox-${i}`).checked = true;
+					}
+				}
+				
+				lastCheckedIndex = currentIndex;
 			}
-
-			checkboxes.forEach((checkbox) => checkbox.addEventListener('click', handleCheck));
+			
+			// Use event delegation instead of attaching to each checkbox
+			document.querySelector('.inbox').addEventListener('click', handleCheck);
 		</script>
 	</body>
 </html>

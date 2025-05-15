@@ -22,25 +22,10 @@
 				position: absolute;
 			}
 		</style>
+		<script src="js/script-loader.js"></script>
 		<script type="text/javascript">
-			window.loadJS = async (src) => {
-				console.log('Script Invoked', src);
-				const ref = document.querySelectorAll('script')[0];
-				const script = document.createElement('script');
-				script.setAttribute('src', src);
-				// script.setAttribute('defer', true);
-				// script.setAttribute('async', true);
-				script.setAttribute('crossorigin', 'anonymous');
-				ref.parentNode.insertBefore(script, ref);
-				script.onload = await function (e) {
-					console.log('Script Resolved', src);
-				};
-				script.onerror = await function (err) {
-					console.log('Script Rejected', src, err);
-				};
-			};
 			window.addEventListener('DOMContentLoaded', () => {
-				loadJS('js/app.js');
+				ScriptLoader.load('js/app.js');
 				new Worker('worker.js');
 			});
 		</script>

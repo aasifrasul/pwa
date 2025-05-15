@@ -2,7 +2,7 @@ const debounceFunction = function (func, delay) {
 	let timerId;
 	const wrapper = function wrapper(...args) {
 		// Cancels the setTimeout method execution
-		clearTimeout(timerId);
+		wrapper.cancel();
 
 		// Executes the func after delay time.
 		timerId = setTimeout(() => func.apply(this, ...args), delay);

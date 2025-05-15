@@ -2,7 +2,7 @@
 
 Bar Raiser Interview has 2 focus areas:
 
-1.Design & Architecture previously solved problem: Discover Surface
+1.Design & Architecture previously solved problem:
 This round focuses on complex, organization-wide architectural challenges that require strategic decision-making. You will be expected to choose one of your previous projects that has gone live.
 Discuss highly complex, multi-team projects that demand global scalability and cross-regional coordination.
 Define architectural direction, standards, and trade-offs for systems across teams.
@@ -45,7 +45,6 @@ We implemented several front-end optimizations:
 Prefetched data before users navigated to the page
 Showed cached data while fetching fresh content in the background
 Added a "New feeds available" button when fresh content was received.
-This was calcluated by just comparing the first five items, rest were simply updated.
 Prefetched two additional pages of data to improve scrolling experience
 Implemented a 5-minute polling mechanism to fetch updated content
 Added a retry mechanism with 3 attempts using linear backoff for resilience against API failures
@@ -63,7 +62,7 @@ Phase 3: Architecture Review & Optimization
 After reviewing the architecture, I identified several issues:
 
 We were fetching duplicate data frequently
-The 5-minute polling interval was too short for average users (unnecessary data fetching).
+The 5-minute polling interval was too short for users (unnecessary data fetching).
 So I proposed to increse the time say 15/30 mins.
 But Product insisted it as necessary for power users (target audience).
 
@@ -72,7 +71,7 @@ Polling was inefficient and resource-intensive, especially for mobile devices
 
 I proposed a lightweight API to check for updates before fetching full data, but the LLM team explained that even this check would require running the full model.
 Final Solution: Middleware Architecture
-Recognizing the need for an intermediate layer, I:
+A this time it was very obvious we need a middleware to do all this heavylifting
 
 Engaged the Java team to develop a middleware solution
 After brainstorming on couple of options, we zeroed on Middleware would build and maintain personalized feed caches.
@@ -81,7 +80,7 @@ But ran to a raodblock, creatiing cache for each and every user would require al
 
 I propsoed Cahce generation would only occur for users who visited the page at least once
 
-But Cold starts would still be slow (7 seconds), which product management found unacceptable.
+But Cold starts would still be slow (7 seconds), which product team found unacceptable.
 Final Architecture
 We arrived at an elegant solution:
 
@@ -160,19 +159,20 @@ Iterative design with continuous feedback leads to better architecture decisions
 
 2.Impact & efficiency: 
 Process Improvement & Efficiency: Can you share an example of when you identified inefficiencies in your team’s processes and implemented changes to improve productivity? What was the impact?
-Shortly after joining Flipkart's mobile web team, I discovered our application wasn't functioning on Firefox—showing only a blank page while working perfectly on Chrome and UC Browser. The team had deprioritized this issue, assuming Firefox traffic was negligible.
+I was asked to look into a critical analytics issue on an e-commerce platform where 15% of 'Buy Now' click events weren't being captured. After methodical investigation, I discovered the root cause: the browser was canceling analytics requests when users navigated to different subdomains during checkout.
+I thought about waiting for the request to complete and then moving to the next page, but was quickly shot down by the Product team, as Anlytics was of lower priority than the redirection.
+If it slowed, the bounce rate would increase.
+After carefull consideration I ended up offloading the request to Service Worker, this ensured the request would go through even if the tab was closed. 
+I recognized an opportunity to address fundamental flaws in our analytics architecture. The existing system was sending fire-and-forget requests with no reliability guarantees or error handling mechanisms.
+I proposed and led the development of a comprehensive analytics module built from the ground up with these key components:
+Event Queue Manager: Collected and prioritized analytics events from various user interactions
+Batch Processor: Optimized API calls by grouping events based on configurable time intervals and batch sizes
+Robust API Client: Handled request formatting and communication with analytics endpoints
+Service Worker Integration: Intercepted requests to ensure delivery even during page navigation, implementing intelligent retry logic with exponential backoff
+Storage Manager: Leveraged Web Workers to persist failed requests.
+Retry Manager: Pull stored evnts from Browesr persistent storage and sned to the API.
+This architecture transformation resulted in near-perfect data capture accuracy (>99%), improved frontend performance by reducing API overhead, and created a unified analytics solution that worked seamlessly across web, mobile web, and native applications. The system's scalability also allowed us to capture more detailed event data, enhancing our ability to make data-driven product decisions.
 
-Rather than accepting this assumption, I gathered browser usage data and demonstrated that we were caught in a circular problem: potential Firefox users couldn't access our site, which artificially suppressed our Firefox traffic metrics. I presented this data-driven feedback to the team and volunteered to investigate the issue myself.
-
-Our application used CSP to enforce security against XSS attacks by generating a unique hash (nonce) on the server, which was passed back as part of the CSP headers and added as an attribute to each script tag in the HTML. Browsers verify this nonce between the CSP headers and script tags before rendering the page.
-
-The prblem was our server was generating a new security nonce for each request, but Firefox strictly enforced matching between the initial CSP headers and subsequent script tags. When these didn't match, Firefox blocked rendering, interpreting it as a potential XSS attack. Chrome and UC Browser were more lenient, honoured the first, ignoring the subsequent.
-
-Solution was simple yet elegant: I modified our implementation to store the initial nonce in a session cookie. When the server received subsequent requests, it checked for an existing nonce in the header and returned it consistently throughout the user session instead of generating new ones.
-
-This simple fix had remarkable results: within two weeks, we saw a 10% increase in overall mobile web traffic, primarily from newly-enabled Firefox users, translating to millions in additional revenue. Even more importantly, it prevented a potential crisis when Chrome later tightened its security standards to match Firefox—a change that would have affected our largest user segment had we not implemented this fix.
-
-This experience demonstrated the value of challenging assumptions with data, proposing solutions rather than just identifying problems, and taking ownership of implementation. The approach proved so effective that I was subsequently asked to implement similar fixes across multiple Flipkart properties.
 
 
 Cross-Team Collaboration: Describe a time when you played a key role in streamlining a cross-team project or initiative. How did you approach it, and what were the results?

@@ -12,12 +12,14 @@ Array.prototype.myReduce =
 		if (!isFunction(callback)) {
 			throw new Error('callback should be a function');
 		}
+
 		const items = Object(this);
 		let accumulator = isUndefined(initialValue) ? null : initialValue;
 
 		for (let i = 0; i < items.length; i++) {
 			accumulator = isNull(accumulator) ? items[i] : callback.call(this, accumulator, items[i], i, items);
 		}
+
 		return accumulator;
 	};
 

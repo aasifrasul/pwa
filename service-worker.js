@@ -1,10 +1,21 @@
-'use srict';
+'use strict';
 
 const SWVERSION = 10;
+const analyticsEndPoints = ['analytics', 'collect', 'track', 'pixel', 'stats', 'metrics'];
 const CURRENT_CACHES = {
 	prefetch: 'prefetch-cache-v' + SWVERSION,
 };
 
+// Retry configuration
+const RETRY_CONFIG = {
+	maxRetries: 3, // Maximum number of retry attempts
+	initialBackoff: 1000, // Initial backoff delay in milliseconds (1 second)
+	maxBackoff: 30000, // Maximum backoff delay in milliseconds (30 seconds)
+	backoffFactor: 2, // Exponential backoff factor
+	retryStatusCodes: [408, 429, 500, 502, 503, 504], // Status codes to retry
+};
+
+// URLs to prefetch during installation
 const urlsToPrefetch = [
 	'/',
 	'/static/images/Dubai-Al-Arab.webp',
@@ -16,6 +27,7 @@ const urlsToPrefetch = [
 	'/web-Worker.js',
 ];
 
+// Application routes for streaming HTML responses
 const routes = [
 	{
 		url: '/',
@@ -24,29 +36,107 @@ const routes = [
 	},
 ];
 
-importScripts('./getApi.js');
-
-const fetchCacheByKey = (name) => ({
-	cache: {
-		name,
-		maxAgeSeconds: null,
-		maxEntries: null,
-	},
-});
-
-const openCache = (options) => {
-	let cacheName;
-	const {
-		cache: { name },
-	} = options || {};
-	cacheName = name || null;
-	return caches.open(cacheName);
+/**
+ * Helper to handle errors consistently
+ * @param {Error} err - Error object
+ */
+const handleError = (err) => {
+	console.error('Service worker error:', err);
+	throw err;
 };
 
+/**
+ * Get the cache for storing service worker version
+ * @returns {Promise<Cache>} - Cache object
+ */
+const fetchSWVersionFromCache = async () => await caches.open('SWVERSION');
+
+/**
+ * Save current service worker version in cache
+ * @param {Request} req - Request object
+ * @param {Response} resp - Response object
+ * @returns {Promise} - Promise that resolves when version is saved
+ */
+const saveCurrentVersionInCache = async (req, resp) => {
+	try {
+		const cache = await fetchSWVersionFromCache();
+		await cache.put(req.url, resp);
+	} catch (err) {
+		handleError(err);
+	}
+};
+
+/**
+ * Fetch cached service worker version
+ * @param {Request} req - Request object
+ * @returns {Promise<number|null>} - Promise that resolves with cached version or null
+ */
+const fetchCachedVersion = async (req) => {
+	try {
+		const cache = await fetchSWVersionFromCache();
+		const response = await cache.match(req);
+	
+		if (!response) return null;
+
+		return await response.json();
+	} catch (err) {
+		handleError(err);
+		return null;
+	}
+};
+
+/**
+ * Notify all clients with a message
+ * @param {Object} message - Message to send to clients
+ * @returns {Promise} - Promise that resolves when all clients are notified
+ */
+const notifyClients = async (message) => {
+	try {
+		const clients = await self.clients.matchAll();
+		if (clients.length === 0) return;
+	
+		const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
+		await Promise.all(clients.map(client => client.postMessage(messageStr)));
+	} catch (err) {
+		handleError(err);
+	}
+};
+
+/**
+ * Check service worker version and notify clients of changes
+ * @returns {Promise} - Promise that resolves when version check is complete
+ */
+const checkVersion = async () => {
+	try {
+		const req = new Request('https://foo.bar/swversion');
+		const cacheversion = await fetchCachedVersion(req.clone());
+	
+		const versionInfo = {
+			newVersion: SWVERSION,
+			oldVersion: cacheversion || null,
+		};
+
+		if (cacheversion !== SWVERSION) {
+			const resp = new Response(JSON.stringify(SWVERSION));
+			await saveCurrentVersionInCache(req, resp);
+		}
+
+		await notifyClients({
+			type: 'VERSION_TRACKING',
+			data: versionInfo,
+		});
+	} catch (err) {
+		handleError(err);
+	}
+};
+
+/**
+ * Create a cache-busted request
+ * @param {string} url - URL to create a cache-busted request for
+ * @returns {Request} - Cache-busted request
+ */
 const createCacheBustedRequest = (url) => {
-	const request = new Request(url, {
-		cache: 'reload',
-	});
+	const request = new Request(url, { cache: 'reload' });
 	if ('cache' in request) {
 		return request;
 	}
@@ -56,334 +146,398 @@ const createCacheBustedRequest = (url) => {
 	return new Request(bustedUrl);
 };
 
-const handleError = (err) => {
-	console.log(err);
-	throw err;
+/**
+ * Implements retry logic with exponential backoff
+ * @param {Request} request - The request to fetch
+ * @param {Object} options - Retry options
+ * @returns {Promise<Response>} - Promise that resolves with response
+ */
+const fetchWithRetry = async (request, options = RETRY_CONFIG) => {
+	const { maxRetries, initialBackoff, maxBackoff, backoffFactor, retryStatusCodes } = options;
+
+	let retries = 0;
+	let lastError = null;
+	let backoff = initialBackoff;
+
+	while (retries <= maxRetries) {
+		try {
+			const response = await fetch(request.clone());
+
+			// If response is ok or not in retry status codes, return it
+			if (response.ok || !retryStatusCodes.includes(response.status)) return response;
+
+			// Log the retry attempt for status codes we want to retry
+			console.log(
+				`Request failed with status ${response.status}. Retry ${retries + 1}/${maxRetries} in ${backoff}ms`,
+			);
+
+			lastError = new Error(`Request failed with status ${response.status}`);
+		} catch (error) {
+			// Network error or other fetch failures
+			console.log(`Fetch error: ${error.message}. Retry ${retries + 1}/${maxRetries} in ${backoff}ms`);
+			lastError = error;
+		}
+
+		// If this was the last retry, throw the error
+		if (retries >= maxRetries) break;
+
+		// Wait for backoff period
+		await new Promise((resolve) => setTimeout(resolve, backoff));
+
+		// Increase backoff for next attempt (with max limit)
+		backoff = Math.min(backoff * backoffFactor, maxBackoff);
+		retries++;
+
+		// Notify clients about retry
+		notifyClients({
+			type: 'FETCH_RETRY',
+			data: {
+				url: request.url,
+				attempt: retries,
+				maxRetries,
+				backoff,
+			},
+		});
+	}
+
+	// If we got here, all retries failed
+	throw lastError || new Error(`Request failed after ${maxRetries} retries`);
 };
 
-const fetchSWVersionFromCache = () => caches.open('SWVERSION');
+// ==== EVENT LISTENERS ====
 
-const saveCurrentVersionInCache = (req, resp) =>
-	fetchSWVersionFromCache().then((cache) => cache.put(req.url, resp).catch(handleError));
-
-const fetchCachedVersion = (req) =>
-	fetchSWVersionFromCache()
-		.then((cache) => {
-			return cache
-				.match(req)
-				.then((response) => {
-					if (response) {
-						return response
-							.json()
-							.then((cacheversion) => cacheversion)
-							.catch(handleError);
-					} else {
-						return Promise.resolve();
-					}
-				})
-				.catch(handleError);
-		})
-		.catch(handleError);
-
-const notifyClients = (response) =>
-	self.clients
-		.matchAll()
-		.then((clients) => {
-			const promises = clients.map((client) => client.postMessage(JSON.stringify(response)));
-			return Promise.all(promises);
-		})
-		.catch(handleError);
-
-const checkVersion = () => {
-	const req = new Request('https://foo.bar/swversion');
-	return fetchCachedVersion(req.clone())
-		.then((cacheversion) => {
-			const obj = {};
-			obj['newVersion'] = SWVERSION;
-			obj['oldVersion'] = cacheversion || null;
-			if (cacheversion !== SWVERSION) {
-				const resp = new Response(SWVERSION);
-				saveCurrentVersionInCache(req, resp).catch(handleError);
-			}
-			return notifyClients({
-				type: 'VERSION_TRACKING',
-				data: obj,
-			});
-		})
-		.catch(handleError);
-};
-
+/**
+ * Handle install event - precache resources
+ */
 self.addEventListener('install', (e) => {
-	e.waitUntil(self.skipWaiting());
+	console.log('Service Worker installing');
 
-	e.waitUntil(
-		caches
-			.open(CURRENT_CACHES.prefetch)
-			.then((cache) => {
-				const cachePromises = urlsToPrefetch.map((urlToPrefetch) => {
-					const url = new URL(urlToPrefetch, self.location.href);
-					url.search += (url.search ? '&' : '?') + 'cache-bust=' + Date.now();
+	// Using async function inside waitUntil
+	e.waitUntil((async () => {
+		// Skip waiting to activate immediately
+		await self.skipWaiting();
+	
+		try {
+			// Pre-cache specified URLs
+			const cache = await caches.open(CURRENT_CACHES.prefetch);
+			console.log('Opened cache for prefetching');
+	  
+			const cachePromises = urlsToPrefetch.map(async (urlToPrefetch) => {
+				const url = new URL(urlToPrefetch, self.location.href);
+				url.search += (url.search ? '&' : '?') + 'cache-bust=' + Date.now();
 
-					const request = new Request(url, {
-						mode: 'no-cors',
-						cache: 'no-cache',
-					});
-					return fetch(request)
-						.then((response) => {
-							const { status, statusText } = response || {};
-							if (status >= 400) {
-								throw new Error(`request for ${urlToPrefetch} failed with status ${statusText}`);
-							}
-
-							return cache.put(urlToPrefetch, response);
-						})
-						.catch((error) => {
-							console.error(`Not caching ${urlToPrefetch} due to ${error}`);
-						});
+				const request = new Request(url, {
+					mode: 'no-cors',
+					cache: 'no-cache',
 				});
 
-				return Promise.all(cachePromises).then(() => console.log('Pre-fetching complete.'));
-			})
-			.catch((error) => console.error('Pre-fetching failed:', error)),
-	);
-});
+				try {
+					const response = await fetchWithRetry(request);
+					const { status, statusText } = response || {};
+		  
+					if (status >= 400) {
+						throw new Error(`Request for ${urlToPrefetch} failed with status ${statusText}`);
+					}
 
-self.addEventListener('activate', (e) => {
-	notifyClients('Hello From SW');
-
-	const expectedCacheNames = Object.values(CURRENT_CACHES);
-
-	e.waitUntil(
-		caches.keys().then((cacheNames) => {
-			const promises = cacheNames.map((cacheName) => {
-				if (expectedCacheNames.indexOf(cacheName) === -1 && cacheName !== 'SWVERSION') {
-					console.log('Deleting out of date cache:', cacheName);
-					return caches.delete(cacheName);
-				} else {
-					return Promise.resolve();
+					await cache.put(urlToPrefetch, response);
+				} catch (error) {
+					console.error(`Not caching ${urlToPrefetch} due to ${error}`);
 				}
 			});
-			return Promise.all(promises);
-		}),
-	);
-	e.waitUntil(self.clients.claim().then(() => checkVersion()));
+
+			await Promise.all(cachePromises);
+			console.log('Pre-fetching complete.');
+		} catch (error) {
+			console.error('Pre-fetching failed:', error);
+		}
+	})());
 });
 
-self.addEventListener('fetch', (e) => {
-	const { request } = e;
-	const { method, url } = request || {};
+/**
+ * Handle activate event - clean up old caches and claim clients
+ */
+self.addEventListener('activate', (e) => {
+	console.log('Service Worker activating');
 
-	fetchHandler(e);
+	e.waitUntil((async () => {
+		// Notify clients of activation
+		await notifyClients('Service Worker Activated');
 
-	// Skip cross-origin requests, like those for Google Analytics.
-	// if (e.request.url.startsWith(self.location.origin)) {
+		// Clean up old caches
+		try {
+			const expectedCacheNames = Object.values(CURRENT_CACHES);
+			const cacheNames = await caches.keys();
+	  
+			const deletePromises = cacheNames.map(async (cacheName) => {
+				if (expectedCacheNames.indexOf(cacheName) === -1 && cacheName !== 'SWVERSION') {
+					console.log('Deleting out of date cache:', cacheName);
+					await caches.delete(cacheName);
+				}
+			});
+	  
+			await Promise.all(deletePromises);
+		} catch (error) {
+			console.error('Cache cleanup failed:', error);
+		}
 
-	if (!url.startsWith(self.location.origin) && method !== 'GET') {
-		console.log('WORKER: fetch event ignored.', method, url);
-		return;
-	}
-	e.respondWith(
-		caches.match(request.clone()).then((response) => {
-			if (response) {
-				return response;
-			}
-			return fetch(request)
-				.then((response) => {
-					const clonedResponse = response.clone();
-					caches.open(CURRENT_CACHES.prefetch).then((cache) => {
-						cache.put(request.url, clonedResponse);
-					});
-					return response;
-				})
-				.catch(handleError);
-		}),
-	);
+		// Claim any clients and check version
+		await self.clients.claim();
+		await checkVersion();
+	})());
 });
 
-const fetchHandler = async (e) => {
-	const { request } = e;
-	const { url, method } = request;
-	const { pathname } = new URL(url);
-	const routeMatch = routes.find(({ url }) => url === pathname);
-
-	if (routeMatch) {
-		e.respondWith(getStreamedHtmlResponse(url, routeMatch));
-	} else {
-		e.respondWith(caches.match(request).then((response) => (response ? response : fetch(request))));
-	}
-};
-
+/**
+ * Generate a streamed HTML response for route-based templating
+ * @param {string} url - URL of the request
+ * @param {Object} routeMatch - Route configuration
+ * @returns {Response} - Streamed HTML response
+ */
 const getStreamedHtmlResponse = (url, routeMatch) => {
 	const stream = new ReadableStream({
 		async start(controller) {
-			const pushToStream = (stream) => {
+			const pushToStream = async (stream) => {
 				const reader = stream.getReader();
-
-				return reader.read().then(function process(result) {
-					if (result.done) {
-						return;
+		
+				try {
+					while (true) {
+						const { done, value } = await reader.read();
+						if (done) break;
+						controller.enqueue(value);
 					}
-					controller.enqueue(result.value);
-					return reader.read().then(process);
-				});
+				} catch (error) {
+					console.error('Error reading stream:', error);
+				}
 			};
 
-			const [header, footer, content, script] = await Promise.all([
-				caches.match('/src/templates/header.html'),
-				caches.match('/src/templates/footer.html'),
-				caches.match(routeMatch.template),
-				caches.match(routeMatch.script),
-			]);
+			try {
+				const [header, footer, content, script] = await Promise.all([
+					caches.match('/src/templates/header.html'),
+					caches.match('/src/templates/footer.html'),
+					caches.match(routeMatch.template),
+					caches.match(routeMatch.script),
+				]);
 
-			await pushToStream(header.body);
-			await pushToStream(content.body);
-			await pushToStream(footer.body);
-			await pushToStream(script.body);
+				if (header) await pushToStream(header.body);
+				if (content) await pushToStream(content.body);
+				if (footer) await pushToStream(footer.body);
+				if (script) await pushToStream(script.body);
+			} catch (error) {
+				console.error('Error streaming HTML:', error);
+			}
 
 			controller.close();
 		},
 	});
-	// here we return the response whose body is the stream
+
 	return new Response(stream, {
 		headers: { 'Content-Type': 'text/html; charset=utf-8' },
 	});
 };
 
-/*
-	// This sample illustrates an aggressive approach to caching, in which every valid response is
-	// cached and every request is first checked against the cache.
-	// This may not be an appropriate approach if your web application makes requests for
-	// arbitrary URLs as part of its normal operation (e.g. a RSS client or a news aggregator),
-	// as the cache could end up containing large responses that might not end up ever being accessed.
-	// Other approaches, like selectively caching based on response headers or only caching
-	// responses served from a specific domain, might be more appropriate for those use cases.
-	self.addEventListener('fetch', function(event) {
-		console.log('Handling fetch event for', event.request.url);
+/**
+ * Check if a URL is for analytics or tracking
+ * @param {string} url - The URL to check
+ * @returns {boolean} - True if the URL is for analytics
+ */
+const isAnalyticsRequest = (url) => {
+	const urlObj = new URL(url);
+	// Common analytics endpoints patterns
+	return (
+		analyticsEndPoints.some((item) => urlObj.pathname.includes(`/${item}`)) ||
+		urlObj.search.includes('analytics') ||
+		urlObj.hostname.includes('analytics')
+	);
+};
 
-		event.respondWith(
-			caches.open(CURRENT_CACHES['prefetch']).then(function(cache) {
-				return cache.match(event.request).then(function(response) {
-					if (response) {
-						// If there is an entry in the cache for event.request, then response will be defined
-						// and we can just return it.
-						console.log(' Found response in cache:', response);
+/**
+ * Handle fetch event with appropriate caching strategy
+ */
+self.addEventListener('fetch', (e) => {
+	const { request } = e;
+	const { method, url } = request || {};
+	const { origin, pathname } = new URL(url);
 
-						return response;
-					}
+	// Skip cross-origin requests for non-GET methods
+	if (!origin.startsWith(self.location.origin) && method !== 'GET') return;
 
-					// Otherwise, if there is no entry in the cache for event.request, response will be
-					// undefined, and we need to fetch() the resource.
-					console.log(' No response for %s found in cache. ' +
-						'About to fetch from network...', event.request.url);
+	// Check if this is a route that needs HTML streaming
+	const routeMatch = routes.find((route) => route.url === pathname);
+	if (routeMatch) {
+		e.respondWith(getStreamedHtmlResponse(url, routeMatch));
+		return;
+	}
 
-					// We call .clone() on the request since we might use it in the call to cache.put() later on.
-					// Both fetch() and cache.put() "consume" the request, so we need to make a copy.
-					// (see https://fetch.spec.whatwg.org/#dom-request-clone)
-					return fetch(event.request.clone()).then(function(response) {
-						console.log('  Response for %s from network is: %O',
-							event.request.url, response);
+	// Check if this is an analytics request
+	if (isAnalyticsRequest(url)) {
+		// Network-only strategy with retry for analytics
+		e.respondWith((async () => {
+			try {
+				return await fetchWithRetry(request);
+			} catch (error) {
+				console.error('Analytics request failed after retries:', error);
 
-						// Optional: add in extra conditions here, e.g. response.type == 'basic' to only cache
-						// responses from the same domain. See https://fetch.spec.whatwg.org/#concept-response-type
-						if (response.status < 400) {
-							// This avoids caching responses that we know are errors (i.e. HTTP status code of 4xx or 5xx).
-							// One limitation is that, for non-CORS requests, we get back a filtered opaque response
-							// (https://fetch.spec.whatwg.org/#concept-filtered-response-opaque) which will always have a
-							// .status of 0, regardless of whether the underlying HTTP call was successful. Since we're
-							// blindly caching those opaque responses, we run the risk of caching a transient error response.
-							//
-							// We need to call .clone() on the response object to save a copy of it to the cache.
-							// (https://fetch.spec.whatwg.org/#dom-request-clone)
-							cache.put(event.request, response.clone());
-						}
-
-						// Return the original response object, which will be used to fulfill the resource request.
-						return response;
-					});
-				}).catch(function(error) {
-					// This catch() will handle exceptions that arise from the match() or fetch() operations.
-					// Note that a HTTP error response (e.g. 404) will NOT trigger an exception.
-					// It will return a normal response object that has the appropriate error code set.
-					console.error('  prefetch caching failed:', error);
-
-					throw error;
+				// For analytics, we might want to queue the failed request for later
+				notifyClients({
+					type: 'ANALYTICS_FAILED',
+					data: {
+						url: request.url,
+						error: error.message,
+					},
 				});
-			})
-		);
-	});
-*/
 
+				// Return a "success" response to the client so the app continues normally
+				return new Response(
+					JSON.stringify({
+						success: false,
+						message: 'Analytics request queued for retry',
+					}),
+					{
+						status: 200,
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					},
+				);
+			}
+		})());
+		return;
+	}
+
+	// Standard cache-first strategy with retry mechanism for normal requests
+	e.respondWith((async () => {
+		try {
+			const cachedResponse = await caches.match(request);
+			if (cachedResponse) return cachedResponse;
+
+			// No cached response, try network with retry
+			const response = await fetchWithRetry(request);
+	  
+			// Don't cache bad responses
+			if (!response || response.status !== 200 || response.type !== 'basic') return response;
+
+			// Clone the response before caching
+			const responseToCache = response.clone();
+			const cache = await caches.open(CURRENT_CACHES.prefetch);
+			await cache.put(request, responseToCache);
+
+			return response;
+		} catch (error) {
+			console.error('Fetch failed after retries:', error);
+
+			// Notify clients about the complete failure
+			notifyClients({
+				type: 'FETCH_FAILED',
+				data: {
+					url: request.url,
+					error: error.message,
+				},
+			});
+
+			// Return custom offline page or fallback
+			return new Response('Network request failed after multiple retries', {
+				status: 503,
+				statusText: 'Service Unavailable',
+				headers: {
+					'Content-Type': 'text/plain',
+				},
+			});
+		}
+	})());
+});
+
+/**
+ * Handle push notifications
+ */
 self.addEventListener('push', (e) => {
 	console.log('Received a push message', e);
 
-	const title = 'Yay a message.';
+	const title = 'App Notification';
 	const body = 'We have received a push message.';
 	const icon = '/images/icon-192x192.png';
-	const tag = 'simple-push-demo-notification-tag';
+	const tag = 'app-notification-tag';
 
 	e.waitUntil(
 		self.registration.showNotification(title, {
 			body,
 			icon,
 			tag,
-		}),
+		})
 	);
 });
 
+/**
+ * Handle notification clicks
+ */
 self.addEventListener('notificationclick', (e) => {
 	console.log('On notification click: ', e.notification.tag);
-	// Android doesn’t close the notification when you click on it
-	// See: http://crbug.com/463146
 	e.notification.close();
 
-	// This looks to see if the current is already open and
-	// focuses if it is
-	e.waitUntil(
-		clients
-			.matchAll({
-				type: 'window',
-			})
-			.then((clientList) => {
-				for (let i = 0; i < clientList.length; i++) {
-					const client = clientList[i];
-					if (client.url === '/' && 'focus' in client) {
-						return client.focus();
-					}
-				}
-				if (clients.openWindow) {
-					//return clients.openWindow('/');
-					return clients.openWindow(e.notification.data.url);
-				}
-			}),
-	);
+	// Focus existing window or open new one
+	e.waitUntil((async () => {
+		const clientList = await clients.matchAll({
+			type: 'window',
+		});
+	
+		// Try to focus an existing window
+		for (let i = 0; i < clientList.length; i++) {
+			const client = clientList[i];
+			if (client.url === '/' && 'focus' in client) {
+				return client.focus();
+			}
+		}
+
+		// Open a new window if needed
+		if (clients.openWindow) {
+			const url = e.notification.data && e.notification.data.url ? e.notification.data.url : '/';
+			return clients.openWindow(url);
+		}
+	})());
 });
 
-self.addEventListener('install', (event) => {
-	event.registerForeignFetch({
-		scopes: ['/random'], // or self.registration.scope to handle everything
-		origins: ['*'], // or ['https://example.com'] to limit the remote origins
-	});
+/**
+ * Handle messages from clients
+ */
+self.addEventListener('message', async (event) => {
+	const { data, ports } = event;
+	console.log(`Received a message from client: ${data}`);
+
+	// Check version and notify clients of any updates
+	await checkVersion();
+
+	// Handle retry configuration updates from clients
+	if (data && typeof data === 'object' && data.type === 'UPDATE_RETRY_CONFIG') {
+		const newConfig = data.config || {};
+
+		// Update retry configuration with valid values
+		if (typeof newConfig.maxRetries === 'number' && newConfig.maxRetries > 0) {
+			RETRY_CONFIG.maxRetries = newConfig.maxRetries;
+		}
+		if (typeof newConfig.initialBackoff === 'number' && newConfig.initialBackoff > 0) {
+			RETRY_CONFIG.initialBackoff = newConfig.initialBackoff;
+		}
+		if (typeof newConfig.maxBackoff === 'number' && newConfig.maxBackoff > 0) {
+			RETRY_CONFIG.maxBackoff = newConfig.maxBackoff;
+		}
+		if (typeof newConfig.backoffFactor === 'number' && newConfig.backoffFactor > 1) {
+			RETRY_CONFIG.backoffFactor = newConfig.backoffFactor;
+		}
+		if (Array.isArray(newConfig.retryStatusCodes)) {
+			RETRY_CONFIG.retryStatusCodes = newConfig.retryStatusCodes;
+		}
+
+		console.log('Updated retry configuration:', RETRY_CONFIG);
+	}
+
+	// Respond through the message port if available
+	if (Array.isArray(ports) && ports[0]) {
+		ports[0].postMessage(`Service worker received: "${data}"`);
+	}
 });
 
-self.addEventListener('foreignFetch', (event) => {
-	event.respondWith(
-		fetch(event.request) // Try to make a network request
-			.catch(() => new Response('34')) // Offline? Your random number is 34!
-			.then((response) => {
-				console.log('response', response);
-				return {
-					response,
-					origin: event.origin, // Make this a CORS response
-				};
-			}),
-	);
+/**
+ * Handle background sync
+ */
+self.addEventListener('sync', (e) => {
+	console.log('Background sync event:', e.tag);
+	// Implement sync logic here
 });
-
-self.addEventListener('message', ({ data, ports }) => {
-	console.log(`Received a message from main thread: ${data}`);
-	checkVersion();
-	console.log(ports);
-	Array.isArray(ports) && ports[0] && ports[0].postMessage(`Roger that! - "${data}"`);
-});
-
-self.addEventListener('sync', (e) => console.log(e));

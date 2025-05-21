@@ -1,4 +1,5 @@
-export const typeCheck = (data, type) => Object.prototype.toString.call(data).slice(8, -1).toLowerCase() === type;
+export const typeCheck = (data, type) =>
+	Object.prototype.toString.call(data).slice(8, -1).toLowerCase() === type;
 
 export const isFunction = (data) => typeCheck(data, 'function');
 export const isArray = (data) => typeCheck(data, 'array');
@@ -14,19 +15,17 @@ export const isGeneratorFunction = (data) => typeCheck(data, 'generatorfunction'
 export const isPromise = (data) => typeCheck(data, 'promise');
 export const isDate = (data) => typeCheck(data, 'date');
 export const isSymbol = (data) => typeCheck(data, 'symbol');
-export const isRegExp = (data) => typeCheck(data, 'regexp');
 
 export const isEmpty = (data) => isUndefined(data) || isNull(data) || data === '';
 
-export const arraySize = (arr) => (isArray(arr) && arr.length) || null;
+export const arraySize = (arr) => isArray(arr) && arr.length || null;
 
 export const safelyExecuteFunction = (func, context, ...params) => {
 	if (!isFunction(func)) {
-		console.log('Please pass a valid function!');
-		return;
+		throw new Error('Please pass a valid function!');
 	}
 
-	if (isObject(context)) {
+	if (isObject(context) && isFunction(context[func.name])) {
 		return func.apply(context, params);
 	}
 

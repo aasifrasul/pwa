@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 	<head>
 		<title>Test</title>
-		<link rel="stylesheet" type="text/css" href="css/test.css" />
+		<link rel="stylesheet" type="text/css" href="/css/test.css" />
 		<style type="text/css"></style>
+		<script src="/js/script-loader.js"></script>
 		<script type="text/javascript">
 			window.getData = (url) => {
 				return fetch(url)
@@ -34,35 +35,15 @@
 					.then((response) => response.json()) // parses JSON response into native JavaScript objects
 					.catch((error) => console.error(error));
 			};
-			window.loadJS = function (url, nonce, async, defer) {
-				async = async || false;
-				defer = defer || false;
-				return new Promise(function (resolve, reject) {
-					var ref = document.getElementsByTagName('script')[0];
-					var script = document.createElement('script');
-					script.setAttribute('src', url);
-					script.setAttribute('type', 'text/javascript');
-					async && script.setAttribute('async', true);
-					defer && script.setAttribute('defer', true);
-					script.setAttribute('crossorigin', 'anonymous');
-					nonce && script.setAttribute('nonce', nonce);
-					script.onload = function (e) {
-						resolve(script);
-					};
-					script.onerror = function (err) {
-						reject(err);
-					};
-					ref.parentNode.insertBefore(script, ref);
-				});
-			};
+
 			window.addEventListener('DOMContentLoaded', function () {
-				window.loadJS('js/test.js');
+				ScriptLoader.load('/js/test.js');
 
 				var loaders = document.querySelector('#loaders');
 				loaders.innerHTML = '';
 				var list = document.querySelector('#list');
 				var fruits = ['Apple', 'Orange', 'Banana', 'Melon'];
-				list.onclick = function(e) {
+				list.onclick = function (e) {
 					alert(e.target.innerText);
 				};
 

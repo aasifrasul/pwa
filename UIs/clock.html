@@ -1,100 +1,212 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>JS + CSS Clock</title>
-  <link rel="icon" href="https://fav.farm/✅" />
-</head>
-<body>
+	<head>
+		<meta charset="UTF-8" />
+		<title>JS + CSS Clock</title>
+		<link rel="icon" href="https://fav.farm/✅" />
+	</head>
+	<body>
+		<div class="clock">
+			<div class="clock-face">
+				<!-- Hour markers -->
+				<div class="hour-marks">
+					<div class="hour-mark" style="transform: rotate(30deg) translateY(-135px)">1</div>
+					<div class="hour-mark" style="transform: rotate(60deg) translateY(-135px)">2</div>
+					<div class="hour-mark" style="transform: rotate(90deg) translateY(-135px)">3</div>
+					<div class="hour-mark" style="transform: rotate(120deg) translateY(-135px)">4</div>
+					<div class="hour-mark" style="transform: rotate(150deg) translateY(-135px)">5</div>
+					<div class="hour-mark" style="transform: rotate(180deg) translateY(-135px)">6</div>
+					<div class="hour-mark" style="transform: rotate(210deg) translateY(-135px)">7</div>
+					<div class="hour-mark" style="transform: rotate(240deg) translateY(-135px)">8</div>
+					<div class="hour-mark" style="transform: rotate(270deg) translateY(-135px)">9</div>
+					<div class="hour-mark" style="transform: rotate(300deg) translateY(-135px)">10</div>
+					<div class="hour-mark" style="transform: rotate(330deg) translateY(-135px)">11</div>
+					<div class="hour-mark" style="transform: rotate(0deg) translateY(-135px)">12</div>
+				</div>
 
+				<!-- Minute markers (only every 5 minutes to avoid clutter) -->
+				<div class="minute-marks">
+					<div class="minute-mark" style="transform: rotate(6deg) translateY(-118px)">05</div>
+					<div class="minute-mark" style="transform: rotate(36deg) translateY(-118px)">10</div>
+					<div class="minute-mark" style="transform: rotate(66deg) translateY(-118px)">15</div>
+					<div class="minute-mark" style="transform: rotate(96deg) translateY(-118px)">20</div>
+					<div class="minute-mark" style="transform: rotate(126deg) translateY(-118px)">25</div>
+					<div class="minute-mark" style="transform: rotate(156deg) translateY(-118px)">30</div>
+					<div class="minute-mark" style="transform: rotate(186deg) translateY(-118px)">35</div>
+					<div class="minute-mark" style="transform: rotate(216deg) translateY(-118px)">40</div>
+					<div class="minute-mark" style="transform: rotate(246deg) translateY(-118px)">45</div>
+					<div class="minute-mark" style="transform: rotate(276deg) translateY(-118px)">50</div>
+					<div class="minute-mark" style="transform: rotate(306deg) translateY(-118px)">55</div>
+					<div class="minute-mark" style="transform: rotate(336deg) translateY(-118px)">00</div>
+				</div>
 
-    <div class="clock">
-      <div class="clock-face">
-        <div class="hand hour-hand"></div>
-        <div class="hand min-hand"></div>
-        <div class="hand second-hand"></div>
-      </div>
-    </div>
-
-
-  <style>
-    html {
-      background: #018DED url(https://unsplash.it/1500/1000?image=881&blur=5);
-      background-size: cover;
-      font-family: 'helvetica neue';
-      text-align: center;
-      font-size: 10px;
-    }
-
-    body {
-      margin: 0;
-      font-size: 2rem;
-      display: flex;
-      flex: 1;
-      min-height: 100vh;
-      align-items: center;
-    }
-
-    .clock {
-      width: 30rem;
-      height: 30rem;
-      border: 20px solid white;
-      border-radius: 50%;
-      margin: 50px auto;
-      position: relative;
-      padding: 2rem;
-      box-shadow:
-        0 0 0 4px rgba(0,0,0,0.1),
-        inset 0 0 0 3px #EFEFEF,
-        inset 0 0 10px black,
-        0 0 10px rgba(0,0,0,0.2);
-    }
-
-    .clock-face {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      transform: translateY(-3px); /* account for the height of the clock hands */
-    }
-
-    .hand {
-      width: 50%;
-      height: 6px;
-      background: black;
-      position: absolute;
-      top: 50%;
-      transform-origin: 100%;
-      transform: rotate(90deg);
-      transition: all 0.05s;
-      transition-timing-function: cubic-bezier(0.1, 2.7, 0.58, 1);
-    }
-</style>
-
-<script>
-  const secondHand = document.querySelector('.second-hand');
-  const minsHand = document.querySelector('.min-hand');
-  const hourHand = document.querySelector('.hour-hand');
-
-  function setDate() {
-    const now = new Date();
-
-    const seconds = now.getSeconds();
-    const secondsDegrees = ((seconds / 60) * 360) + 90;
-    secondHand.style.transform = `rotate(${secondsDegrees}deg)`;
-
-    const mins = now.getMinutes();
-    const minsDegrees = ((mins / 60) * 360) + ((seconds/60)*6) + 90;
-    minsHand.style.transform = `rotate(${minsDegrees}deg)`;
-
-    const hour = now.getHours();
-    const hourDegrees = ((hour / 12) * 360) + ((mins/60)*30) + 90;
-    hourHand.style.transform = `rotate(${hourDegrees}deg)`;
-  }
-
-  setInterval(setDate, 1000);
-
-  setDate();
-
-</script>
-</body>
+				<!-- Clock hands -->
+				<div class="center-point"></div>
+				<div class="hand hour-hand"></div>
+				<div class="hand min-hand"></div>
+				<div class="hand second-hand"></div>
+			</div>
+		</div>
+		<style>
+			html {
+				background: #018ded url(https://unsplash.it/1500/1000?image=881&blur=5);
+				background-size: cover;
+				font-family: 'helvetica neue';
+				text-align: center;
+				font-size: 10px;
+			}
+			body {
+				margin: 0;
+				font-size: 2rem;
+				display: flex;
+				flex: 1;
+				min-height: 100vh;
+				align-items: center;
+			}
+			.clock {
+				width: 30rem;
+				height: 30rem;
+				border: 20px solid white;
+				border-radius: 50%;
+				margin: 50px auto;
+				position: relative;
+				padding: 2rem;
+				box-shadow:
+					0 0 0 4px rgba(0, 0, 0, 0.1),
+					inset 0 0 0 3px #efefef,
+					inset 0 0 10px black,
+					0 0 10px rgba(0, 0, 0, 0.2);
+			}
+			.clock-face {
+				position: relative;
+				width: 100%;
+				height: 100%;
+				transform: translateY(-3px); /* account for the height of the clock hands */
+			}
+			.hand {
+				width: 50%;
+				height: 6px;
+				background: black;
+				position: absolute;
+				top: 50%;
+				transform-origin: 100%;
+				transform: rotate(90deg);
+				transition: all 0.05s;
+				transition-timing-function: cubic-bezier(0.1, 2.7, 0.58, 1);
+			}
+			
+			/* Different styling for each hand */
+			.hour-hand {
+				width: 35%;
+				left: 15%;
+				height: 8px;
+				background: #333;
+			}
+			
+			.min-hand {
+				height: 4px;
+			}
+			
+			.second-hand {
+				height: 2px;
+				background: red;
+			}
+			
+			/* Center point */
+			.center-point {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				width: 12px;
+				height: 12px;
+				border-radius: 50%;
+				background: #333;
+				transform: translate(-50%, -50%);
+			}
+			
+			/* Hour markers styling */
+			.hour-marks {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				font-weight: bold;
+				font-size: 18px;
+			}
+			
+			.hour-mark {
+				position: absolute;
+				width: 30px;
+				height: 30px;
+				left: 45%;
+				top: 47%;
+				transform-origin: center;
+				text-align: center;
+				line-height: 30px;
+				color: #333;
+			}
+			
+			/* Minute markers styling */
+			.minute-marks {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				font-size: 12px;
+			}
+			
+			.minute-mark {
+				position: absolute;
+				width: 30px;
+				height: 20px;
+				left: 50%;
+				top: 50%;
+				transform-origin: center;
+				text-align: center;
+				line-height: 20px;
+				color: #777;
+				opacity: 0.7;
+			}
+		</style>
+		<script>
+			const secondHand = document.querySelector('.second-hand');
+			const minsHand = document.querySelector('.min-hand');
+			const hourHand = document.querySelector('.hour-hand');
+			
+			function setDate() {
+				const now = new Date();
+				
+				// Update seconds hand
+				const seconds = now.getSeconds();
+				const secondsDegrees = (seconds / 60) * 360 + 90;
+				secondHand.style.transform = `rotate(${secondsDegrees}deg)`;
+				
+				// Update minutes hand
+				const mins = now.getMinutes();
+				const minsDegrees = (mins / 60) * 360 + (seconds / 60) * 6 + 90;
+				minsHand.style.transform = `rotate(${minsDegrees}deg)`;
+				
+				// Update hours hand
+				const hour = now.getHours();
+				const hourDegrees = (hour / 12) * 360 + (mins / 60) * 30 + 90;
+				hourHand.style.transform = `rotate(${hourDegrees}deg)`;
+				
+				// Fix transition glitch when hands complete a full circle
+				if (seconds === 0) {
+					secondHand.style.transition = 'none';
+					setTimeout(() => secondHand.style.transition = 'all 0.05s', 50);
+				}
+				
+				if (mins === 0 && seconds === 0) {
+					minsHand.style.transition = 'none';
+					setTimeout(() => minsHand.style.transition = 'all 0.05s', 50);
+				}
+			}
+			
+			setInterval(setDate, 1000);
+			setDate(); // Set initial position
+		</script>
+	</body>
 </html>

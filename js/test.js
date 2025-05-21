@@ -11,8 +11,7 @@
 		loaderCount > 1 && queue.push(loaderCount);
 		let key = `loader${loaderCount}`;
 		let loader = document.querySelector(`#${key}`);
-		const startLoader = (key) =>
-			(timeIntervalIds[key] = setInterval(displayLoader, 100, key));
+		const startLoader = (key) => (timeIntervalIds[key] = setInterval(displayLoader, 100, key));
 		const displayLoader = (key) => {
 			loader.style.maxWidth = `${count * 20}px`;
 			if (++count === 30) {

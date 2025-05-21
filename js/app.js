@@ -1,6 +1,17 @@
 'use srict';
 
 (function () {
+	document.querySelector('#enableNotifications').addEventListener('click', (e) => {
+		Notification.requestPermission().then((permission) => {
+			if (permission === 'granted') {
+				alert('Notification permission granted.');
+			} else {
+				alert('Notification permission denied.');
+			}
+		});
+	});
+
+/*
 	let docElement = document.documentElement;
 	console.log('docElement', docElement);
 
@@ -9,6 +20,7 @@
 		docElement.style.setProperty('--mouse-x', e.clientX + 'px');
 		docElement.style.setProperty('--mouse-y', e.clientY + 'px');
 	});
+*/
 
 	const getJSON = (url) =>
 		fetch(url).then(
@@ -37,7 +49,7 @@
 
 	const loadDynamically = ['js/states.json', 'js/countries.json', 'js/cities.json'];
 
-	loadJS('SWRegistration.js').then((script) => {
+	ScriptLoader.load('SWRegistration.js').then((script) => {
 		console.info('script', script);
 		if (navigator.serviceWorker) {
 			navigator.serviceWorker.ready.then(console.log);
@@ -45,11 +57,11 @@
 		}
 	});
 	/*
-	loadJS('loadSW.js').then(() => {
+	ScriptLoader.load('loadSW.js').then(() => {
 	  console.log(`Service Worker Loading script loaded`)
 	});
   */
-	loadDynamically.map(loadJS);
+	loadDynamically.map(ScriptLoader.load);
 
 	if (!Worker) {
 		const importScriptWorker = new Worker('importScriptWorker.js');

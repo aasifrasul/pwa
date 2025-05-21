@@ -1,56 +1,31 @@
-function memoize(func) {
-	const hashMap = new Map();
+function generateKey(obj) {
+	return JSON.stringify(obj);
+}
+
+function memoize(fn) {
+	const map = new Map();
 
 	function wrapper(...args) {
-		const self = this;
-		let result;
-		const key = JSON.stringify(args);
+		const key = generateKey(args);
 
-		const localhash = hashMap.get(func.name) || new Map();
-		console.log('localhash', localhash);
-		if (localhash.has(key)) {
-			console.log('InCache');
-			result = localhash.get(key);
-		} else {
-			console.log('Computing');
-			result = func.apply(self, args);
-			localhash.set(key, result);
-		}
+		map.has(key) ? null : map.set(key, fn.apply(this, args));
 
-		hashMap.set(func.name, localhash);
-
-		return result;
+		return map.get(key);
 	}
 
-	wrapper.cancel = function () {
-		hashMap.set(func.name, new Map());
-	};
-
-	wrapper.getHashMap = function () {
-		return hashMap;
-	};
+	wrapper.clear = () => map.clear();
 
 	return wrapper;
 }
 
 function sum(a, b) {
+	console.log('Function Invocation sum');
 	return a + b;
 }
 
-var memoizedSum = memoize(sum);
+const memoizedSum = memoize(sum);
 
-memoizedSum(1, 2);
-memoizedSum(1, 2);
-memoizedSum(3, 2);
-memoizedSum(1, 2);
-
-function compare(obj1, obj2) {
-	return obj1.a > obj2.a;
-}
-
-var memoizedCompare = memoize(compare);
-
-memoizedCompare({ a: 1 }, { a: 1 });
-memoizedCompare({ a: 1 }, { a: 1 });
-memoizedCompare({ a: 2 }, { a: 2 });
-memoizedCompare({ a: 2 }, { a: 2 });
+console.log(memoizedSum(1, 2));
+console.log(memoizedSum(1, 2));
+console.log(memoizedSum(3, 2));
+console.log(memoizedSum(3, 2));

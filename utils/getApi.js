@@ -38,29 +38,29 @@
 	};
 
 	/*
-    getJSON('story.json').then((story) => {
-      addHtmlToPage(story.heading);
-      return story.chapterUrls.reduce((sequence, chapterUrl) => {
-        // Once the last chapter's promise is done…
-        return sequence.then(() => {
-          // …fetch the next chapter
-          return getJSON(chapterUrl);
-        }).then((chapter) => {
-          // and add it to the page
-          addHtmlToPage(chapter.html);
-        });
-      }, Promise.resolve());
-    }).then(() => {
-      // And we're all done!
-      addTextToPage("All done");
-    }).catch((err) => {
-      // Catch any error that happened along the way
-      addTextToPage("Argh, broken: " + err.message);
-    }).then(() => {
-      // Always hide the spinner
-      document.querySelector('.spinner').style.display = 'none';
-    });
-  */
+		getJSON('story.json').then((story) => {
+			addHtmlToPage(story.heading);
+			return story.chapterUrls.reduce((sequence, chapterUrl) => {
+				// Once the last chapter's promise is done…
+				return sequence.then(() => {
+					// …fetch the next chapter
+					return getJSON(chapterUrl);
+				}).then((chapter) => {
+					// and add it to the page
+					addHtmlToPage(chapter.html);
+				});
+			}, Promise.resolve());
+		}).then(() => {
+			// And we're all done!
+			addTextToPage("All done");
+		}).catch((err) => {
+			// Catch any error that happened along the way
+			addTextToPage("Argh, broken: " + err.message);
+		}).then(() => {
+			// Always hide the spinner
+			document.querySelector('.spinner').style.display = 'none';
+		});
+	*/
 
 	const spawn = (generatorFunc) => {
 		const continuer = (verb, arg) => {

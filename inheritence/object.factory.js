@@ -1,7 +1,7 @@
 /*
-What foes new Foo() does ?
+What new Foo() does ?
 It creates a new blank object.
-It makes this to point to this newly created object inside the constructor function
+It makes `this` to point to this newly created object inside the constructor function
 It sets the prototype of the newly created object to the constructor function's prototype.
 It makes the constructor function return the newly created object IF it is not returning anything.
 */

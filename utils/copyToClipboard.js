@@ -9,7 +9,6 @@ const copyToClipboard = (str) => {
 	console.log('selected=>', selected);
 	el.select();
 	document.execCommand('copy');
-	debugger;
 	document.body.removeChild(el);
 	if (selected) {
 		document.getSelection().removeAllRanges();

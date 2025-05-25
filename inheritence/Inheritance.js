@@ -11,8 +11,8 @@ function inherit(child, parent) {
 }
 
 Child = inherit(Child, Parent);
-const o = new Child();
-console.log(o.inheritedMethod()); // this is inherited
+const newChild = new Child();
+console.log(newChild.inheritedMethod()); // this is inherited
 
 function Child() {}
 function Parent() {}

@@ -1,14 +1,12 @@
 function Binding(b) {
-	_this = this;
+	const self = this;
 	this.elementBindings = [];
 	this.value = b.object[b.property];
-	this.valueGetter = function () {
-		return _this.value;
-	};
+	this.valueGetter = () => self.value;
 	this.valueSetter = function (val) {
-		_this.value = val;
-		for (var i = 0; i < _this.elementBindings.length; i++) {
-			var binding = _this.elementBindings[i];
+		self.value = val;
+		for (var i = 0; i < self.elementBindings.length; i++) {
+			var binding = self.elementBindings[i];
 			binding.element[binding.attribute] = val;
 		}
 	};
@@ -18,14 +16,12 @@ function Binding(b) {
 			attribute,
 		};
 		if (event) {
-			element.addEventListener(event, function (event) {
-				_this.valueSetter(element[attribute]);
-			});
+			element.addEventListener(event, (event) => self.valueSetter(element[attribute]));
 			binding.event = event;
 		}
 		this.elementBindings.push(binding);
-		element[attribute] = _this.value;
-		return _this;
+		element[attribute] = self.value;
+		return self;
 	};
 
 	Object.defineProperty(b.object, b.property, {

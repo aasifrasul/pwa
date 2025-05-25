@@ -4,10 +4,10 @@ const SWFile = 'service-worker.js';
 
 const isLocalhost = Boolean(
 	window.location.hostname === 'localhost' ||
-	// [::1] is the IPv6 localhost address.
-	window.location.hostname === '[::1]' ||
-	// 127.0.0.1/8 is considered localhost for IPv4.
-	window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/),
+		// [::1] is the IPv6 localhost address.
+		window.location.hostname === '[::1]' ||
+		// 127.0.0.1/8 is considered localhost for IPv4.
+		window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/),
 );
 
 /**
@@ -64,7 +64,7 @@ const registerValidSW = async (swUrl) => {
 		};
 	} catch (e) {
 		console.error('Error during service worker registration:', e);
-	};
+	}
 };
 
 /**
@@ -85,7 +85,7 @@ const checkValidServiceWorker = async (swUrl) => {
 		}
 	} catch (err) {
 		console.log('No internet connection found. App is running in offline mode.');
-	};
+	}
 };
 
 /**
@@ -118,7 +118,6 @@ const unregister = async (cb) => {
 	await registration.unregister();
 	if (cb && typeof cb === 'function') cb();
 };
-
 
 function addListeners() {
 	// Handle controller changes (new service worker activation)

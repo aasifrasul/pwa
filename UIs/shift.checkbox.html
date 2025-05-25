@@ -95,25 +95,25 @@
 				if (!e.target.matches('input[type="checkbox"]')) {
 					return;
 				}
-				
+
 				const checkbox = e.target;
 				const currentIndex = parseInt(checkbox.dataset.index);
-				
+
 				// Check if they had the shift key down AND they are checking the box
 				if (e.shiftKey && checkbox.checked && lastCheckedIndex !== null) {
 					// Determine the range of checkboxes to check
 					const start = Math.min(currentIndex, lastCheckedIndex);
 					const end = Math.max(currentIndex, lastCheckedIndex);
-					
+
 					// Check all boxes between the current and last checked
 					for (let i = start; i <= end; i++) {
 						document.querySelector(`#checkbox-${i}`).checked = true;
 					}
 				}
-				
+
 				lastCheckedIndex = currentIndex;
 			}
-			
+
 			// Use event delegation instead of attaching to each checkbox
 			document.querySelector('.inbox').addEventListener('click', handleCheck);
 		</script>

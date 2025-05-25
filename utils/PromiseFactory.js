@@ -54,8 +54,7 @@ class PromiseFactory {
 	}
 
 	fetchResolvedData(key) {
-		const this.promise = this.get(key) || {};
-		return this.promise?.data;
+		return this.get(key)?.data;
 	}
 
 	updateResolvedData(key, data) {

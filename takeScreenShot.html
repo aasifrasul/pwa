@@ -1,48 +1,48 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-	<title>Webcam Access</title>
-</head>
-<body>
-	<video autoplay playsinline></video>
-	<button id="stopButton">Stop Camera</button>
+	<head>
+		<title>Webcam Access</title>
+	</head>
+	<body>
+		<video autoplay playsinline></video>
+		<button id="stopButton">Stop Camera</button>
 
-	<script>
-		const video = document.querySelector('video');
-		const stopButton = document.getElementById('stopButton');
-		let mediaStream = null;
+		<script>
+			const video = document.querySelector('video');
+			const stopButton = document.getElementById('stopButton');
+			let mediaStream = null;
 
-		async function startCamera() {
-			try {
-				if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-					alert('getUserMedia is not supported on your browser.');
-					return;
+			async function startCamera() {
+				try {
+					if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+						alert('getUserMedia is not supported on your browser.');
+						return;
+					}
+
+					const constraints = { video: true };
+					mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+					video.srcObject = mediaStream;
+				} catch (error) {
+					console.error('Error accessing media devices:', error);
+					alert('Failed to access the camera. Please check your browser permissions.');
 				}
-
-				const constraints = { video: true };
-				mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-				video.srcObject = mediaStream;
-			} catch (error) {
-				console.error('Error accessing media devices:', error);
-				alert('Failed to access the camera. Please check your browser permissions.');
 			}
-		}
 
-		function stopCamera() {
-			if (mediaStream) {
-				mediaStream.getTracks().forEach(track => {
-					track.stop();
-				});
-				video.srcObject = null;
-				mediaStream = null;
+			function stopCamera() {
+				if (mediaStream) {
+					mediaStream.getTracks().forEach((track) => {
+						track.stop();
+					});
+					video.srcObject = null;
+					mediaStream = null;
+				}
 			}
-		}
 
-		// Start the camera when the script loads
-		startCamera();
+			// Start the camera when the script loads
+			startCamera();
 
-		// Add an event listener to the stop button
-		stopButton.addEventListener('click', stopCamera);
-	</script>
-</body>
+			// Add an event listener to the stop button
+			stopButton.addEventListener('click', stopCamera);
+		</script>
+	</body>
 </html>

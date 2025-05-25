@@ -75,7 +75,7 @@ const fetchCachedVersion = async (req) => {
 	try {
 		const cache = await fetchSWVersionFromCache();
 		const response = await cache.match(req);
-	
+
 		if (!response) return null;
 
 		return await response.json();
@@ -94,9 +94,9 @@ const notifyClients = async (message) => {
 	try {
 		const clients = await self.clients.matchAll();
 		if (clients.length === 0) return;
-	
+
 		const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
-		await Promise.all(clients.map(client => client.postMessage(messageStr)));
+		await Promise.all(clients.map((client) => client.postMessage(messageStr)));
 	} catch (err) {
 		handleError(err);
 	}
@@ -110,7 +110,7 @@ const checkVersion = async () => {
 	try {
 		const req = new Request('https://foo.bar/swversion');
 		const cacheversion = await fetchCachedVersion(req.clone());
-	
+
 		const versionInfo = {
 			newVersion: SWVERSION,
 			oldVersion: cacheversion || null,
@@ -213,44 +213,46 @@ self.addEventListener('install', (e) => {
 	console.log('Service Worker installing');
 
 	// Using async function inside waitUntil
-	e.waitUntil((async () => {
-		// Skip waiting to activate immediately
-		await self.skipWaiting();
-	
-		try {
-			// Pre-cache specified URLs
-			const cache = await caches.open(CURRENT_CACHES.prefetch);
-			console.log('Opened cache for prefetching');
-	  
-			const cachePromises = urlsToPrefetch.map(async (urlToPrefetch) => {
-				const url = new URL(urlToPrefetch, self.location.href);
-				url.search += (url.search ? '&' : '?') + 'cache-bust=' + Date.now();
+	e.waitUntil(
+		(async () => {
+			// Skip waiting to activate immediately
+			await self.skipWaiting();
 
-				const request = new Request(url, {
-					mode: 'no-cors',
-					cache: 'no-cache',
+			try {
+				// Pre-cache specified URLs
+				const cache = await caches.open(CURRENT_CACHES.prefetch);
+				console.log('Opened cache for prefetching');
+
+				const cachePromises = urlsToPrefetch.map(async (urlToPrefetch) => {
+					const url = new URL(urlToPrefetch, self.location.href);
+					url.search += (url.search ? '&' : '?') + 'cache-bust=' + Date.now();
+
+					const request = new Request(url, {
+						mode: 'no-cors',
+						cache: 'no-cache',
+					});
+
+					try {
+						const response = await fetchWithRetry(request);
+						const { status, statusText } = response || {};
+
+						if (status >= 400) {
+							throw new Error(`Request for ${urlToPrefetch} failed with status ${statusText}`);
+						}
+
+						await cache.put(urlToPrefetch, response);
+					} catch (error) {
+						console.error(`Not caching ${urlToPrefetch} due to ${error}`);
+					}
 				});
 
-				try {
-					const response = await fetchWithRetry(request);
-					const { status, statusText } = response || {};
-		  
-					if (status >= 400) {
-						throw new Error(`Request for ${urlToPrefetch} failed with status ${statusText}`);
-					}
-
-					await cache.put(urlToPrefetch, response);
-				} catch (error) {
-					console.error(`Not caching ${urlToPrefetch} due to ${error}`);
-				}
-			});
-
-			await Promise.all(cachePromises);
-			console.log('Pre-fetching complete.');
-		} catch (error) {
-			console.error('Pre-fetching failed:', error);
-		}
-	})());
+				await Promise.all(cachePromises);
+				console.log('Pre-fetching complete.');
+			} catch (error) {
+				console.error('Pre-fetching failed:', error);
+			}
+		})(),
+	);
 });
 
 /**
@@ -259,31 +261,33 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
 	console.log('Service Worker activating');
 
-	e.waitUntil((async () => {
-		// Notify clients of activation
-		await notifyClients('Service Worker Activated');
+	e.waitUntil(
+		(async () => {
+			// Notify clients of activation
+			await notifyClients('Service Worker Activated');
 
-		// Clean up old caches
-		try {
-			const expectedCacheNames = Object.values(CURRENT_CACHES);
-			const cacheNames = await caches.keys();
-	  
-			const deletePromises = cacheNames.map(async (cacheName) => {
-				if (expectedCacheNames.indexOf(cacheName) === -1 && cacheName !== 'SWVERSION') {
-					console.log('Deleting out of date cache:', cacheName);
-					await caches.delete(cacheName);
-				}
-			});
-	  
-			await Promise.all(deletePromises);
-		} catch (error) {
-			console.error('Cache cleanup failed:', error);
-		}
+			// Clean up old caches
+			try {
+				const expectedCacheNames = Object.values(CURRENT_CACHES);
+				const cacheNames = await caches.keys();
 
-		// Claim any clients and check version
-		await self.clients.claim();
-		await checkVersion();
-	})());
+				const deletePromises = cacheNames.map(async (cacheName) => {
+					if (expectedCacheNames.indexOf(cacheName) === -1 && cacheName !== 'SWVERSION') {
+						console.log('Deleting out of date cache:', cacheName);
+						await caches.delete(cacheName);
+					}
+				});
+
+				await Promise.all(deletePromises);
+			} catch (error) {
+				console.error('Cache cleanup failed:', error);
+			}
+
+			// Claim any clients and check version
+			await self.clients.claim();
+			await checkVersion();
+		})(),
+	);
 });
 
 /**
@@ -297,7 +301,7 @@ const getStreamedHtmlResponse = (url, routeMatch) => {
 		async start(controller) {
 			const pushToStream = async (stream) => {
 				const reader = stream.getReader();
-		
+
 				try {
 					while (true) {
 						const { done, value } = await reader.read();
@@ -370,79 +374,83 @@ self.addEventListener('fetch', (e) => {
 	// Check if this is an analytics request
 	if (isAnalyticsRequest(url)) {
 		// Network-only strategy with retry for analytics
-		e.respondWith((async () => {
-			try {
-				return await fetchWithRetry(request);
-			} catch (error) {
-				console.error('Analytics request failed after retries:', error);
+		e.respondWith(
+			(async () => {
+				try {
+					return await fetchWithRetry(request);
+				} catch (error) {
+					console.error('Analytics request failed after retries:', error);
 
-				// For analytics, we might want to queue the failed request for later
+					// For analytics, we might want to queue the failed request for later
+					notifyClients({
+						type: 'ANALYTICS_FAILED',
+						data: {
+							url: request.url,
+							error: error.message,
+						},
+					});
+
+					// Return a "success" response to the client so the app continues normally
+					return new Response(
+						JSON.stringify({
+							success: false,
+							message: 'Analytics request queued for retry',
+						}),
+						{
+							status: 200,
+							headers: {
+								'Content-Type': 'application/json',
+							},
+						},
+					);
+				}
+			})(),
+		);
+		return;
+	}
+
+	// Standard cache-first strategy with retry mechanism for normal requests
+	e.respondWith(
+		(async () => {
+			try {
+				const cachedResponse = await caches.match(request);
+				if (cachedResponse) return cachedResponse;
+
+				// No cached response, try network with retry
+				const response = await fetchWithRetry(request);
+
+				// Don't cache bad responses
+				if (!response || response.status !== 200 || response.type !== 'basic') return response;
+
+				// Clone the response before caching
+				const responseToCache = response.clone();
+				const cache = await caches.open(CURRENT_CACHES.prefetch);
+				await cache.put(request, responseToCache);
+
+				return response;
+			} catch (error) {
+				console.error('Fetch failed after retries:', error);
+
+				// Notify clients about the complete failure
 				notifyClients({
-					type: 'ANALYTICS_FAILED',
+					type: 'FETCH_FAILED',
 					data: {
 						url: request.url,
 						error: error.message,
 					},
 				});
 
-				// Return a "success" response to the client so the app continues normally
-				return new Response(
-					JSON.stringify({
-						success: false,
-						message: 'Analytics request queued for retry',
-					}),
-					{
-						status: 200,
-						headers: {
-							'Content-Type': 'application/json',
-						},
+				// Return custom offline page or fallback
+				return new Response('Network request failed after multiple retries', {
+					status: 503,
+					statusText: 'Service Unavailable',
+					headers: {
+						'Content-Type': 'text/plain',
 					},
-				);
+				});
 			}
-		})());
-		return;
-	}
-
-	// Standard cache-first strategy with retry mechanism for normal requests
-	e.respondWith((async () => {
-		try {
-			const cachedResponse = await caches.match(request);
-			if (cachedResponse) return cachedResponse;
-
-			// No cached response, try network with retry
-			const response = await fetchWithRetry(request);
-	  
-			// Don't cache bad responses
-			if (!response || response.status !== 200 || response.type !== 'basic') return response;
-
-			// Clone the response before caching
-			const responseToCache = response.clone();
-			const cache = await caches.open(CURRENT_CACHES.prefetch);
-			await cache.put(request, responseToCache);
-
-			return response;
-		} catch (error) {
-			console.error('Fetch failed after retries:', error);
-
-			// Notify clients about the complete failure
-			notifyClients({
-				type: 'FETCH_FAILED',
-				data: {
-					url: request.url,
-					error: error.message,
-				},
-			});
-
-			// Return custom offline page or fallback
-			return new Response('Network request failed after multiple retries', {
-				status: 503,
-				statusText: 'Service Unavailable',
-				headers: {
-					'Content-Type': 'text/plain',
-				},
-			});
-		}
-	})());
+		})(),
+	);
 });
 
 /**
@@ -461,7 +469,7 @@ self.addEventListener('push', (e) => {
 			body,
 			icon,
 			tag,
-		})
+		}),
 	);
 });
 
@@ -473,25 +481,27 @@ self.addEventListener('notificationclick', (e) => {
 	e.notification.close();
 
 	// Focus existing window or open new one
-	e.waitUntil((async () => {
-		const clientList = await clients.matchAll({
-			type: 'window',
-		});
-	
-		// Try to focus an existing window
-		for (let i = 0; i < clientList.length; i++) {
-			const client = clientList[i];
-			if (client.url === '/' && 'focus' in client) {
-				return client.focus();
-			}
-		}
+	e.waitUntil(
+		(async () => {
+			const clientList = await clients.matchAll({
+				type: 'window',
+			});
 
-		// Open a new window if needed
-		if (clients.openWindow) {
-			const url = e.notification.data && e.notification.data.url ? e.notification.data.url : '/';
-			return clients.openWindow(url);
-		}
-	})());
+			// Try to focus an existing window
+			for (let i = 0; i < clientList.length; i++) {
+				const client = clientList[i];
+				if (client.url === '/' && 'focus' in client) {
+					return client.focus();
+				}
+			}
+
+			// Open a new window if needed
+			if (clients.openWindow) {
+				const url = e.notification.data && e.notification.data.url ? e.notification.data.url : '/';
+				return clients.openWindow(url);
+			}
+		})(),
+	);
 });
 
 /**

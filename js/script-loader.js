@@ -11,12 +11,15 @@
 			if (src in loadedScripts) return loadedScripts[src];
 
 			// Default options
-			const config = Object.assign({
-				async: true,
-				defer: false,
-				crossOrigin: 'anonymous',
-				type: 'text/javascript'
-			}, options);
+			const config = Object.assign(
+				{
+					async: true,
+					defer: false,
+					crossOrigin: 'anonymous',
+					type: 'text/javascript',
+				},
+				options,
+			);
 
 			// Create promise for script loading
 			const promise = new Promise((resolve, reject) => {
@@ -58,9 +61,7 @@
 
 		// Load multiple scripts in parallel
 		loadParallel: function (scriptSources, options = {}) {
-			return Promise.all(
-				scriptSources.map(src => this.load(src, options))
-			);
+			return Promise.all(scriptSources.map((src) => this.load(src, options)));
 		},
 
 		// Create a Web Worker
@@ -73,18 +74,18 @@
 				console.error('Failed to create worker:', scriptSrc, error);
 				throw error;
 			}
-		}
+		},
 	};
 
 	// Auto-initialization when DOM is ready
 	document.addEventListener('DOMContentLoaded', () => {
 		// Look for script tags with data-loader attributes
 		const autoloadScripts = document.querySelectorAll('script[data-loader]');
-		autoloadScripts.forEach(scriptTag => {
+		autoloadScripts.forEach((scriptTag) => {
 			const src = scriptTag.getAttribute('data-src');
 			const async = scriptTag.hasAttribute('data-async');
 			const defer = scriptTag.hasAttribute('data-defer');
-					
+
 			if (src) {
 				window.ScriptLoader.load(src, { async, defer });
 			}

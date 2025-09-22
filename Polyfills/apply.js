@@ -1,54 +1,36 @@
-const dataType = (data) => Object.prototype.toString.call(data).slice(8, -1).toLowerCase();
-
-const isFunction = (data) => dataType(data) === 'function';
-const isArray = (data) => dataType(data) === 'array';
-const isObject = (data) => dataType(data) === 'object';
-const isUndefined = (data) => dataType(data) === 'undefined';
-
-function getGlobalContext() {
-	if (isUndefined(global) || !isObject(global) || global.Math !== Math || global.Array !== Array) {
-		return getGlobal();
-	}
-	return global;
+// A more robust way to get the global object, if needed.
+// For most modern environments, globalThis is preferred.
+function getGlobalObject() {
+    if (typeof globalThis !== 'undefined') {
+        return globalThis;
+    }
+    // Fallback for older environments
+    if (typeof self !== 'undefined') {
+        return self;
+    }
+    if (typeof window !== 'undefined') {
+        return window;
+    }
+    if (typeof global !== 'undefined') {
+        return global;
+    }
+    return new Function('return this')();
 }
 
-function getGlobal() {
-	if (!isUndefined(self)) {
-		return self;
-	} else if (!isUndefined(window)) {
-		return window;
-	} else if (!isUndefined(global)) {
-		return global;
-	} else {
-		return new Function('return this')();
-	}
-}
+const globalObject = getGlobalObject();
 
 Function.prototype.myApply =
 	Function.prototype.myApply ||
-	function myApply(context = getGlobalContext(), args = []) {
-		context.myApply = this;
-		const result = context.myApply(...args);
-		delete context.myApply;
+	function myApply(thisArg, args = []) {
+		// In strict mode, thisArg is used as-is
+		// In non-strict mode, null/undefined becomes globalThis
+		const context = thisArg == null ? globalThis : Object(thisArg);
+		const uniqueKey = Symbol('fnRef'); // Use Symbol to avoid conflicts
+		context[uniqueKey] = this;
+		const result = context[uniqueKey](...args);
+		delete context[uniqueKey];
 		return result;
 	};
-
-Function.prototype.myApply = function (obj, args = []) {
-	if (!isFunction(this)) {
-		throw new TypeError('Attempt to call apply on non-function');
-	}
-	if (!isObject(obj) && !isFunction(obj)) {
-		throw new TypeError('Function.prototype.apply: Arguments list has wrong type');
-	}
-	if (!isArray(args)) {
-		throw new TypeError('CreateListFromArrayLike called on non-object');
-	}
-
-	obj.fnRef = this;
-	const result = obj.fnRef(...args);
-	delete obj.fnRef;
-	return result;
-};
 
 var obj = {
 	a: 'Hi, ',
@@ -66,7 +48,5 @@ globalContext.a = 1;
 globalContext.b = 2;
 
 console.log(func()); // prints 3
-
-console.log(func.myApply(obj, [5, 6])); // prints 'Hi, Hello!'
-
-console.log(func.myApply([3, 4])); // prints 3
+console.log(func.myApply(obj, [5, 6])); // prints 'Hi, Hello!' and returns 11
+console.log(func.myApply(null, [3, 4])); // returns 7 (but abc/xyz are undefined)

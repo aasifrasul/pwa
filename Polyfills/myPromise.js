@@ -50,8 +50,37 @@ class myPromise {
 			reject(error);
 		});
 	}
-
+	// "All must succeed" - fails fast
 	static all(promises) {
+		if (!Array.isArray(promises)) {
+			throw new Error('Parameter expected of type array');
+		}
+		if (promises.length === 0) {
+			return myPromise.resolve([]);
+		}
+
+		return new myPromise((resolve, reject) => {
+			const results = new Array(promises.length);
+			let resolvedCount = 0;
+
+			promises.forEach((promise, index) => {
+				myPromise.resolve(promise) // Handle non-promises
+					.then((value) => {
+						results[index] = value;
+						resolvedCount++;
+						if (resolvedCount === promises.length) {
+							resolve(results);
+						}
+					})
+					.catch((error) => {
+						reject(error); // Fail fast - reject immediately
+					});
+			});
+		});
+	}
+
+	// "Wait for everything" - never fails
+	static allSettled(promises) {
 		if (!Array.isArray(promises)) {
 			throw new Error('Parameter expected of type array');
 		}
@@ -60,180 +89,165 @@ class myPromise {
 			return myPromise.resolve([]);
 		}
 
-		return new myPromise((resolve, reject) => {
-			const result = {};
-			let countOfResolvedPromises = 0;
+		return new myPromise((resolve) => {
+			const results = new Array(promises.length);
+			let settledCount = 0;
 
-			for (let i = 0; i < promises.length; i++) {
-				const promise = promises[i];
-
-				try {
-					promise.then((data) => {
-						countOfResolvedPromises++;
-						result[i] = data;
-						if (promises.length === countOfResolvedPromises) {
-							resolve(result);
-							return;
-						}
-					});
-				} catch (err) {
-					throw new Error(err);
+			function checkForCompletion() {
+				settledCount++;
+				if (settledCount === promises.length) {
+					resolve(results);
 				}
 			}
+
+			promises.forEach((promise, index) => {
+				myPromise.resolve(promise) // Handle non-promises
+					.then(
+						(value) => {
+							results[index] = { status: 'fulfilled', value };
+							checkForCompletion();
+						},
+						(reason) => {
+							results[index] = { status: 'rejected', reason };
+							checkForCompletion();
+						},
+					);
+			});
 		});
 	}
 
-	static allSettled(promises) {
-		if (!Array.isArray(promises)) {
-			throw new Error('Parameter expected of type array');
-		}
-
-		return new myPromise((resolve, reject) => {
-			const result = [];
-			let countOfResolvedPromises = 0;
-
-			for (let i = 0; i < promises.length; i++) {
-				const promise = promises[i];
-
-				promise.then(
-					(value) => {
-						countOfResolvedPromises++;
-						result[i] = { status: 'fulfilled', value };
-						if (promises.length === countOfResolvedPromises) {
-							resolve(result);
-						}
-					},
-					(reason) => {
-						countOfResolvedPromises++;
-						result[i] = { status: 'rejected', reason };
-						if (promises.length === countOfResolvedPromises) {
-							resolve(result);
-						}
-					},
-				);
-			}
-		});
-	}
-
+	// "First success wins" - ignores failures until all fail
 	static any(promises) {
 		if (!Array.isArray(promises)) {
 			throw new Error('Parameter expected of type array');
 		}
 
 		if (promises.length === 0) {
-			return myPromise.resolve([]);
+			return Promise.reject(new AggregateError([], 'No promises provided'));
 		}
 
 		return new Promise((resolve, reject) => {
-			let resultData;
-			let countOfCompletedPromises = 0;
+			let rejectedCount = 0;
+			const errors = [];
 
-			for (let promise of promises) {
-				promise
-					.then((data) => {
-						if (!resultData) {
-							resultData = data;
-						}
+			promises.forEach((promise, index) => {
+				myPromise.resolve(promise) // Handle non-promise values
+					.then((value) => {
+						resolve(value); // Resolve immediately on first success
 					})
-					.finally(() => {
-						++countOfCompletedPromises;
+					.catch((error) => {
+						errors[index] = error;
+						rejectedCount++;
 
-						if (countOfCompletedPromises === promises.length) {
-							if (resultData) {
-								resolve(resultData);
-							} else {
-								reject(new Error('AggregateError'));
-							}
+						// Only reject when ALL promises have failed
+						if (rejectedCount === promises.length) {
+							reject(new AggregateError(errors, 'All promises rejected'));
 						}
 					});
-			}
+			});
 		});
 	}
 
+	// "First to finish wins" - could be success or failure
 	static race(promises) {
 		if (!Array.isArray(promises)) {
 			throw new Error('Parameter expected of type array');
 		}
 
 		return new myPromise((resolve, reject) => {
-			for (let promise of promises) {
-				promise
-					.then((data) => resolve(data))
-					.catch((err) => {
-						reject(err);
-						throw new Error(err);
+			let settled = false; // Prevent multiple settlements
+
+			promises.forEach((promise) => {
+				myPromise.resolve(promise)
+					.then((value) => {
+						if (!settled) {
+							settled = true;
+							resolve(value);
+						}
+					})
+					.catch((error) => {
+						if (!settled) {
+							settled = true;
+							reject(error);
+						}
 					});
-			}
+			});
 		});
 	}
 
 	constructor(callback) {
-		this.validateFunction(callback);
-		this.state = 'pending'; //pending/fulfilled/rejected
+		this.status = 'pending';
 		this.data = null;
 		this.error = null;
+		this.successHandlers = [];
+		this.errorHandlers = [];
 
-		this.finallyCallback = () => {};
-		this.successCallback = () => {};
-		this.errorCallback = () => {};
-
-		this.resolve = this.resolve.bind(this);
-		this.reject = this.reject.bind(this);
-
-		callback(this.resolve, this.reject);
-	}
-
-	resolve(data) {
-		if (this.state === 'pending') {
-			this.state = 'fulfilled';
-			this.data = data;
-
-			this.successCallback(data);
-			this.finallyCallback();
+		try {
+			callback(this.resolve.bind(this), this.reject.bind(this));
+		} catch (error) {
+			this.reject(error);
 		}
 	}
 
-	reject(error) {
-		if (this.state === 'pending') {
-			this.state = 'rejected';
-			this.error = error;
+	resolve(data) {
+		if (this.status !== 'pending') return;
+		this.status = 'resolved';
+		this.data = data;
 
-			this.errorCallback(error);
-			this.finallyCallback();
+		// Execute asynchronously
+		queueMicrotask(() => this.executeHandlers(), 0);
+	}
+
+	reject(error) {
+		if (this.status !== 'pending') return;
+		this.status = 'rejected';
+		this.error = error;
+
+		queueMicrotask(this.executeHandlers.bind(this));
+	}
+
+	executeHandlers() {
+		if (this.status === 'resolved') {
+			this.successHandlers.forEach((cb) => cb(this.data));
+			this.successHandlers = []; // Clear after execution
+		} else if (this.status === 'rejected') {
+			this.errorHandlers.forEach((cb) => cb(this.error));
+			this.errorHandlers = []; // Clear after execution
 		}
 	}
 
 	then(successCallback, errorCallback) {
-		this.validateFunction(successCallback, 'successCallback');
-		errorCallback && this.validateFunction(errorCallback, 'errorCallback');
+		if (successCallback) {
+			this.successHandlers.push(successCallback);
+		}
 
-		this.data && this.successCallback(this.data);
-		this.error && errorCallback && this.errorCallback(this.error);
-		this.finallyCallback();
+		if (errorCallback) {
+			this.errorHandlers.push(errorCallback);
+		}
+
+		// Only execute if already settled
+		if (this.status !== 'pending') {
+			queueMicrotask(() => this.executeHandlers(), 0);
+		}
 
 		return this;
 	}
 
 	catch(errorCallback) {
-		this.validateFunction(errorCallback, 'errorCallback');
-		this.error && this.errorCallback(this.error);
-		this.finallyCallback();
+		if (errorCallback) {
+			this.errorHandlers.push(errorCallback);
+		}
+
+		// Only execute if already settled
+		if (this.status !== 'pending') {
+			queueMicrotask(() => this.executeHandlers(), 0);
+		}
 
 		return this;
 	}
 
-	finally(finallyCallback) {
-		this.validateFunction(finallyCallback, 'finallyCallback');
-	}
-
-	validateFunction(func, funcName) {
-		if (typeof func !== 'function') {
-			throw new Error('Invalid function', funcName);
-		}
-
-		if (typeof funcName === 'string' && funcName.length > 0) {
-			this[funcName] = func;
-		}
+	finally(callback) {
+		callback && callback();
 	}
 }
 

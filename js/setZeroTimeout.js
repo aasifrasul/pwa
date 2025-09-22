@@ -35,8 +35,9 @@
 // BEGIN demo that uses setZeroTimeout
 
 function runtest() {
-	const output = document.getElementById('output');
+	const output = document.querySelector('.top-to-btm');
 	const outputText = document.createTextNode('');
+	output.innerHTML = '';
 	output.appendChild(outputText);
 
 	function printOutput(line) {
@@ -69,5 +70,7 @@ function runtest() {
 		}
 	}
 }
+
+runtest();
 
 // END demo that uses setZeroTimeout

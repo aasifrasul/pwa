@@ -8,6 +8,7 @@
 			content="width=device-width, minimum-scale=1.0, user-scalable=no, initial-scale=1.0, shrink-to-fit=no"
 		/>
 		<meta http-equiv="Accept-CH" content="DPR, Viewport-Width, Width" />
+		<script src="/js/script-loader.js"></script>
 		<body>
 			<canvas id="canvas"> </canvas>
 			<img
@@ -117,24 +118,8 @@
 					<ul id="log"></ul>
 				</article>
 				<script>
-					const loadJS = async (src) => {
-						console.log('Script Invoked', src);
-						const ref = document.querySelectorAll('script')[0];
-						const script = document.createElement('script');
-						script.setAttribute('src', src);
-						script.setAttribute('defer', true);
-						script.setAttribute('async', true);
-						script.setAttribute('crossorigin', 'anonymous');
-						ref.parentNode.insertBefore(script, ref);
-						script.onload = await function (e) {
-							console.log('load', e);
-						};
-						script.onerror = await function (err) {
-							console.log('Script Rejected', src, err);
-						};
-					};
-					// window.addEventListener('DOMContentLoaded', () => loadJS('Demo.js').then(() => loadJS('config.js').then(() => loadJS('main.js'))));
-					window.addEventListener('DOMContentLoaded', () => loadJS('chat.js'));
+					// window.addEventListener('DOMContentLoaded', () => ScriptLoader.load('Demo.js').then(() => ScriptLoader.load('config.js').then(() => ScriptLoader.load('main.js'))));
+					window.addEventListener('DOMContentLoaded', () => ScriptLoader.load('chat.js'));
 				</script>
 			</section>
 		</body>

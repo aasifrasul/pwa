@@ -15,7 +15,7 @@ const getNestedValue = (obj, path) => {
 	const accessorPaths = path.split('.');
 	let result = obj;
 
-	/*
+	/**
 	if (isArray(accessorPaths) && accessorPaths.length > 0) {
 		for (let value of accessorPaths) {
 			if (!isEmpty(value) && isObject(result)) {
@@ -23,10 +23,12 @@ const getNestedValue = (obj, path) => {
 			}
 		}
 	}
-*/
+
+	return result;
+	*/
 	return (
 		isArray(accessorPaths) &&
-		accessorPaths.reduce((accu, value) => (!isEmpty(value) && isObject(accu) ? accu[value] : null), {})
+		accessorPaths.reduce((accu, value) => (!isEmpty(value) && isObject(accu) ? accu[value] : null), obj)
 	);
 };
 

@@ -26,6 +26,7 @@
 		displayPagination();
 		addSeparator(app);
 		buildForm();
+		addEvents();
 	});
 
 	function addCompletedOption() {
@@ -161,7 +162,7 @@
 	function buildForm() {
 		const form = document.createElement('form');
 		form.id = 'form';
-		fromContainer.appendChild(form);
+
 		form.onsubmit = function (e) {
 			console.log('Submit');
 			e.preventDefault();
@@ -178,23 +179,18 @@
 		submitButton.appendChild(document.createTextNode('Submit'));
 		form.appendChild(submitButton);
 		form.on;
+		fromContainer.appendChild(form);
 	}
 
 	function displayPagination() {
 		if (items.length > pageSize) {
 			const div = document.createElement('div');
+			div.classList.add('pagination');
 			const pages = Math.ceil(items.length / pageSize);
 			for (let i = 1; i <= pages; i++) {
 				const span = document.createElement('span');
 				const link = document.createElement('a');
 				link.href = '';
-
-				link.onclick = function (e) {
-					e.preventDefault();
-					pageNum = i;
-					const lastIndex = pageNum * pageSize;
-					displayList(items.slice(lastIndex - pageSize, lastIndex));
-				};
 
 				const text = document.createTextNode(i);
 
@@ -207,6 +203,15 @@
 			}
 			app.insertAdjacentElement('afterend', div);
 		}
+	}
+
+	function addEvents() {
+		document.querySelector('.pagination').addEventListener('click', function (e) {
+			e.preventDefault();
+			pageNum = Number(e.target.innerHTML);
+			const lastIndex = pageNum * pageSize;
+			displayList(items.slice(lastIndex - pageSize, lastIndex));
+		});
 	}
 
 	function displayUndoDeleteButton() {

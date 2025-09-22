@@ -1,27 +1,35 @@
-const dataType = (data) => Object.prototype.toString.call(data).slice(8, -1).toLowerCase();
+function myReduce(callback, initialValue) {
+	if (!Array.isArray(this)) {
+		throw new TypeError('this is null or undefined');
+	}
 
-const isFunction = (data) => dataType(data) === 'function';
-const isUndefined = (data) => dataType(data) === 'undefined';
-const isNumber = (data) => dataType(data) === 'number';
-const isString = (data) => dataType(data) === 'string';
-const isNull = (data) => dataType(data) === 'null';
+	if (typeof callback !== 'function') {
+		throw new TypeError(callback + ' is not a function');
+	}
 
-Array.prototype.myReduce =
-	Array.prototype.myReduce ||
-	function myReduce(callback, initialValue) {
-		if (!isFunction(callback)) {
-			throw new Error('callback should be a function');
+	const list = Object(this);
+
+	if (list.length === 0) {
+		throw new TypeError('Reduce of empty array with no initial value');
+	}
+
+	let result = initialValue || list[0];
+	const start = initialValue ? 0 : 1;
+
+	for (let i = start; i < list.length; i++) {
+		if (i in list) {
+			try {
+				result = callback(result, list[i], i, list);
+			} catch (err) {
+				throw err;
+			}
 		}
+	}
 
-		const items = Object(this);
-		let accumulator = isUndefined(initialValue) ? null : initialValue;
+	return result;
+}
 
-		for (let i = 0; i < items.length; i++) {
-			accumulator = isNull(accumulator) ? items[i] : callback.call(this, accumulator, items[i], i, items);
-		}
-
-		return accumulator;
-	};
+Array.prototype.myReduce = Array.prototype.myReduce || myReduce;
 
 [1, 2, 3, 4].myReduce((accumulator, item) => {
 	console.log(accumulator);

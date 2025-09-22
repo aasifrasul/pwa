@@ -14,8 +14,8 @@ const isLocalhost = Boolean(
  * Registers a valid service worker
  * @param {string} swUrl - URL to the service worker file
  */
-const registerValidSW = async (swUrl) => {
-	// Your service-worker.js *must* be located at the top-level directory relative to your site.
+const registerValidServiceWorker = async (swUrl) => {
+	// service-worker.js *must* be located at the top-level directory relative to your site.
 	try {
 		const registeringSW = await window.navigator.serviceWorker.register(swUrl, {
 			scope: '/',
@@ -81,7 +81,7 @@ const checkValidServiceWorker = async (swUrl) => {
 			unregister(() => window.location.reload());
 		} else {
 			// Service worker found. Proceed as normal.
-			registerValidSW(swUrl);
+			registerValidServiceWorker(swUrl);
 		}
 	} catch (err) {
 		console.log('No internet connection found. App is running in offline mode.');
@@ -105,7 +105,7 @@ const register = async () => {
 		);
 	} else {
 		// Not localhost. Just register service worker
-		registerValidSW(swUrl);
+		registerValidServiceWorker(swUrl);
 	}
 };
 
@@ -152,7 +152,7 @@ function addListeners() {
 // Delay registration until after the page has loaded
 window.addEventListener('load', async () => {
 	// Only run if service worker is supported
-	if ('serviceWorker' in window.navigator) {
+	if (window.navigator.serviceWorker) {
 		register();
 		addListeners();
 	}

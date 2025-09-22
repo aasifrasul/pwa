@@ -1,51 +1,47 @@
-// bind Polyfill
-const dataType = (data) => Object.prototype.toString.call(data).slice(8, -1).toLowerCase();
-
-const isFunction = (data) => dataType(data) === 'function';
-const isArray = (data) => dataType(data) === 'array';
-const isObject = (data) => dataType(data) === 'object';
-const isUndefined = (data) => dataType(data) === 'undefined';
-
-function getGlobalContext() {
-	if (isUndefined(global) || !isObject(global) || global.Math !== Math || global.Array !== Array) {
-		return getGlobal();
+// A more robust way to get the global object, if needed.
+// For most modern environments, globalThis is preferred.
+function getGlobalObject() {
+	if (typeof globalThis !== 'undefined') {
+		return globalThis;
 	}
-	return global;
-}
-
-function getGlobal() {
-	if (!isUndefined(self)) {
+	// Fallback for older environments
+	if (typeof self !== 'undefined') {
 		return self;
-	} else if (!isUndefined(window)) {
-		return window;
-	} else if (!isUndefined(global)) {
-		return global;
-	} else {
-		return new Function('return this')();
 	}
+	if (typeof window !== 'undefined') {
+		return window;
+	}
+	if (typeof global !== 'undefined') {
+		return global;
+	}
+	return new Function('return this')();
 }
+
+const globalObject = getGlobalObject();
 
 Function.prototype.myBind =
 	Function.prototype.myBind ||
-	function (context = getGlobalContext(), ...args) {
-		context.myBind = this;
-		return function () {
-			return context.myBind(...args);
+	function myBind(thisArg, ...originalArgs) {
+		const context = thisArg == null ? globalObject : Object(thisArg);
+		const uniqueKey = Symbol('fnRef');
+		context[uniqueKey] = this;
+
+		return function (...args) {
+			const result = context[uniqueKey](...originalArgs, ...args);
+			delete context[uniqueKey];
+			return result;
 		};
 	};
 
 var obj = {
 	a: 'Hi, ',
-	b: 'There!',
-	func: function func() {
-		console.log('In func');
-		return this.a + this.b;
+	b: 'Hello!',
+	func: function (x, y) {
+		console.log(this.a + this.b);
+		return (x || 0) + (y || 0); // Ensure numeric addition with default values
 	},
 };
 
-var func = obj.func;
-console.log('func', func);
-var boundedFunc = func.myBind(obj);
-console.log('boundedFunc', boundedFunc);
-
-console.log(boundedFunc()); // prints 'Hi, There!'
+// Fix the binding calls
+console.log(func.myBind(obj, 5, 6)()); // Remove array brackets
+console.log(func.myBind(null, 3, 4)()); // Remove array brackets
